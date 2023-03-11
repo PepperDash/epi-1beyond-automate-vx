@@ -1,6 +1,6 @@
 ﻿using PepperDash.Essentials.Core;
 
-namespace EssentialsPluginTemplate
+namespace PDT.OneBeyondAutomateVx.EPI
 {
 	/// <summary>
 	/// Plugin device Bridge Join Map

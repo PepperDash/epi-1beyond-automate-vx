@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using PepperDash.Essentials.Core;
 
-namespace EssentialsPluginTemplate
+namespace PDT.OneBeyondAutomateVx.EPI
 {
 	/// <summary>
 	/// Plugin device configuration object
@@ -14,7 +14,7 @@ namespace EssentialsPluginTemplate
 	/// "EssentialsPluginConfigObjectTemplate" renamed to "SamsungMdcConfig"
 	/// </example>
 	[ConfigSnippet("\"properties\":{\"control\":{}")]
-	public class EssentialsPluginTemplateConfigObject
+	public class OneBeyondAutomateVXConfigObject
 	{
 		/// <summary>
 		/// JSON control object
@@ -54,92 +54,12 @@ namespace EssentialsPluginTemplate
 		public EssentialsControlPropertiesConfig Control { get; set; }
 
 		/// <summary>
-		/// Serializes the poll time value
-		/// </summary>
-		/// <remarks>
-		/// This is an exmaple device plugin property.  This should be modified or deleted as needed for the plugin being built.
-		/// </remarks>
-		/// <value>
-		/// PollTimeMs property gets/sets the value as a long
-		/// </value>
-		/// <example>
-		/// <code>
-		/// "properties": {
-		///		"polltimeMs": 30000
-		/// }
-		/// </code>
-		/// </example>
-		[JsonProperty("pollTimeMs")]
-		public long PollTimeMs { get; set; }
-
-		/// <summary>
-		/// Serializes the warning timeout value
-		/// </summary>
-		/// <remarks>
-		/// This is an exmaple device plugin property.  This should be modified or deleted as needed for the plugin being built.
-		/// </remarks>
-		/// <value>
-		/// WarningTimeoutMs property gets/sets the value as a long
-		/// </value>
-		/// <example>
-		/// <code>
-		/// "properties": {
-		///		"warningTimeoutMs": 180000
-		/// }
-		/// </code>
-		/// </example>
-		[JsonProperty("warningTimeoutMs")]
-		public long WarningTimeoutMs { get; set; }
-
-		/// <summary>
-		/// Serializes the error timeout value
-		/// </summary>
-		/// /// <remarks>
-		/// This is an exmaple device plugin property.  This should be modified or deleted as needed for the plugin being built.
-		/// </remarks>
-		/// <value>
-		/// ErrorTimeoutMs property gets/sets the value as a long
-		/// </value>
-		/// <example>
-		/// <code>
-		/// "properties": {
-		///		"errorTimeoutMs": 300000
-		/// }
-		/// </code>
-		/// </example>
-		[JsonProperty("errorTimeoutMs")]
-		public long ErrorTimeoutMs { get; set; }
-
-		/// <summary>
 		/// Example dictionary of objects
 		/// </summary>
 		/// <remarks>
 		/// This is an example collection configuration object.  This should be modified or deleted as needed for the plugin being built.
 		/// </remarks>
 		/// <example>
-		/// <code>
-		/// "properties": {
-		///		"presets": {
-		///			"preset1": {
-		///				"enabled": true,
-		///				"name": "Preset 1"
-		///			}
-		///		}
-		/// }
-		/// </code>
-		/// </example>
-		/// <example>
-		/// <code>
-		/// "properties": {
-		///		"inputNames": {
-		///			"input1": "Input 1",
-		///			"input2": "Input 2"		
-		///		}
-		/// }
-		/// </code>
-		/// </example>
-		[JsonProperty("DeviceDictionary")]
-		public Dictionary<string, EssentialsPluginTemplateConfigObjectDictionary> DeviceDictionary { get; set; }
 
 		/// <summary>
 		/// Constuctor
@@ -148,9 +68,8 @@ namespace EssentialsPluginTemplate
 		/// If using a collection you must instantiate the collection in the constructor
 		/// to avoid exceptions when reading the configuration file 
 		/// </remarks>
-        public EssentialsPluginTemplateConfigObject()
+        public OneBeyondAutomateVXConfigObject()
 		{
-			DeviceDictionary = new Dictionary<string, EssentialsPluginTemplateConfigObjectDictionary>();
 		}
 	}
 
