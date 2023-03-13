@@ -17,8 +17,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
 	/// <summary>
 	/// Plugin device template for third party devices that use IBasicCommunication
 	/// </summary>
-	public class OneBeyondAutomateVX : EssentialsBridgeableDevice
+	public partial class OneBeyondAutomateVX : EssentialsBridgeableDevice
     {
+        // Fields, propeties and feedbacks for device feedback            ********************
+        // located in separate file: 1BeyondAutomateVXDeviceProperties.cs ********************
+
+
         /// <summary>
         /// It is often desirable to store the config
         /// </summary>
@@ -40,6 +44,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         private string _base64Login;
 
+
 		/// <summary>
 		/// Plugin device constructor for devices that need IBasicCommunication
 		/// </summary>
@@ -50,8 +55,6 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public OneBeyondAutomateVX(string key, string name, OneBeyondAutomateVXConfigObject config)
 			: base(key, name)
 		{
-
-
 
 			Debug.Console(0, this, "Constructing new {0} instance", name);
 
@@ -77,7 +80,18 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 _httpsClient = new HttpsClient();
             }
 
+            InitializeFeedbacks();
             
+        }
+
+        private void InitializeFeedbacks()
+        {
+            AutoSwitchIsOnFB = new BoolFeedback(() => AutoSwitchIsOn);
+            RecordIsOnFB = new BoolFeedback(() => RecordIsOn);
+            IsoRecordIsOnFB = new BoolFeedback(() => IsoRecordIsOn);
+            StreamIsOnFB = new BoolFeedback(() => StreamIsOn);
+            OutputIsOnFB = new BoolFeedback(() => OutputIsOn);
+
         }
 
 
@@ -258,6 +272,218 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
 
+
+        public void GetAutoSwitchStatus()
+        {
+            var method = _apiPrefix + "AutoSwitchStatus";
+
+            var res = MakeRequest(method, null);
+
+            if (res.Results != true)
+                AutoSwitchIsOn = false;
+            else
+                AutoSwitchIsOn = true;
+        }
+
+        public void SetAutoSwitch(bool state)
+        {
+            var method = "";
+
+            if (state)
+            {
+                method = _apiPrefix + "StartAutoSwitch";
+            }
+            else
+            {
+                method = _apiPrefix + "StopAutoSwitch";
+            }
+
+            var res = MakeRequest(method, null);
+
+            if (res.Message != "AutoSwitching Started Successfully")
+                AutoSwitchIsOn = false;
+            else
+                AutoSwitchIsOn = true;
+        }
+
+
+        public void GetRecordStatus()
+        {
+            var method = _apiPrefix + "RecordStatus";
+
+            var res = MakeRequest(method, null);
+
+            if (res.Results != true)
+                RecordIsOn = false;
+            else
+                RecordIsOn = true;
+        }
+
+        public enum eRecordOperation
+        {
+            start = 0,
+            stop = 1,
+            pause = 2,
+        }
+
+        public void SetRecord(eRecordOperation operation)
+        {
+            var method = "";
+
+            if (operation == eRecordOperation.start)
+            {
+                method = _apiPrefix + "StartRecord";
+            }
+            else if (operation == eRecordOperation.pause)
+            {
+                method = _apiPrefix + "PauseRecord";
+            }
+            else if (operation == eRecordOperation.stop)
+            {
+                method = _apiPrefix + "StopRecord";
+            }
+
+            var res = MakeRequest(method, null);
+
+            if (res.Message != "Record Started Successfully")
+                RecordIsOn = false;
+            else
+                RecordIsOn = true;
+        }
+
+
+        public void GetIsoRecordStatus()
+        {
+            var method = _apiPrefix + "ISORecordStatus";
+
+            var res = MakeRequest(method, null);
+
+            if (res.Results != true)
+                IsoRecordIsOn = false;
+            else
+                IsoRecordIsOn = true;
+        }
+
+        public void SetIsoRecord(bool state)
+        {
+            var method = "";
+
+            if (state)
+            {
+                method = _apiPrefix + "StartISORecord";
+            }
+            else
+            {
+                method = _apiPrefix + "StopISORecord";
+            }
+
+            var res = MakeRequest(method, null);
+
+            if (res.Message != "Started ISO Recording Successfully")
+                IsoRecordIsOn = false;
+            else
+                IsoRecordIsOn = true;
+        }
+
+
+        public void GetStreamStatus()
+        {
+            var method = _apiPrefix + "StreamStatus";
+
+            var res = MakeRequest(method, null);
+
+            if (res.Results != true)
+                StreamIsOn = false;
+            else
+                StreamIsOn = true;
+        }
+
+        public void SetStream(bool state)
+        {
+            var method = "";
+
+            if (state)
+            {
+                method = _apiPrefix + "StartStream";
+            }
+            else
+            {
+                method = _apiPrefix + "StopStream";
+            }
+
+            var res = MakeRequest(method, null);
+
+            if (res.Message != "Streaming Started Successfully")
+                StreamIsOn = false;
+            else
+                StreamIsOn = true;
+        }
+
+
+        public void GetOutputStatus()
+        {
+            var method = _apiPrefix + "OutputStatus";
+
+            var res = MakeRequest(method, null);
+
+            if (res.Results != true)
+                OutputIsOn = false;
+            else
+                OutputIsOn = true;
+        }
+
+        public void SetOutput(bool state)
+        {
+            var method = "";
+
+            if (state)
+            {
+                method = _apiPrefix + "StartOutput";
+            }
+            else
+            {
+                method = _apiPrefix + "StopOutput";
+            }
+
+            var res = MakeRequest(method, null);
+
+            if (res.Message != "Outputing Started Successfully")
+                OutputIsOn = false;
+            else
+                OutputIsOn = true;
+        }
+
+
+        public void GetLayouts()
+        {
+            var method = _apiPrefix + "GetLayouts";
+
+            var res = MakeRequest(method, null);
+
+            if (res.Layouts != null)
+                Layouts = res.Layouts;
+        }
+
+
+        public void GetLayoutStatus()
+        {
+            var method = _apiPrefix + "LayoutStatus";
+
+            var res = MakeRequest(method, null);
+
+            if (res.Layout != null)
+                Layout = res.Layout;
+        }
+
+        public void SetLayout(uint id)
+        {
+            var method = _apiPrefix + "ChangeLayout";
+
+            var res = MakeRequest(method, new Id(id.ToString()));
+
+            if (res.Layout != null)
+                Layout = res.Layout;
+        } 
 
 
 
