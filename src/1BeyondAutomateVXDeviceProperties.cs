@@ -12,31 +12,42 @@ namespace PDT.OneBeyondAutomateVx.EPI
         // Constructors, methods and some fields located in ******************************
         // separate file: 1BeyondAutomateVXDevice.cs        ******************************
 
+        event EventHandler<string> ErrorMessageReceived;
 
+        private void OnErrorMessageReceived(string error)
+        {
+            var handler = ErrorMessageReceived;
+            if (handler != null)
+            {
+                handler(this, error);
+            }
+        }
+
+        #region AutoSwitch
         private bool _autoSwitchIsOn;
 
-        private bool AutoSwitchIsOn
+        public bool AutoSwitchIsOn
         {
             get { return _autoSwitchIsOn; }
-            set
+            private set
             {
-                if (value != _autoSwitchIsOn)
-                {
-                    value = _autoSwitchIsOn;
-                    AutoSwitchIsOnFB.FireUpdate();
-                }
+                if (value == _autoSwitchIsOn) return;
+                
+                _autoSwitchIsOn = value;
+                AutoSwitchIsOnFB.FireUpdate();          
             }
         }
 
         public BoolFeedback AutoSwitchIsOnFB;
+        #endregion
 
-
+        #region Recording
         private bool _recordIsOn;
 
-        private bool RecordIsOn
+        public bool RecordIsOn
         {
             get { return _recordIsOn; }
-            set
+            private set
             {
                 if (value != _recordIsOn)
                 {
@@ -47,14 +58,16 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
         public BoolFeedback RecordIsOnFB;
+        #endregion
 
+        #region ISO Recording
 
         private bool _isoRecordIsOn;
 
-        private bool IsoRecordIsOn
+        public bool IsoRecordIsOn
         {
             get { return _isoRecordIsOn; }
-            set
+            private set
             {
                 if (value != _isoRecordIsOn)
                 {
@@ -65,14 +78,16 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
         public BoolFeedback IsoRecordIsOnFB;
+        #endregion
 
+        #region Streaming
 
         private bool _streamIsOn;
 
-        private bool StreamIsOn
+        public bool StreamIsOn
         {
             get { return _streamIsOn; }
-            set
+            private set
             {
                 if (value != _streamIsOn)
                 {
@@ -83,14 +98,16 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
         public BoolFeedback StreamIsOnFB;
+        #endregion
 
+        #region Output
 
         private bool _outputIsOn;
 
-        private bool OutputIsOn
+        public bool OutputIsOn
         {
             get { return _outputIsOn; }
-            set
+            private set
             {
                 if (value != _outputIsOn)
                 {
@@ -102,17 +119,21 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public BoolFeedback OutputIsOnFB;
 
+
+        #endregion
+
+        #region Available Layouts
         event EventHandler LayoutsChanged;
 
-        private List<Layout> _layouts;
+        private List<IdName> _layouts;
 
-        public List<Layout> Layouts
+        public List<IdName> Layouts
         {
             get
             {
                 return _layouts;
             }
-            set
+            private set
             {
                 _layouts = value;
 
@@ -130,17 +151,20 @@ namespace PDT.OneBeyondAutomateVx.EPI
             }
         }
 
+        #endregion
+
+        #region Current Layout
         event EventHandler LayoutChanged;
 
-        private Layout _layout;
+        private IdName _layout;
 
-        public Layout Layout
+        public IdName Layout
         {
             get
             {
                 return _layout;
             }
-            set
+            private set
             {
                 _layout = value;
 
@@ -157,5 +181,182 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 handler(this, new EventArgs());
             }
         }
+        #endregion
+
+        #region Available RoomConfigs
+        event EventHandler RoomConfigsChanged;
+
+        private List<IdName> _roomConfigs;
+
+        public List<IdName> RoomConfigs
+        {
+            get
+            {
+                return _roomConfigs;
+            }
+            private set
+            {
+                _roomConfigs = value;
+
+                OnRoomConfigsChanged();
+            }
+        }
+
+        private void OnRoomConfigsChanged()
+        {
+            var handler = RoomConfigsChanged;
+
+            if (handler != null)
+            {
+                handler(this, new EventArgs());
+            }
+        }
+
+        #endregion
+
+
+        #region Current RoomConfig
+        event EventHandler RoomConfigChanged;
+
+        private IdName _roomConfig;
+
+        public IdName RoomConfig
+        {
+            get
+            {
+                return _roomConfig;
+            }
+            private set 
+            {
+                _roomConfig = value;
+
+                OnRoomConfigChanged();
+            }
+        }
+
+        private void OnRoomConfigChanged()
+        {
+            var handler = RoomConfigChanged;
+
+            if (handler != null)
+            {
+                handler(this, new EventArgs());
+            }
+        }
+        #endregion
+
+        #region CameraAddress
+
+        private uint _cameraAddress;
+
+        public uint CameraAddress
+        {
+            get { return _cameraAddress; }
+            private set
+            {
+                if (value != _cameraAddress)
+                {
+                    value = _cameraAddress;
+                    CameraAddressFB.FireUpdate();
+                }
+            }
+        }
+
+        public IntFeedback CameraAddressFB;
+
+        #endregion
+
+        #region Available Cameras
+        event EventHandler CamerasChanged;
+
+        private List<Camera> _cameras;
+
+        public List<Camera> Cameras
+        {
+            get
+            {
+                return _cameras;
+            }
+            private set
+            {
+                _cameras = value;
+
+                OnCamerasChanged();
+            }
+        }
+
+        private void OnCamerasChanged()
+        {
+            var handler = CamerasChanged;
+
+            if (handler != null)
+            {
+                handler(this, new EventArgs());
+            }
+        }
+
+        #endregion
+
+        #region Available Storage
+        event EventHandler StorageSpaceAvailableChanged;
+
+        private List<Drive> _drives;
+
+        public List<Drive> Drives
+        {
+            get
+            {
+                return _drives;
+            }
+            private set
+            {
+                _drives = value;
+
+                OnDrivesChanged();
+            }
+        }
+
+        private void OnDrivesChanged()
+        {
+            var handler = StorageSpaceAvailableChanged;
+
+            if (handler != null)
+            {
+                handler(this, new EventArgs());
+            }
+        }
+
+        #endregion
+
+        #region Recording Space
+        event EventHandler RecordingSpaceAvailableChanged;
+
+        private RecordingSpace _recordingSpace;
+
+        public RecordingSpace RecordingSpace
+        {
+            get 
+            { 
+                return _recordingSpace;
+            }
+            private set 
+            {
+                _recordingSpace = value;
+                OnRecordingSpaceChanged();
+            }
+        }
+
+        private void OnRecordingSpaceChanged()
+        {
+            var handler = RecordingSpaceAvailableChanged;
+
+            if (handler != null)
+            {
+                handler(this, new EventArgs());
+            }
+        }
+
+        #endregion
+
     }
 }

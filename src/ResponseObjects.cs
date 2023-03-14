@@ -19,8 +19,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
         [JsonProperty("err", NullValueHandling = NullValueHandling.Ignore)]
         public string Error { get; set; }
 
-        [JsonProperty("results", NullValueHandling = NullValueHandling.Ignore)]
-        public bool Results { get; set; }
+        [JsonProperty("results")]
+        public bool? Results { get; set; }
 
         [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
         public string Message { get; set; }
@@ -38,13 +38,21 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public List<Camera> Cameras { get; set; }
 
         [JsonProperty("layouts", NullValueHandling = NullValueHandling.Ignore)]
-        public List<Layout> Layouts { get; set; }
+        public List<IdName> Layouts { get; set; }
 
         [JsonProperty("layout", NullValueHandling = NullValueHandling.Ignore)]
-        public Layout Layout { get; set; }
+        public IdName Layout { get; set; }
 
         [JsonProperty("address", NullValueHandling = NullValueHandling.Ignore)]
         public string Address { get; set; }
+
+        [JsonProperty("drives")]
+        public List<Drive> Drives { get; set; }
+
+        public ResponseObjectBase()
+        {
+            Results = null;
+        }
 
     }
 
@@ -57,10 +65,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public string IpAddress { get; set; }
     }
 
-    public class Layout : Id
+    public class IdName : Id
     {
-        [JsonProperty("id")]
-        public string Id { get; set; }
 
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -74,6 +80,89 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public Id(string id)
         {
             Id = id;
+        }
+    }
+
+    public class Address
+    {
+        [JsonProperty("address")]
+        public string Address { get; set; }
+
+        public Address(string id)
+        {
+            Address = id;
+        }    
+    }
+
+    public class CameraPreset
+    {
+        [JsonProperty("cam")]
+        public string CameraId { get; set; }
+
+        [JsonProperty("pre")]
+        public string PresetId { get; set; }
+
+        public CameraPreset(string camId, string presetId)
+        {
+            CameraId = camId;
+            PresetId = PresetId;
+        }
+    }
+
+    public class FilesParams
+    {
+        [JsonProperty("destination")]
+        public string Destination { get; set; }
+
+        [JsonProperty("logDestination")]
+        public string LogDestination { get; set; }
+
+        [JsonProperty("deleteSource")]
+        public bool DeleteSource { get; set; }
+
+        public FilesParams(string dest, string logDest, bool delete)
+        {
+            Destination = dest;
+            LogDestination = logDest;
+            DeleteSource = delete;
+        }
+    }
+
+    public class DrivesParams
+    {
+        [JsonProperty("drives")]
+        public string Drives { get; set; }
+
+        public DrivesParams(string drives)
+        {
+            Drives = drives;
+        }
+    }
+
+    public class Drive
+    {
+        [JsonProperty("C:\\", NullValueHandling = NullValueHandling.Ignore)]
+        public string C { get; set; }
+
+        [JsonProperty("D:\\", NullValueHandling = NullValueHandling.Ignore)]
+        public string D { get; set; }
+    
+        [JsonProperty("L:\\", NullValueHandling = NullValueHandling.Ignore)]
+        public string L { get; set; }
+    }
+
+    public class RecordingSpace
+    {
+        [JsonProperty("available_gigabytes", NullValueHandling = NullValueHandling.Ignore)]
+        public string AvailableGigabytes { get; set; }
+
+        [JsonProperty("total_gigabytes", NullValueHandling = NullValueHandling.Ignore)]
+        public string TotalGigabytes { get; set; }
+
+        public RecordingSpace(string avail, string total)
+        {
+            AvailableGigabytes = avail;
+            TotalGigabytes = total;
         }
     }
 }

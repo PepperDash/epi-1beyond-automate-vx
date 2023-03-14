@@ -36,7 +36,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         private string _url;
 
-        private string _apiPrefix = "/api/";
+        private const string _apiPrefix = "/api/";
 
         private bool _isHttps = false;
 
@@ -60,6 +60,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
 			_config = config;
 
+            // TODO: Check for data validity
             _port = _config.Control.TcpSshProperties.Port;
 
             // Encode the user:pass as base64
@@ -149,18 +150,20 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #endregion
 
 
-        private HttpClientRequest GetHttpRequest(string url)
+        private HttpClientRequest GetHttpRequest(string url, Crestron.SimplSharp.Net.Http.RequestType type)
         {
             var req = new HttpClientRequest();
             req.Url.Parse(url);
+            req.RequestType = type;
 
             return req;
         }
 
-        private HttpsClientRequest GetHttpsRequest(string url)
+        private HttpsClientRequest GetHttpsRequest(string url, Crestron.SimplSharp.Net.Https.RequestType type)
         {
             var req = new HttpsClientRequest();
             req.Url.Parse(url);
+            req.RequestType = type;
 
             return req;
         }
@@ -171,14 +174,15 @@ namespace PDT.OneBeyondAutomateVx.EPI
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        private ResponseObjectBase MakeRequest(string url, object reqData)
+        private TResponse MakeRequest<TResponse, TRequest>(string url, TRequest reqData) where TResponse : new()
         {
-            var resData = new ResponseObjectBase();
+            var resData = new TResponse();
             var authHeader = !string.IsNullOrEmpty(_token) ? _token : _base64Login;
 
             if (!_isHttps)
             {
-                var req = GetHttpRequest(url);
+                var req = GetHttpRequest(url, Crestron.SimplSharp.Net.Http.RequestType.Post);
+
 
                 req.Header.AddHeader(new HttpHeader("Authorization", authHeader));
                 req.Header.ContentType = "application/json";
@@ -191,12 +195,13 @@ namespace PDT.OneBeyondAutomateVx.EPI
                         case 200:
                         {
                             Debug.Console(2, this, "Successful Request");
-                            
-                            var content = JsonConvert.DeserializeObject<ResponseObjectBase>(res.ContentString);
 
-                            if (resData != null)
+                            var content = JsonConvert.DeserializeObject<TResponse>(res.ContentString);
+
+                            if (content != null && !CheckForError(content as ResponseObjectBase))
+                            {
                                 resData = content;
-
+                            }
                             break;
                         }
                         case 404:
@@ -207,7 +212,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
                         default:
                         {
                             Debug.Console(2, this, "Request Error: {0}", e);
-                                
+                            OnErrorMessageReceived(e.ToString());
                             break;
                         }
                     }
@@ -216,7 +221,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             }
             else
             {
-                var req = GetHttpsRequest(url);
+                var req = GetHttpsRequest(url, Crestron.SimplSharp.Net.Https.RequestType.Post);
 
                 req.Header.AddHeader(new HttpsHeader("Authorization", authHeader));
                 req.Header.ContentType = "application/json";
@@ -231,11 +236,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
                         {
                             Debug.Console(2, this, "Successful Request");
 
-                            var content = JsonConvert.DeserializeObject<ResponseObjectBase>(res.ContentString);
+                            var content = JsonConvert.DeserializeObject<TResponse>(res.ContentString);
 
-                            if (resData != null)
+                            if (content != null && !CheckForError(content as ResponseObjectBase))
+                            {
                                 resData = content;
-
+                            }
                             break;
                         }
                         case 404:
@@ -246,7 +252,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
                         default:
                         {
                             Debug.Console(2, this, "Request Error: {0}", e);
-
+                            OnErrorMessageReceived(e.ToString());
                             break;
                         }
                     }
@@ -257,13 +263,31 @@ namespace PDT.OneBeyondAutomateVx.EPI
             return resData;
         }
 
+        /// <summary>
+        /// Checks for error message and fires event if found
+        /// </summary>
+        /// <param name="res"></param>
+        private bool CheckForError(ResponseObjectBase res)
+        {
+            if(res.Status.ToLower() == "error")
+            {
+                if (!string.IsNullOrEmpty(res.Error))
+                {
+                    OnErrorMessageReceived(res.Error);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
         /// <summary>
         /// Attempts to get an authorization token
         /// </summary>
         public void GetToken()
         {
-            var data = MakeRequest(_url + "/Get-Token", null);
+            var data = MakeRequest<ResponseObjectBase, object>(_url + "/Get-Token", null);
 
             if (!string.IsNullOrEmpty(data.Token))
                 _token = data.Token;
@@ -275,30 +299,33 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void GetAutoSwitchStatus()
         {
-            var method = _apiPrefix + "AutoSwitchStatus";
+            var url = _apiPrefix + "AutoSwitchStatus";
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
+            if (res.Results == null) return;
+            
             if (res.Results != true)
                 AutoSwitchIsOn = false;
             else
                 AutoSwitchIsOn = true;
+
         }
 
         public void SetAutoSwitch(bool state)
         {
-            var method = "";
+            var url = "";
 
             if (state)
             {
-                method = _apiPrefix + "StartAutoSwitch";
+                url = _apiPrefix + "StartAutoSwitch";
             }
             else
             {
-                method = _apiPrefix + "StopAutoSwitch";
+                url = _apiPrefix + "StopAutoSwitch";
             }
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Message != "AutoSwitching Started Successfully")
                 AutoSwitchIsOn = false;
@@ -309,9 +336,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void GetRecordStatus()
         {
-            var method = _apiPrefix + "RecordStatus";
+            var url = _apiPrefix + "RecordStatus";
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Results != true)
                 RecordIsOn = false;
@@ -328,22 +355,22 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void SetRecord(eRecordOperation operation)
         {
-            var method = "";
+            var url = "";
 
             if (operation == eRecordOperation.start)
             {
-                method = _apiPrefix + "StartRecord";
+                url = _apiPrefix + "StartRecord";
             }
             else if (operation == eRecordOperation.pause)
             {
-                method = _apiPrefix + "PauseRecord";
+                url = _apiPrefix + "PauseRecord";
             }
             else if (operation == eRecordOperation.stop)
             {
-                method = _apiPrefix + "StopRecord";
+                url = _apiPrefix + "StopRecord";
             }
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Message != "Record Started Successfully")
                 RecordIsOn = false;
@@ -354,9 +381,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void GetIsoRecordStatus()
         {
-            var method = _apiPrefix + "ISORecordStatus";
+            var url = _apiPrefix + "ISORecordStatus";
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Results != true)
                 IsoRecordIsOn = false;
@@ -377,7 +404,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 method = _apiPrefix + "StopISORecord";
             }
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(method, null);
 
             if (res.Message != "Started ISO Recording Successfully")
                 IsoRecordIsOn = false;
@@ -388,9 +415,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void GetStreamStatus()
         {
-            var method = _apiPrefix + "StreamStatus";
+            var url = _apiPrefix + "StreamStatus";
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Results != true)
                 StreamIsOn = false;
@@ -400,18 +427,18 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void SetStream(bool state)
         {
-            var method = "";
+            var url = "";
 
             if (state)
             {
-                method = _apiPrefix + "StartStream";
+                url = _apiPrefix + "StartStream";
             }
             else
             {
-                method = _apiPrefix + "StopStream";
+                url = _apiPrefix + "StopStream";
             }
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Message != "Streaming Started Successfully")
                 StreamIsOn = false;
@@ -422,9 +449,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void GetOutputStatus()
         {
-            var method = _apiPrefix + "OutputStatus";
+            var url = _apiPrefix + "OutputStatus";
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Results != true)
                 OutputIsOn = false;
@@ -434,18 +461,18 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void SetOutput(bool state)
         {
-            var method = "";
+            var url = "";
 
             if (state)
             {
-                method = _apiPrefix + "StartOutput";
+                url = _apiPrefix + "StartOutput";
             }
             else
             {
-                method = _apiPrefix + "StopOutput";
+                url = _apiPrefix + "StopOutput";
             }
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Message != "Outputing Started Successfully")
                 OutputIsOn = false;
@@ -456,9 +483,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void GetLayouts()
         {
-            var method = _apiPrefix + "GetLayouts";
+            var url = _apiPrefix + "GetLayouts";
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Layouts != null)
                 Layouts = res.Layouts;
@@ -467,9 +494,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void GetLayoutStatus()
         {
-            var method = _apiPrefix + "LayoutStatus";
+            var url = _apiPrefix + "LayoutStatus";
 
-            var res = MakeRequest(method, null);
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Layout != null)
                 Layout = res.Layout;
@@ -477,16 +504,149 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         public void SetLayout(uint id)
         {
-            var method = _apiPrefix + "ChangeLayout";
+            var url = _apiPrefix + "ChangeLayout";
 
-            var res = MakeRequest(method, new Id(id.ToString()));
+            var res = MakeRequest<ResponseObjectBase, Id>(url, new Id(id.ToString()));
 
             if (res.Layout != null)
                 Layout = res.Layout;
-        } 
+        }
 
 
+        public void GetRoomConfigStatus()
+        {
+            var url = _apiPrefix + "RoomConfigStatus";
 
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.Layout != null)
+                RoomConfig = res.Layout;
+        }
+
+        public void GetRoomConfigs()
+        {
+            var url = _apiPrefix + "GetRoomConfigs";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.Layouts != null)
+                RoomConfigs = res.Layouts;
+        }
+
+        public void SetRoomConfig(uint id)
+        {
+            var url = _apiPrefix + "ChangeRoomConfig";
+
+            var res = MakeRequest<ResponseObjectBase, Id>(url, new Id(id.ToString()));
+
+            if (res.Layout != null)
+                RoomConfig = res.Layout;
+        }
+
+        public void ForceSetRoomConfig(uint id)
+        {
+            var url = _apiPrefix + "ForceChangeRoomConfig";
+
+            var res = MakeRequest<ResponseObjectBase, Id>(url, new Id(id.ToString()));
+
+            if (res.Layout != null)
+                RoomConfig = res.Layout;
+        }
+
+        public void GoHome()
+        {
+            var url = _apiPrefix + "GoHome";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+        }
+
+
+        public void GetCameras()
+        {
+            var url = _apiPrefix + "GetCameras";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.Cameras != null)
+                Cameras = res.Cameras;
+        }
+
+        public void GetCameraStatus()
+        {
+            var url = _apiPrefix + "CameraStatus";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.Address != null)
+                CameraAddress = System.Convert.ToUInt32(res.Address);
+        }
+
+        public void SetCamera(uint address)
+        {
+            var url = _apiPrefix + "ManualSwitchCamera";
+
+            var res = MakeRequest<ResponseObjectBase, Address>(url, new Address(address.ToString()));
+
+            if (res.Layout != null)
+                RoomConfig = res.Layout;
+        }
+
+        public void SetCameraPreset(uint camId, uint presetId)
+        {
+            var url = _apiPrefix + "CallCameraPreset";
+
+            var res = MakeRequest<ResponseObjectBase, CameraPreset>(url, new CameraPreset(camId.ToString(), presetId.ToString()));
+        }
+
+
+        public void ImportCameraPresets()
+        {
+            var url = _apiPrefix + "ImportCameraPresets";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+        }
+
+        public void ExportCameraPresets()
+        {
+            var url = _apiPrefix + "ExportCameraPresets";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+        }
+
+
+        public void CopyFiles(string dest, string logDest, bool delete)
+        {
+            var url = _apiPrefix + "CopyFiles";
+
+            var res = MakeRequest<ResponseObjectBase, FilesParams>(url, new FilesParams(dest, logDest, delete));
+        }
+
+        public void GetStorageSpaceAvailable()
+        {
+            var url = _apiPrefix + "StorageSpaceAvail";
+
+            // TODO: Test the formatting of this command, API documentation is not clear on the value of the drives to send
+            // https://sdkcon78221.crestron.com/sdk/Automate-VX-API/Content/Topics/Automate-API/API-Reference/StorageSpaceAvail-API.htm
+            var res = MakeRequest<ResponseObjectBase, DrivesParams>(url, new DrivesParams("C:\\, D:\\, L:\\"));
+
+            if (res.Drives != null)
+                Drives = res.Drives;
+        }
+
+        public void GetRecordingSpaceAvailable()
+        {
+            var url = _apiPrefix + "RecodingSpaceAvail";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.AvailableGigabytes != null && res.TotalGigabytes != null)
+            {
+                RecordingSpace = new RecordingSpace(res.AvailableGigabytes, res.TotalGigabytes);
+            }
+        }
+
+
+        
     }
 }
 
