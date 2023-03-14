@@ -12,14 +12,24 @@ namespace PDT.OneBeyondAutomateVx.EPI
         // Constructors, methods and some fields located in ******************************
         // separate file: 1BeyondAutomateVXDevice.cs        ******************************
 
-        event EventHandler<string> ErrorMessageReceived;
+        event EventHandler<ErrorEventArgs> ErrorMessageReceived;
+
+        public class ErrorEventArgs : EventArgs
+        {
+            public string ErrorMessage;
+
+            public ErrorEventArgs(string err)
+            {
+                ErrorMessage = err;
+            }
+        }
 
         private void OnErrorMessageReceived(string error)
         {
             var handler = ErrorMessageReceived;
             if (handler != null)
             {
-                handler(this, error);
+                handler(this, new ErrorEventArgs(error));
             }
         }
 
@@ -51,7 +61,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             {
                 if (value != _recordIsOn)
                 {
-                    value = _recordIsOn;
+                    _recordIsOn = value;
                     RecordIsOnFB.FireUpdate();
                 }
             }
@@ -71,7 +81,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             {
                 if (value != _isoRecordIsOn)
                 {
-                    value = _isoRecordIsOn;
+                    _isoRecordIsOn = value;
                     IsoRecordIsOnFB.FireUpdate();
                 }
             }
@@ -91,7 +101,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             {
                 if (value != _streamIsOn)
                 {
-                    value = _streamIsOn;
+                    _streamIsOn = value;
                     StreamIsOnFB.FireUpdate();
                 }
             }
@@ -111,7 +121,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             {
                 if (value != _outputIsOn)
                 {
-                    value = _outputIsOn;
+                    _outputIsOn = value;
                     OutputIsOnFB.FireUpdate();
                 }
             }
@@ -256,7 +266,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             {
                 if (value != _cameraAddress)
                 {
-                    value = _cameraAddress;
+                    _cameraAddress = value;
                     CameraAddressFB.FireUpdate();
                 }
             }

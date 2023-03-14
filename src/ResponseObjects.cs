@@ -56,39 +56,45 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
     }
 
-    public class Camera : Id
+    public class Camera : ID
     {
         [JsonProperty("name")]
         public string Name { get; set; }
 
         [JsonProperty("ip")]
         public string IpAddress { get; set; }
+
+        public Camera() { }
     }
 
-    public class IdName : Id
+    public class IdName : ID
     {
 
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        public IdName() { }
     }
 
-    public class Id
+    public class ID
     {
         [JsonProperty("id")]
         public string Id { get; set; }
 
-        public Id(string id)
+        public ID() { }
+
+        public ID(string id)
         {
             Id = id;
         }
     }
 
-    public class Address
+    public class CamAddress
     {
         [JsonProperty("address")]
         public string Address { get; set; }
 
-        public Address(string id)
+        public CamAddress(string id)
         {
             Address = id;
         }    

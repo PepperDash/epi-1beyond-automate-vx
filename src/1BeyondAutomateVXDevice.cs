@@ -506,7 +506,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         {
             var url = _apiPrefix + "ChangeLayout";
 
-            var res = MakeRequest<ResponseObjectBase, Id>(url, new Id(id.ToString()));
+            var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(id.ToString()));
 
             if (res.Layout != null)
                 Layout = res.Layout;
@@ -537,7 +537,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         {
             var url = _apiPrefix + "ChangeRoomConfig";
 
-            var res = MakeRequest<ResponseObjectBase, Id>(url, new Id(id.ToString()));
+            var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(id.ToString()));
 
             if (res.Layout != null)
                 RoomConfig = res.Layout;
@@ -547,7 +547,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         {
             var url = _apiPrefix + "ForceChangeRoomConfig";
 
-            var res = MakeRequest<ResponseObjectBase, Id>(url, new Id(id.ToString()));
+            var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(id.ToString()));
 
             if (res.Layout != null)
                 RoomConfig = res.Layout;
@@ -585,7 +585,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         {
             var url = _apiPrefix + "ManualSwitchCamera";
 
-            var res = MakeRequest<ResponseObjectBase, Address>(url, new Address(address.ToString()));
+            var res = MakeRequest<ResponseObjectBase, CamAddress>(url, new CamAddress(address.ToString()));
 
             if (res.Layout != null)
                 RoomConfig = res.Layout;
