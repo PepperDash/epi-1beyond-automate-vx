@@ -49,6 +49,14 @@ namespace PDT.OneBeyondAutomateVx.EPI
         [JsonProperty("drives")]
         public List<Drive> Drives { get; set; }
 
+        [JsonProperty("scenarios", NullValueHandling = NullValueHandling.Ignore)]
+        public List<IdName> Scenarios { get; set; }
+
+        [JsonProperty("scenario", NullValueHandling = NullValueHandling.Ignore)]
+        public IdName Scenario { get; set; }
+
+
+
         public ResponseObjectBase()
         {
             Results = null;

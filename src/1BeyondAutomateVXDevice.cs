@@ -32,7 +32,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         private HttpsClient _httpsClient;
 
-        private int _port;
+        private int _httpPort = 3579; //default
+
+        private int _httpsPort = 4443; //default
 
         private string _url;
 
@@ -40,7 +42,20 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         private bool _isHttps = false;
 
-        private string _token;
+        private string _token = null;
+
+        public string Token
+        {
+            get { return _token; }
+            private set
+            {
+                if (value != _token)
+                {
+                    _token = value;
+                    LoginSuccessfulFB.FireUpdate();
+                }
+            }
+        }
 
         private string _base64Login;
 
@@ -61,23 +76,29 @@ namespace PDT.OneBeyondAutomateVx.EPI
 			_config = config;
 
             // TODO: Check for data validity
-            _port = _config.Control.TcpSshProperties.Port;
+
 
             // Encode the user:pass as base64
             _base64Login = System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(string.Format("{0}:{1}", _config.Control.TcpSshProperties.Username, _config.Control.TcpSshProperties.Password)));
 
             if (_config.Control.Method == eControlMethod.Http)
             {
-                _url = string.Format("http://{0}:{1}", _config.Control.TcpSshProperties.Address, _port);
+                if(_config.Control.TcpSshProperties.Port != 0)
+                    _httpPort = _config.Control.TcpSshProperties.Port;
 
-                Debug.Console(0, this, "Using HTTP for server at: {0} on port: {1}", _url, _port);
+                _url = string.Format("http://{0}:{1}", _config.Control.TcpSshProperties.Address, _httpPort);
+
+                Debug.Console(0, this, "Using HTTP for server at: {0} on port: {1}", _url, _httpPort);
                 _httpClient = new HttpClient();
             }
             else if (_config.Control.Method == eControlMethod.Https)
             {
-                _url = string.Format("https://{0}:{1}", _config.Control.TcpSshProperties.Address, _port);
+                if (_config.Control.TcpSshProperties.Port != 0)
+                    _httpsPort = _config.Control.TcpSshProperties.Port;
 
-                Debug.Console(0, this, "Using HTTPS for server at: {0} on port: {1}", _url, _port);
+                _url = string.Format("https://{0}:{1}", _config.Control.TcpSshProperties.Address, _httpsPort);
+
+                Debug.Console(0, this, "Using HTTPS for server at: {0} on port: {1}", _url, _httpsPort);
                 _httpsClient = new HttpsClient();
             }
 
@@ -87,12 +108,13 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         private void InitializeFeedbacks()
         {
+            LoginSuccessfulFB = new BoolFeedback(() => !string.IsNullOrEmpty(Token));
             AutoSwitchIsOnFB = new BoolFeedback(() => AutoSwitchIsOn);
             RecordIsOnFB = new BoolFeedback(() => RecordIsOn);
             IsoRecordIsOnFB = new BoolFeedback(() => IsoRecordIsOn);
             StreamIsOnFB = new BoolFeedback(() => StreamIsOn);
             OutputIsOnFB = new BoolFeedback(() => OutputIsOn);
-
+            CameraAddressFB = new IntFeedback(() => CameraAddress);
         }
 
 
@@ -125,20 +147,56 @@ namespace PDT.OneBeyondAutomateVx.EPI
             Debug.Console(1, "Linking to Trilist '{0}'", trilist.ID.ToString("X"));
             Debug.Console(0, "Linking to Bridge Type {0}", GetType().Name);
 
-            // TODO [ ] Implement bridge links as needed
+            // Linked Feedbacks
+            LoginSuccessfulFB.LinkInputSig(trilist.BooleanInput[joinMap.AuthenticatedFB.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.AutoSwitchOn.JoinNumber, () => SetAutoSwitch(true));
+            AutoSwitchIsOnFB.LinkInputSig(trilist.BooleanInput[joinMap.AutoSwitchOn.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.AutoSwitchOff.JoinNumber, () => SetAutoSwitch(true));
+            AutoSwitchIsOnFB.LinkComplementInputSig(trilist.BooleanInput[joinMap.AutoSwitchOff.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.RecordStart.JoinNumber, () => SetRecord(eRecordOperation.start));
+            RecordIsOnFB.LinkInputSig(trilist.BooleanInput[joinMap.RecordStart.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.RecordPause.JoinNumber, () => SetRecord(eRecordOperation.pause));
+
+            trilist.SetSigFalseAction(joinMap.RecordStop.JoinNumber, () => SetRecord(eRecordOperation.stop));
+            RecordIsOnFB.LinkComplementInputSig(trilist.BooleanInput[joinMap.RecordStop.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.IsoRecordOn.JoinNumber, () => SetIsoRecord(true));
+            IsoRecordIsOnFB.LinkInputSig(trilist.BooleanInput[joinMap.IsoRecordOn.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.IsoRecordOff.JoinNumber, () => SetIsoRecord(true));
+            IsoRecordIsOnFB.LinkComplementInputSig(trilist.BooleanInput[joinMap.IsoRecordOff.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.StreamOn.JoinNumber, () => SetStream(true));
+            StreamIsOnFB.LinkInputSig(trilist.BooleanInput[joinMap.StreamOn.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.StreamOff.JoinNumber, () => SetStream(true));
+            StreamIsOnFB.LinkComplementInputSig(trilist.BooleanInput[joinMap.StreamOff.JoinNumber]);
+
+
+            // Subscribe to events as needed
+
+            ErrorMessageReceived += (o, a) =>
+                {
+                    trilist.StringInput[joinMap.ErrorMessage.JoinNumber].StringValue = a.ErrorMessage;
+                };
+
+            SuccessMessageReceived += (o, a) =>
+                {
+                    trilist.StringInput[joinMap.SuccessMessage.JoinNumber].StringValue = a.SuccessMessage;
+                };
 
             // links to bridge
 
 
             UpdateFeedbacks();
 
-            trilist.OnlineStatusChange += (o, a) =>
-            {
-                if (!a.DeviceOnLine) return;
 
-                trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
-                UpdateFeedbacks();
-            };
+
+            
         }
 
         private void UpdateFeedbacks()
@@ -177,7 +235,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         private TResponse MakeRequest<TResponse, TRequest>(string url, TRequest reqData) where TResponse : new()
         {
             var resData = new TResponse();
-            var authHeader = !string.IsNullOrEmpty(_token) ? _token : _base64Login;
+            var authHeader = !string.IsNullOrEmpty(Token) ? Token : _base64Login;
 
             if (!_isHttps)
             {
@@ -234,7 +292,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
                     {
                         case 200:
                         {
-                            Debug.Console(2, this, "Successful Request");
+                            Debug.Console(2, this, "Successful Request: {0}", req.Url);
+                            Debug.Console(2, this, @"Response: \n{0}", res.ContentString);
 
                             var content = JsonConvert.DeserializeObject<TResponse>(res.ContentString);
 
@@ -246,12 +305,13 @@ namespace PDT.OneBeyondAutomateVx.EPI
                         }
                         case 404:
                         {
+
+                            Debug.Console(2, this, "Failed Request: {0}", req.Url);
                             Debug.Console(2, this, "Request path not found");
                             break;
                         }
                         default:
                         {
-                            Debug.Console(2, this, "Request Error: {0}", e);
                             OnErrorMessageReceived(e.ToString());
                             break;
                         }
@@ -273,10 +333,18 @@ namespace PDT.OneBeyondAutomateVx.EPI
             {
                 if (!string.IsNullOrEmpty(res.Error))
                 {
+                    // Check for login credentials error and clear token
+                    if (res.Error == "Incorrect Username or Password")
+                    {
+                        ClearToken();
+                    }
+
                     OnErrorMessageReceived(res.Error);
                     return true;
                 }
             }
+
+            LoginSuccessfulFB.FireUpdate();
 
             return false;
         }
@@ -290,12 +358,17 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var data = MakeRequest<ResponseObjectBase, object>(_url + "/Get-Token", null);
 
             if (!string.IsNullOrEmpty(data.Token))
-                _token = data.Token;
+            {
+                Token = data.Token;
+            }
             else if (!string.IsNullOrEmpty(data.Error))
                 Debug.Console(0, this, data.Error);
         }
 
-
+        public void ClearToken()
+        {
+            Token = null;
+        }
 
         public void GetAutoSwitchStatus()
         {
@@ -578,7 +651,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
             if (res.Address != null)
-                CameraAddress = System.Convert.ToUInt32(res.Address);
+                CameraAddress = System.Convert.ToInt32(res.Address);
         }
 
         public void SetCamera(uint address)
@@ -596,6 +669,19 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var url = _apiPrefix + "CallCameraPreset";
 
             var res = MakeRequest<ResponseObjectBase, CameraPreset>(url, new CameraPreset(camId.ToString(), presetId.ToString()));
+
+            if (!string.IsNullOrEmpty(res.Message))
+                OnSuccessMessageReceived(res.Message);
+        }
+
+        public void SaveCameraPreset(uint camId, uint presetId)
+        {
+            var url = _apiPrefix + "SaveCameraPreset";
+
+            var res = MakeRequest<ResponseObjectBase, CameraPreset>(url, new CameraPreset(camId.ToString(), presetId.ToString()));
+
+            if (!string.IsNullOrEmpty(res.Message))
+                OnSuccessMessageReceived(res.Message);
         }
 
 
@@ -614,6 +700,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
 
+        /// <summary>
+        /// Copy Files on teh device
+        /// </summary>
+        /// <param name="dest">Destination folder to copy files to</param>
+        /// <param name="logDest">Destination for log.  Leave black to turn off logging</param>
+        /// <param name="delete">If true, delete source files after copy</param>
         public void CopyFiles(string dest, string logDest, bool delete)
         {
             var url = _apiPrefix + "CopyFiles";
@@ -646,7 +738,69 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
 
-        
+        public void SetSleep()
+        {
+            var url = _apiPrefix + "Sleep";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+        }
+
+        public void SetWake()
+        {
+            var url = _apiPrefix + "Wake";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+        }
+
+
+        public void Restart()
+        {
+            var url = _apiPrefix + "Restart";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+        }
+
+
+        public void SetCloseWirecast()
+        {
+            var url = _apiPrefix + "CloseWirecast";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+        }
+
+
+        public void GetScenarios()
+        {
+            var url = _apiPrefix + "GetScenarios";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.Scenarios != null)
+                Scenarios = res.Scenarios;
+        }
+
+
+        public void GetScenarioStatus()
+        {
+            var url = _apiPrefix + "ScenarioStatus";
+
+            var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.Scenario != null)
+                Scenario = res.Scenario;
+        }
+
+        public void SetScenario(uint id)
+        {
+            var url = _apiPrefix + "ChangeScenario";
+
+            var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(id.ToString()));
+
+            if (res.Scenario != null)
+                Scenario = res.Scenario;
+        }
+
+
     }
 }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Crestron.SimplSharp;
 using PepperDash.Essentials.Core;
+using PepperDash.Core;
 
 namespace PDT.OneBeyondAutomateVx.EPI
 {
@@ -11,6 +12,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
     {
         // Constructors, methods and some fields located in ******************************
         // separate file: 1BeyondAutomateVXDevice.cs        ******************************
+
+        public BoolFeedback LoginSuccessfulFB;
 
         event EventHandler<ErrorEventArgs> ErrorMessageReceived;
 
@@ -29,7 +32,31 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var handler = ErrorMessageReceived;
             if (handler != null)
             {
+                Debug.Console(1, this, "Error: {0}", error);
                 handler(this, new ErrorEventArgs(error));
+            }
+        }
+
+
+        event EventHandler<SuccessEventArgs> SuccessMessageReceived;
+
+        public class SuccessEventArgs : EventArgs
+        {
+            public string SuccessMessage;
+
+            public SuccessEventArgs(string msg)
+            {
+                SuccessMessage = msg;
+            }
+        }
+
+        private void OnSuccessMessageReceived(string msg)
+        {
+            var handler = SuccessMessageReceived;
+            if (handler != null)
+            {
+                Debug.Console(0, this, "Success: {0}", msg);
+                handler(this, new SuccessEventArgs(msg));
             }
         }
 
@@ -257,9 +284,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         #region CameraAddress
 
-        private uint _cameraAddress;
+        private int _cameraAddress;
 
-        public uint CameraAddress
+        public int CameraAddress
         {
             get { return _cameraAddress; }
             private set
@@ -366,6 +393,68 @@ namespace PDT.OneBeyondAutomateVx.EPI
             }
         }
 
+        #endregion
+
+
+        #region Available Scenarios
+        event EventHandler ScenariosChanged;
+
+        private List<IdName> _scenarios;
+
+        public List<IdName> Scenarios
+        {
+            get
+            {
+                return _scenarios;
+            }
+            private set
+            {
+                _scenarios = value;
+
+                OnScenariosChanged();
+            }
+        }
+
+        private void OnScenariosChanged()
+        {
+            var handler = ScenariosChanged;
+
+            if (handler != null)
+            {
+                handler(this, new EventArgs());
+            }
+        }
+
+        #endregion
+
+        #region Current Scenario
+        event EventHandler ScenarioChanged;
+
+        private IdName _scenario;
+
+        public IdName Scenario
+        {
+            get
+            {
+                return _scenario;
+            }
+            private set
+            {
+                _scenario = value;
+
+                OnScenarioChanged();
+            }
+        }
+
+        private void OnScenarioChanged()
+        {
+            var handler = ScenarioChanged;
+
+            if (handler != null)
+            {
+                handler(this, new EventArgs());
+            }
+        }
         #endregion
 
     }
