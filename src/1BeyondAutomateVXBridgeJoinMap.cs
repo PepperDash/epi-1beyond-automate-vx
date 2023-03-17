@@ -64,7 +64,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public JoinDataComplete RecordStart = new JoinDataComplete(
             new JoinData
             {
-                JoinNumber =42,
+                JoinNumber =4,
                 JoinSpan = 1
             },
             new JoinMetadata
@@ -158,27 +158,362 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 JoinType = eJoinType.Digital
             });
 
+        [JoinName("OutputOn")]
+        public JoinDataComplete OutputOn = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 11,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Pulse input to start stream. FB high when enabled",
+                JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+                JoinType = eJoinType.Digital
+            });
 
-		#endregion
+        [JoinName("OutputOff")]
+        public JoinDataComplete OutputOff = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 12,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Pulse input to stop stream. FB high when disabled",
+                JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("Sleep")]
+        public JoinDataComplete Sleep = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 13,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Pulse input call the home shot in the system",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("Wake")]
+        public JoinDataComplete Wake = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 14,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Pulse input call the home shot in the system",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GoHome")]
+        public JoinDataComplete GoHome = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 15,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Pulse input call the home shot in the system",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetAutoSwitchStatus")]
+        public JoinDataComplete GetAutoSwitchStatus = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 16,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets current status",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetRecordStatus")]
+        public JoinDataComplete GetRecordStatus = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 17,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets current status",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetIsoRecordStatus")]
+        public JoinDataComplete GetIsoRecordStatus = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 18,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets current status",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetStreamStatus")]
+        public JoinDataComplete GetStreamStatus = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 19,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets current status",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetOutputStatus")]
+        public JoinDataComplete GetOutputStatus = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 20,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets current status",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetCurrentLayout")]
+        public JoinDataComplete GetCurrentLayout = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 21,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets current status",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetLayouts")]
+        public JoinDataComplete GetLayouts = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 22,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets available layouts",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetCameraStatus")]
+        public JoinDataComplete GetCameraStatus = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 23,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets current status",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("GetCameras")]
+        public JoinDataComplete GetCameras = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 23,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Gets available cameras",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("RecallCameraPreset")]
+        public JoinDataComplete RecallCameraPreset = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 23,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Recalls the preset specified by the CameraPresetToRecall and CameraToRecallPresetOn analog joins.",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+        #endregion
 
 
 		#region Analog
 
 		// TODO [ ] Add analog joins below plugin being developed
 
-        //[JoinName("Status")]
-        //public JoinDataComplete Status = new JoinDataComplete(
-        //    new JoinData
-        //    {
-        //        JoinNumber = 1,
-        //        JoinSpan = 1
-        //    },
-        //    new JoinMetadata
-        //    {
-        //        Description = "Socket Status",
-        //        JoinCapabilities = eJoinCapabilities.ToSIMPL,
-        //        JoinType = eJoinType.Analog
-        //    });
+        [JoinName("ChangeLayout")]
+        public JoinDataComplete ChangeLayout = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 1,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Specifies the desired layout and provides feedback for current layout. Valid values 1-26 correspond to A-Z",
+                JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+        [JoinName("NumberOfLayouts")]
+        public JoinDataComplete NumberOfLayouts = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 2,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Reports the number of layouts stored on the Automate server",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+        [JoinName("ChangeRoomConfig")]
+        public JoinDataComplete ChangeRoomConfig = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 3,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Specifies the desired room config and provides feedback for current config. Valid values 1-99.",
+                JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+        [JoinName("ForceChangeRoomConfig")]
+        public JoinDataComplete ForceChangeRoomConfig = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 4,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Forces the desired room config. Valid values 1-99.",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Analog
+            });
+        
+        [JoinName("NumberOfRoomConfigs")]
+        public JoinDataComplete NumberOfRoomConfigs = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 5,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Reports the number of configs stored on the Automate server",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+
+        [JoinName("ChangeCamera")]
+        public JoinDataComplete ChangeCamera = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 6,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Specifies the desired camera and provides feedback for current camera.",
+                JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+        [JoinName("NumberOfCameras")]
+        public JoinDataComplete NumberOfCameras = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 7,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Reports the number of cameras available on the Automate server",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+        [JoinName("LiveCameraPreset")]
+        public JoinDataComplete LiveCameraPreset = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 8,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Specifies preset for the current camera.",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+        [JoinName("CameraPresetToRecall")]
+        public JoinDataComplete CameraPresetToRecall = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 9,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Specifies preset to recall on CameraToRecallPresetOn. Pulse RecallCameraPreset join to execute.",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+        [JoinName("CameraToRecallPresetOn")]
+        public JoinDataComplete CameraToRecallPresetOn = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 10,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Specifies camera to recall preset on specified by CameraPresetToRecall.. Pulse RecallCameraPreset join to execute.",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Analog
+            });
 
 		#endregion
 

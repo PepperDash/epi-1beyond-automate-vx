@@ -162,7 +162,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Available Layouts
         event EventHandler LayoutsChanged;
 
-        private List<IdName> _layouts;
+        private List<IdName> _layouts = new List<IdName>();
 
         public List<IdName> Layouts
         {
@@ -193,9 +193,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Current Layout
         event EventHandler LayoutChanged;
 
-        private IdName _layout;
+        private ID _layout = new ID();
 
-        public IdName Layout
+        public ID Layout
         {
             get
             {
@@ -223,7 +223,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Available RoomConfigs
         event EventHandler RoomConfigsChanged;
 
-        private List<IdName> _roomConfigs;
+        private List<IdName> _roomConfigs = new List<IdName>();
 
         public List<IdName> RoomConfigs
         {
@@ -255,7 +255,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Current RoomConfig
         event EventHandler RoomConfigChanged;
 
-        private IdName _roomConfig;
+        private IdName _roomConfig = new IdName();
 
         public IdName RoomConfig
         {
@@ -306,7 +306,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Available Cameras
         event EventHandler CamerasChanged;
 
-        private List<Camera> _cameras;
+        private List<Camera> _cameras = new List<Camera>();
 
         public List<Camera> Cameras
         {
@@ -337,7 +337,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Available Storage
         event EventHandler StorageSpaceAvailableChanged;
 
-        private List<Drive> _drives;
+        private List<Drive> _drives = new List<Drive>();
 
         public List<Drive> Drives
         {
@@ -368,7 +368,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Recording Space
         event EventHandler RecordingSpaceAvailableChanged;
 
-        private RecordingSpace _recordingSpace;
+        private RecordingSpace _recordingSpace = new RecordingSpace("0", "0");
 
         public RecordingSpace RecordingSpace
         {
@@ -399,7 +399,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Available Scenarios
         event EventHandler ScenariosChanged;
 
-        private List<IdName> _scenarios;
+        private List<IdName> _scenarios = new List<IdName>();
 
         public List<IdName> Scenarios
         {
@@ -430,7 +430,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Current Scenario
         event EventHandler ScenarioChanged;
 
-        private IdName _scenario;
+        private IdName _scenario = new IdName();
 
         public IdName Scenario
         {

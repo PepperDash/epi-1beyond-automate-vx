@@ -172,22 +172,112 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
             trilist.SetSigFalseAction(joinMap.StreamOn.JoinNumber, () => SetStream(true));
             StreamIsOnFB.LinkInputSig(trilist.BooleanInput[joinMap.StreamOn.JoinNumber]);
-
+                
             trilist.SetSigFalseAction(joinMap.StreamOff.JoinNumber, () => SetStream(true));
             StreamIsOnFB.LinkComplementInputSig(trilist.BooleanInput[joinMap.StreamOff.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.OutputOn.JoinNumber, () => SetOutput(true));
+            OutputIsOnFB.LinkInputSig(trilist.BooleanInput[joinMap.OutputOn.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.OutputOff.JoinNumber, () => SetOutput(true));
+            OutputIsOnFB.LinkComplementInputSig(trilist.BooleanInput[joinMap.OutputOff.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.Sleep.JoinNumber, () => SetSleep());
+            trilist.SetSigFalseAction(joinMap.Wake.JoinNumber, () => SetWake());
+
+            trilist.SetSigFalseAction(joinMap.GoHome.JoinNumber, () => GoHome());
+
+            trilist.SetSigFalseAction(joinMap.GetAutoSwitchStatus.JoinNumber, () => GetAutoSwitchStatus());
+            trilist.SetSigFalseAction(joinMap.GetRecordStatus.JoinNumber, () => GetRecordStatus());
+            trilist.SetSigFalseAction(joinMap.GetIsoRecordStatus.JoinNumber, () => GetIsoRecordStatus());
+            trilist.SetSigFalseAction(joinMap.GetStreamStatus.JoinNumber, () => GetStreamStatus());
+            trilist.SetSigFalseAction(joinMap.GetOutputStatus.JoinNumber, () => GetOutputStatus());
+            trilist.SetSigFalseAction(joinMap.GetCurrentLayout.JoinNumber, () => GetLayoutStatus());
+            trilist.SetSigFalseAction(joinMap.GetLayouts.JoinNumber, () => GetLayouts());
+
+            trilist.SetUShortSigAction(joinMap.ChangeLayout.JoinNumber, (l) =>
+            {
+                // Check for valid input (1-26)
+                if (l < 1 || l > 26)
+                    return;
+
+                // convert the integer value passed in (1-26) to the equivalent alphabet character A-Z (capitalized)
+                int offset = 64; // decimal value to add as an offset to get the desired ASCII value
+                char layout = System.Convert.ToChar(offset + l);
+ 
+                SetLayout(layout.ToString());
+            });
+
+            trilist.SetUShortSigAction(joinMap.ChangeRoomConfig.JoinNumber, (rc) => SetRoomConfig(rc));
+            trilist.SetUShortSigAction(joinMap.ForceChangeRoomConfig.JoinNumber, (rc) => ForceSetRoomConfig(rc));
+
+            trilist.SetUShortSigAction(joinMap.ChangeCamera.JoinNumber, (c) => SetCamera(c));
+            CameraAddressFB.LinkInputSig(trilist.UShortInput[joinMap.ChangeCamera.JoinNumber]);
+
+            trilist.SetSigFalseAction(joinMap.GetCameraStatus.JoinNumber, () => GetCameraStatus());
+            trilist.SetSigFalseAction(joinMap.GetCameras.JoinNumber, () => GetCameras());
+
+            trilist.SetUShortSigAction(joinMap.LiveCameraPreset.JoinNumber, (p) => SetCameraPreset(CameraAddressFB.UShortValue, p));
+
+            trilist.SetSigFalseAction(joinMap.RecallCameraPreset.JoinNumber, () => 
+                {
+                    var camId = trilist.GetUshort(joinMap.CameraToRecallPresetOn.JoinNumber);
+                    var presetId = trilist.GetUshort(joinMap.CameraPresetToRecall.JoinNumber);
+
+                    if (camId == 0 || presetId == 0)
+                    {
+                        Debug.Console(0, this,
+                            "Unable to recall preset.  Please specify values for both CameraToRecallPresetOn and CameraPresetToRecall analog joins");
+                        return;
+                    }
+
+                    SetCameraPreset(camId, presetId);
+                });
+
 
 
             // Subscribe to events as needed
 
             ErrorMessageReceived += (o, a) =>
                 {
-                    trilist.StringInput[joinMap.ErrorMessage.JoinNumber].StringValue = a.ErrorMessage;
+                    trilist.SetString(joinMap.ErrorMessage.JoinNumber, a.ErrorMessage);
                 };
 
             SuccessMessageReceived += (o, a) =>
                 {
-                    trilist.StringInput[joinMap.SuccessMessage.JoinNumber].StringValue = a.SuccessMessage;
+                    trilist.SetString(joinMap.SuccessMessage.JoinNumber, a.SuccessMessage);
                 };
+
+            LayoutChanged += (o, a) =>
+                {
+                    // convert from the letter A-Z back to 1-26
+                    char c = System.Convert.ToChar(Layout.Id);
+                    var val = (int)c;
+
+                    trilist.SetUshort(joinMap.ChangeLayout.JoinNumber, (ushort)val);
+                };
+
+            LayoutsChanged += (o, a) =>
+                {
+                    trilist.SetUshort(joinMap.NumberOfLayouts.JoinNumber, (ushort)Layouts.Count);
+                };
+
+            RoomConfigChanged += (o, a) =>
+                {
+                    trilist.SetUshort(joinMap.ChangeRoomConfig.JoinNumber, System.Convert.ToUInt16(RoomConfig.Id));
+                };
+
+            RoomConfigsChanged += (o, a) =>
+                {
+                    trilist.SetUshort(joinMap.NumberOfRoomConfigs.JoinNumber, (ushort)RoomConfigs.Count);
+                };
+
+            CamerasChanged += (o, a) =>
+                {
+                    trilist.SetUshort(joinMap.NumberOfCameras.JoinNumber, (ushort)Cameras.Count);
+                };
+
+            
 
             // links to bridge
 
@@ -575,11 +665,13 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 Layout = res.Layout;
         }
 
-        public void SetLayout(uint id)
+
+
+        public void SetLayout(string layout)
         {
             var url = _apiPrefix + "ChangeLayout";
 
-            var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(id.ToString()));
+            var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(layout));
 
             if (res.Layout != null)
                 Layout = res.Layout;
