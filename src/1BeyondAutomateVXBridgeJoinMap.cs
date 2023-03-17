@@ -344,7 +344,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public JoinDataComplete GetCameras = new JoinDataComplete(
             new JoinData
             {
-                JoinNumber = 23,
+                JoinNumber = 24,
                 JoinSpan = 1
             },
             new JoinMetadata
@@ -358,7 +358,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public JoinDataComplete RecallCameraPreset = new JoinDataComplete(
             new JoinData
             {
-                JoinNumber = 23,
+                JoinNumber = 25,
                 JoinSpan = 1
             },
             new JoinMetadata
@@ -367,6 +367,49 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 JoinCapabilities = eJoinCapabilities.FromSIMPL,
                 JoinType = eJoinType.Digital
             });
+
+        [JoinName("CopyFiles")]
+        public JoinDataComplete CopyFiles = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 26,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Trigger copying of files.",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("CopyFilesSuccesfulFB")]
+        public JoinDataComplete CopyFilesSuccesfulFB = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 27,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Pulses when copy is successful.",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
+        [JoinName("DeleteFiles")]
+        public JoinDataComplete DeleteFiles = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 27,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Set High to have files deleted after copy files operation",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Digital
+            });
+
         #endregion
 
 
@@ -529,7 +572,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 			new JoinMetadata
 			{
 				Description = "Error message from device",
-				JoinCapabilities = eJoinCapabilities.FromSIMPL,
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
 				JoinType = eJoinType.Serial
 			});
 
@@ -543,9 +586,39 @@ namespace PDT.OneBeyondAutomateVx.EPI
             new JoinMetadata
             {
                 Description = "Success message from device",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
+                JoinType = eJoinType.Serial
+            });
+
+        [JoinName("CopyFilesDestination")]
+        public JoinDataComplete CopyFilesDestination = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 3,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "The location to copy files to",
                 JoinCapabilities = eJoinCapabilities.FromSIMPL,
                 JoinType = eJoinType.Serial
             });
+
+        [JoinName("CopyLogDestination")]
+        public JoinDataComplete CopyLogDestination = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 3,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "The location for the log file for the copy files operation",
+                JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Serial
+            });
+
+
 		#endregion
 
 		/// <summary>

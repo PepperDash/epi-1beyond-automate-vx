@@ -2,6 +2,7 @@
 // For Basic SIMPL#Pro classes
 
 using Crestron.SimplSharpPro.DeviceSupport;
+using Crestron.SimplSharp;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
 using Crestron.SimplSharp.Cryptography;
@@ -234,7 +235,23 @@ namespace PDT.OneBeyondAutomateVx.EPI
                     SetCameraPreset(camId, presetId);
                 });
 
+            trilist.SetSigFalseAction(joinMap.CopyFiles.JoinNumber, () =>
+                {
+                    var destFolder = trilist.GetString(joinMap.CopyFilesDestination.JoinNumber);
+                    var logFolder = trilist.GetString(joinMap.CopyLogDestination.JoinNumber);
+                    var delete = trilist.GetBool(joinMap.DeleteFiles.JoinNumber);
 
+                    if (string.IsNullOrEmpty(destFolder))
+                    {
+                        Debug.Console(0, this, "Destination folder must be specified to copy files");
+                        return;
+                    }
+
+                    CopyFiles(destFolder, logFolder, delete);
+
+                });
+
+            
 
             // Subscribe to events as needed
 
@@ -275,6 +292,16 @@ namespace PDT.OneBeyondAutomateVx.EPI
             CamerasChanged += (o, a) =>
                 {
                     trilist.SetUshort(joinMap.NumberOfCameras.JoinNumber, (ushort)Cameras.Count);
+                };
+
+            FileCopySuccessful += (o, a) =>
+                {
+                    CrestronInvoke.BeginInvoke((i) =>
+                    {
+                        trilist.SetBool(joinMap.CopyFilesSuccesfulFB.JoinNumber, true);
+                        CrestronEnvironment.Sleep(100);
+                        trilist.SetBool(joinMap.CopyFilesSuccesfulFB.JoinNumber, false);
+                    }, null);
                 };
 
             
@@ -803,6 +830,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var url = _apiPrefix + "CopyFiles";
 
             var res = MakeRequest<ResponseObjectBase, FilesParams>(url, new FilesParams(dest, logDest, delete));
+
+            if (res.Status == "OK" && res.Message == "Successfully backed up information")
+                OnFileCopySuccessful();
         }
 
         public void GetStorageSpaceAvailable()

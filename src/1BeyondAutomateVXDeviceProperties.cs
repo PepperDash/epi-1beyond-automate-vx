@@ -365,6 +365,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         #endregion
 
+
+
         #region Recording Space
         event EventHandler RecordingSpaceAvailableChanged;
 
@@ -456,6 +458,19 @@ namespace PDT.OneBeyondAutomateVx.EPI
             }
         }
         #endregion
+
+        event EventHandler FileCopySuccessful;
+
+
+        private void OnFileCopySuccessful()
+        {
+            var handler = FileCopySuccessful;
+
+            if (handler != null)
+            {
+                handler(this, new EventArgs());
+            }
+        }
 
     }
 }
