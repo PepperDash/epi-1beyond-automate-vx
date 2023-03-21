@@ -12,7 +12,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 	/// <example>
 	/// "EssentialsPluginBridgeJoinMapTemplate" renamed to "SamsungMdcBridgeJoinMap"
 	/// </example>
-	public class EssentialsPluginTemplateBridgeJoinMap : JoinMapBaseAdvanced
+	public class OneBeyondAutomateVxBridgeJoinMap : JoinMapBaseAdvanced
 	{
 		#region Digital
 
@@ -681,8 +681,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
 		/// Plugin device BridgeJoinMap constructor
 		/// </summary>
 		/// <param name="joinStart">This will be the join it starts on the EISC bridge</param>
-        public EssentialsPluginTemplateBridgeJoinMap(uint joinStart)
-            : base(joinStart, typeof(EssentialsPluginTemplateBridgeJoinMap))
+        public OneBeyondAutomateVxBridgeJoinMap(uint joinStart)
+            : base(joinStart, typeof(OneBeyondAutomateVxBridgeJoinMap))
 		{
 		}
 	}

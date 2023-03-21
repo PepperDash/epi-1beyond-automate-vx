@@ -130,7 +130,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         /// <param name="bridge"></param>
         public override void LinkToApi(BasicTriList trilist, uint joinStart, string joinMapKey, EiscApiAdvanced bridge)
         {
-            var joinMap = new EssentialsPluginTemplateBridgeJoinMap(joinStart);
+            var joinMap = new OneBeyondAutomateVxBridgeJoinMap(joinStart);
 
             // This adds the join map to the collection on the bridge
             if (bridge != null)
@@ -267,51 +267,28 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
             LayoutChanged += (o, a) =>
                 {
-                    // convert from the letter A-Z back to 1-26
-                    char c = System.Convert.ToChar(Layout.Id);
-                    var val = (int)c;
-
-                    trilist.SetUshort(joinMap.ChangeLayout.JoinNumber, (ushort)val);
+                    UpdateCurrentLayout(trilist, joinMap);
                 };
 
             LayoutsChanged += (o, a) =>
                 {
-                    trilist.SetUshort(joinMap.NumberOfLayouts.JoinNumber, (ushort)Layouts.Count);
-
-                    for (uint i = 0; i < joinMap.LayoutName.JoinSpan; i++)
-                    {
-                        var name = "";
-
-                        if (Layouts.Count < i - 1)
-                            name = Layouts[(int)i].Name;
-
-                        trilist.SetString(joinMap.LayoutName.JoinNumber + i, name);
-                    }
+                    UpdateLayoutNames(trilist, joinMap);
                 };
 
             RoomConfigChanged += (o, a) =>
                 {
-                    trilist.SetUshort(joinMap.ChangeRoomConfig.JoinNumber, System.Convert.ToUInt16(RoomConfig.Id));
-
-                    for (uint i = 0; i < joinMap.RoomConfigName.JoinSpan; i++)
-                    {
-                        var name = "";
-
-                        if (RoomConfigs.Count < i - 1)
-                            name = RoomConfigs[(int)i].Name;
-
-                        trilist.SetString(joinMap.RoomConfigName.JoinNumber + i, name);
-                    }
+                    UpdateRoomConfig(trilist, joinMap);
                 };
 
             RoomConfigsChanged += (o, a) =>
                 {
-                    trilist.SetUshort(joinMap.NumberOfRoomConfigs.JoinNumber, (ushort)RoomConfigs.Count);
+                    UpdateRoomConfigNames(trilist, joinMap);
+
                 };
 
             CamerasChanged += (o, a) =>
                 {
-                    trilist.SetUshort(joinMap.NumberOfCameras.JoinNumber, (ushort)Cameras.Count);
+                    UpdateCameras(trilist, joinMap);
                 };
 
             FileCopySuccessful += (o, a) =>
@@ -327,13 +304,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
             RecordingSpaceAvailableChanged += (o, a) =>
                 {
-                    var availableSpace = System.Convert.ToUInt16(RecordingSpace.AvailableGigabytes);
-
-                    trilist.SetUshort(joinMap.StorageSpaceAvailableGB.JoinNumber, (ushort)availableSpace);
-
-                    var totalSpace = System.Convert.ToUInt16(RecordingSpace.TotalGigabytes);
-
-                    trilist.SetUshort(joinMap.StorageSpaceTotalGB.JoinNumber, (ushort)totalSpace);
+                    UpdateAvailableSpace(trilist, joinMap);
                 };
 
 
@@ -341,7 +312,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 {
                     if (a.DeviceOnLine)
                     {
-                        SetInitialFBValues();
+                        SetInitialFBValues(trilist, joinMap);
                     }
                 };
 
@@ -349,10 +320,91 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
 
-        private void SetInitialFBValues()
+        private void SetInitialFBValues(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
         {
+            UpdateCurrentLayout(trilist, joinMap);
+            UpdateLayoutNames(trilist, joinMap);
+            UpdateRoomConfig(trilist, joinMap);
+            UpdateRoomConfigNames(trilist, joinMap);
+            UpdateCameras(trilist, joinMap);
+            UpdateAvailableSpace(trilist, joinMap);
+        }
+
+        private void UpdateCurrentLayout(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+        {
+            if (Layout == null)
+                return;
+
+            // convert from the letter A-Z back to 1-26
+            char c = System.Convert.ToChar(Layout.Id);
+            var val = (int)c;
+
+            trilist.SetUshort(joinMap.ChangeLayout.JoinNumber, (ushort)val);
 
         }
+
+        private void UpdateLayoutNames(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+        {
+            if (Layouts == null)
+                return;
+
+            trilist.SetUshort(joinMap.NumberOfLayouts.JoinNumber, (ushort)Layouts.Count);
+
+            for (uint i = 0; i < joinMap.LayoutName.JoinSpan; i++)
+            {
+                var name = "";
+
+                if (Layouts.Count < i - 1)
+                    name = Layouts[(int)i].Name;
+
+                trilist.SetString(joinMap.LayoutName.JoinNumber + i, name);
+            }
+        }
+
+        private void UpdateRoomConfig(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+        {
+            if (RoomConfig == null)
+                return;
+
+            var roomConfig = System.Convert.ToUInt16(RoomConfig.Id);
+
+            trilist.SetUshort(joinMap.ChangeRoomConfig.JoinNumber, roomConfig);
+        }
+
+        private void UpdateRoomConfigNames(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+        {
+            if (RoomConfigs == null)
+                return;
+
+            trilist.SetUshort(joinMap.NumberOfRoomConfigs.JoinNumber, (ushort)RoomConfigs.Count);
+
+            for (uint i = 0; i < joinMap.RoomConfigName.JoinSpan; i++)
+            {
+                var name = "";
+
+                if (RoomConfigs.Count < i - 1)
+                    name = RoomConfigs[(int)i].Name;
+
+                trilist.SetString(joinMap.RoomConfigName.JoinNumber + i, name);
+            }
+        }
+
+        private void UpdateCameras(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+        {
+            trilist.SetUshort(joinMap.NumberOfCameras.JoinNumber, (ushort)Cameras.Count);
+        }
+
+        private void UpdateAvailableSpace(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+        {
+            var availableSpace = System.Convert.ToUInt16(RecordingSpace.AvailableGigabytes);
+
+            trilist.SetUshort(joinMap.StorageSpaceAvailableGB.JoinNumber, (ushort)availableSpace);
+
+            var totalSpace = System.Convert.ToUInt16(RecordingSpace.TotalGigabytes);
+
+            trilist.SetUshort(joinMap.StorageSpaceTotalGB.JoinNumber, (ushort)totalSpace);
+        }
+
 
         #endregion
 
