@@ -277,11 +277,31 @@ namespace PDT.OneBeyondAutomateVx.EPI
             LayoutsChanged += (o, a) =>
                 {
                     trilist.SetUshort(joinMap.NumberOfLayouts.JoinNumber, (ushort)Layouts.Count);
+
+                    for (uint i = 0; i < joinMap.LayoutName.JoinSpan; i++)
+                    {
+                        var name = "";
+
+                        if (Layouts.Count < i - 1)
+                            name = Layouts[(int)i].Name;
+
+                        trilist.SetString(joinMap.LayoutName.JoinNumber + i, name);
+                    }
                 };
 
             RoomConfigChanged += (o, a) =>
                 {
                     trilist.SetUshort(joinMap.ChangeRoomConfig.JoinNumber, System.Convert.ToUInt16(RoomConfig.Id));
+
+                    for (uint i = 0; i < joinMap.RoomConfigName.JoinSpan; i++)
+                    {
+                        var name = "";
+
+                        if (RoomConfigs.Count < i - 1)
+                            name = RoomConfigs[(int)i].Name;
+
+                        trilist.SetString(joinMap.RoomConfigName.JoinNumber + i, name);
+                    }
                 };
 
             RoomConfigsChanged += (o, a) =>
@@ -304,21 +324,33 @@ namespace PDT.OneBeyondAutomateVx.EPI
                     }, null);
                 };
 
-            
 
-            // links to bridge
+            RecordingSpaceAvailableChanged += (o, a) =>
+                {
+                    var availableSpace = System.Convert.ToUInt16(RecordingSpace.AvailableGigabytes);
+
+                    trilist.SetUshort(joinMap.StorageSpaceAvailableGB.JoinNumber, (ushort)availableSpace);
+
+                    var totalSpace = System.Convert.ToUInt16(RecordingSpace.TotalGigabytes);
+
+                    trilist.SetUshort(joinMap.StorageSpaceTotalGB.JoinNumber, (ushort)totalSpace);
+                };
 
 
-            UpdateFeedbacks();
-
-
+            bridge.Eisc.OnlineStatusChange += (o, a) =>
+                {
+                    if (a.DeviceOnLine)
+                    {
+                        SetInitialFBValues();
+                    }
+                };
 
             
         }
 
-        private void UpdateFeedbacks()
+
+        private void SetInitialFBValues()
         {
-            // TODO [ ] Update as needed for the plugin being developed
 
         }
 

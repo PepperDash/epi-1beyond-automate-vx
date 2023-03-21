@@ -558,6 +558,34 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 JoinType = eJoinType.Analog
             });
 
+        [JoinName("StorageSpaceAvailableGB")]
+        public JoinDataComplete StorageSpaceAvailableGB = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 11,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Reports the remaining storage space in GB",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
+        [JoinName("StorageSpaceTotalGB")]
+        public JoinDataComplete StorageSpaceTotalGB = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 12,
+                JoinSpan = 1
+            },
+            new JoinMetadata
+            {
+                Description = "Reports the total storage space in GB",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
+                JoinType = eJoinType.Analog
+            });
+
 		#endregion
 
 
@@ -615,6 +643,34 @@ namespace PDT.OneBeyondAutomateVx.EPI
             {
                 Description = "The location for the log file for the copy files operation",
                 JoinCapabilities = eJoinCapabilities.FromSIMPL,
+                JoinType = eJoinType.Serial
+            });
+
+        [JoinName("LayoutName")]
+        public JoinDataComplete LayoutName = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 5,
+                JoinSpan =  26,
+            },
+            new JoinMetadata
+            {
+                Description = "Name of each layout [A-Z]",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
+                JoinType = eJoinType.Serial
+            });
+
+        [JoinName("RoomConfigName")]
+        public JoinDataComplete RoomConfigName = new JoinDataComplete(
+            new JoinData
+            {
+                JoinNumber = 101,
+                JoinSpan = 99,
+            },
+            new JoinMetadata
+            {
+                Description = "Name of each room config [1-99]",
+                JoinCapabilities = eJoinCapabilities.ToSIMPL,
                 JoinType = eJoinType.Serial
             });
 
