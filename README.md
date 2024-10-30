@@ -83,68 +83,7 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - oneBeyondAutomateVx
 <!-- END Supported Types -->
 <!-- START Join Maps -->
-### Join Maps
 
-#### Digitals
-
-| Join | Description |
-|------|-------------|
-| 1 | Successfully authenticated to Automate VX server |
-| 2 | Pulse input to enable auto switch. FB high when enabled |
-| 3 | Pulse input to disable auto switch. FB high when disabled |
-| 4 | Pulse input to start recording. FB high when recording |
-| 5 | Pulse input to pause recording |
-| 6 | Pulse input to stop recording. FB high when not recording |
-| 7 | Pulse input to start ISO Recording. FB high when enabled |
-| 8 | Pulse input to stop ISO Recording. FB high when disabled |
-| 9 | Pulse input to start stream. FB high when enabled |
-| 10 | Pulse input to stop stream. FB high when disabled |
-| 11 | Pulse input to start stream. FB high when enabled |
-| 12 | Pulse input to stop stream. FB high when disabled |
-| 13 | Pulse input call the home shot in the system |
-| 14 | Pulse input call the home shot in the system |
-| 15 | Pulse input call the home shot in the system |
-| 16 | Gets current status |
-| 17 | Gets current status |
-| 18 | Gets current status |
-| 19 | Gets current status |
-| 20 | Gets current status |
-| 21 | Gets current status |
-| 22 | Gets available layouts |
-| 23 | Gets current status |
-| 24 | Gets available cameras |
-| 25 | Recalls the preset specified by the CameraPresetToRecall and CameraToRecallPresetOn analog joins. |
-| 26 | Trigger copying of files. |
-| 27 | Pulses when copy is successful. |
-| 27 | Set High to have files deleted after copy files operation |
-
-#### Analogs
-
-| Join | Description |
-|------|-------------|
-| 1 | Specifies the desired layout and provides feedback for current layout. Valid values 1-26 correspond to A-Z |
-| 2 | Reports the number of layouts stored on the Automate server |
-| 3 | Specifies the desired room config and provides feedback for current config. Valid values 1-99. |
-| 4 | Forces the desired room config. Valid values 1-99. |
-| 5 | Reports the number of configs stored on the Automate server |
-| 6 | Specifies the desired camera and provides feedback for current camera. |
-| 7 | Reports the number of cameras available on the Automate server |
-| 8 | Specifies preset for the current camera. |
-| 9 | Specifies preset to recall on CameraToRecallPresetOn. Pulse RecallCameraPreset join to execute. |
-| 10 | Specifies camera to recall preset on specified by CameraPresetToRecall.. Pulse RecallCameraPreset join to execute. |
-| 11 | Reports the remaining storage space in GB |
-| 12 | Reports the total storage space in GB |
-
-#### Serials
-
-| Join | Description |
-|------|-------------|
-| 1 | Error message from device |
-| 2 | Success message from device |
-| 3 | The location to copy files to |
-| 3 | The location for the log file for the copy files operation |
-| 5 | Name of each layout [A-Z] |
-| 101 | Name of each room config [1-99] |
 <!-- END Join Maps -->
 <!-- START Interfaces Implemented -->
 ### Interfaces Implemented
@@ -155,8 +94,8 @@ __If you do not make these changes to the nuspec file, the project will not gene
 ### Base Classes
 
 - JoinMapBaseAdvanced
-- EssentialsBridgeableDevice
 - EventArgs
+- EssentialsBridgeableDevice
 <!-- END Base Classes -->
 <!-- START Public Methods -->
 ### Public Methods
