@@ -5,6 +5,7 @@ using System.Text;
 using Crestron.SimplSharp;
 using PepperDash.Essentials.Core;
 using PepperDash.Core;
+using PepperDash.Essentials.Devices.Common.Cameras;
 
 namespace PDT.OneBeyondAutomateVx.EPI
 {
@@ -71,11 +72,33 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 if (value == _autoSwitchIsOn) return;
                 
                 _autoSwitchIsOn = value;
-                AutoSwitchIsOnFB.FireUpdate();          
+                CameraAutoModeIsOnFeedback.FireUpdate();          
             }
         }
 
-        public BoolFeedback AutoSwitchIsOnFB;
+        public void CameraAutoModeOff()
+        {
+            SetAutoSwitch(false);
+        }
+
+        public void CameraAutoModeOn()
+        {
+            SetAutoSwitch(true);
+        }
+
+        public void CameraAutoModeToggle()
+        {
+            if (!CameraAutoModeIsOnFeedback.BoolValue)
+            {
+                CameraAutoModeOn();
+            }
+            else
+            {
+                CameraAutoModeOff();
+            }
+        }
+
+        public BoolFeedback CameraAutoModeIsOnFeedback { get; private set; }
         #endregion
 
         #region Recording
@@ -304,7 +327,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #endregion
 
         #region Available Cameras
-        event EventHandler CamerasChanged;
+        //event EventHandler CameraSelected;
 
         private List<Camera> _cameras = new List<Camera>();
 
@@ -324,12 +347,23 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         private void OnCamerasChanged()
         {
-            var handler = CamerasChanged;
+            var handler = CameraSelected;
 
             if (handler != null)
             {
-                handler(this, new EventArgs());
+                handler(this, new CameraSelectedEventArgs());
             }
+        }
+
+        public CameraBase SelectedCamera { get; private set; }
+
+        public StringFeedback SelectedCameraFeedback { get; private set; }
+
+        public event EventHandler<CameraSelectedEventArgs> CameraSelected;
+
+        public void SelectCamera(string key)
+        {
+
         }
 
         #endregion
