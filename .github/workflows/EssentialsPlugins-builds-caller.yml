@@ -20,9 +20,13 @@ jobs:
       version: ${{ needs.getVersion.outputs.version }}
       tag: ${{ needs.getVersion.outputs.tag }}
       channel: ${{ needs.getVersion.outputs.channel }}
-  
+    steps:
+      - name: Print version info
+        run: echo "Building 3Series with version ${{ needs.getVersion.outputs.version }}, tag ${{ needs.getVersion.outputs.tag }}, channel ${{ needs.getVersion.outputs.channel }}"
+
   build-4Series:
-    uses: PepperDash/workflow-templates/.github/workflows/essentialsplugins-4Series-builds.yml@main
+    # uses: PepperDash/workflow-templates/.github/workflows/essentialsplugins-4Series-builds.yml@main
+    uses: PepperDash/workflow-templates/.github/workflows/essentialsplugins-4Series-builds.yml@add-feedbacks
     secrets: inherit
     needs: getVersion
     if: needs.getVersion.outputs.newVersion == 'true'
@@ -31,3 +35,6 @@ jobs:
       version: ${{ needs.getVersion.outputs.version }}
       tag: ${{ needs.getVersion.outputs.tag }}
       channel: ${{ needs.getVersion.outputs.channel }}
+    steps:
+      - name: Print version info
+        run: echo "Building 4Series with version ${{ needs.getVersion.outputs.version }}, tag ${{ needs.getVersion.outputs.tag }}, channel ${{ needs.getVersion.outputs.channel }}"
