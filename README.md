@@ -1,6 +1,5 @@
 # Essentials Plugin Template (c) 2020
 
-
 ## License
 
 Provided under MIT license
