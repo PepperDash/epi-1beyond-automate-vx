@@ -8,7 +8,7 @@ on:
 jobs:
   getVersion:
     uses: PepperDash/workflow-templates/.github/workflows/essentialsplugins-getversion.yml@main
-    secrets: inherit    
+    secrets: inherit  
   
   build-4Series:
     # uses: PepperDash/workflow-templates/.github/workflows/essentialsplugins-4Series-builds.yml@main
