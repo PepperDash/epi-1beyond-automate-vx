@@ -18,6 +18,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
 	/// <summary>
 	/// Plugin device template for third party devices that use IBasicCommunication
 	/// </summary>
+    /// 
+
 	public partial class OneBeyondAutomateVX : EssentialsBridgeableDevice
     {
         // Fields, propeties and feedbacks for device feedback            ********************
