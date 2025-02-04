@@ -93,8 +93,8 @@ __If you do not make these changes to the nuspec file, the project will not gene
 <!-- START Base Classes -->
 ### Base Classes
 
-- JoinMapBaseAdvanced
 - EventArgs
+- JoinMapBaseAdvanced
 - EssentialsBridgeableDevice
 <!-- END Base Classes -->
 <!-- START Public Methods -->
@@ -138,3 +138,21 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - public void GetScenarioStatus()
 - public void SetScenario(uint id)
 <!-- END Public Methods -->
+<!-- START Bool Feedbacks -->
+### Bool Feedbacks
+
+- LoginSuccessfulFB
+- AutoSwitchIsOnFB
+- RecordIsOnFB
+- IsoRecordIsOnFB
+- StreamIsOnFB
+- OutputIsOnFB
+<!-- END Bool Feedbacks -->
+<!-- START Int Feedbacks -->
+### Int Feedbacks
+
+- CameraAddressFB
+<!-- END Int Feedbacks -->
+<!-- START String Feedbacks -->
+
+<!-- END String Feedbacks -->
