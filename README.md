@@ -100,6 +100,10 @@ __If you do not make these changes to the nuspec file, the project will not gene
 <!-- START Public Methods -->
 ### Public Methods
 
+- public void CameraAutoModeOff()
+- public void CameraAutoModeOn()
+- public void CameraAutoModeToggle()
+- public void SelectCamera(string key)
 - public void GetToken()
 - public void ClearToken()
 - public void GetAutoSwitchStatus()
@@ -142,7 +146,7 @@ __If you do not make these changes to the nuspec file, the project will not gene
 ### Bool Feedbacks
 
 - LoginSuccessfulFB
-- AutoSwitchIsOnFB
+- CameraAutoModeIsOnFeedback
 - RecordIsOnFB
 - IsoRecordIsOnFB
 - StreamIsOnFB
@@ -154,5 +158,7 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - CameraAddressFB
 <!-- END Int Feedbacks -->
 <!-- START String Feedbacks -->
+### String Feedbacks
 
+- SelectedCameraFeedback
 <!-- END String Feedbacks -->
