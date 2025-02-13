@@ -10,6 +10,7 @@ using PepperDash.Core;
 using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
 using PepperDash.Essentials.Core.Queues;
+using PepperDash.Essentials.Devices.Common.Cameras;
 using Newtonsoft.Json;
 
 
@@ -18,9 +19,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 	/// <summary>
 	/// Plugin device template for third party devices that use IBasicCommunication
 	/// </summary>
-    /// 
-
-	public partial class OneBeyondAutomateVX : EssentialsBridgeableDevice
+    public partial class OneBeyondAutomateVX : EssentialsBridgeableDevice, IHasCameras, IHasCameraAutoMode
     {
         // Fields, propeties and feedbacks for device feedback            ********************
         // located in separate file: 1BeyondAutomateVXDeviceProperties.cs ********************
@@ -61,6 +60,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
         private string _base64Login;
+
+        private StandbyStatus _standbyStatus = StandbyStatus.Unknown;
 
 
 		/// <summary>
@@ -112,7 +113,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         private void InitializeFeedbacks()
         {
             LoginSuccessfulFB = new BoolFeedback(() => !string.IsNullOrEmpty(Token));
-            AutoSwitchIsOnFB = new BoolFeedback(() => AutoSwitchIsOn);
+            CameraAutoModeIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
             RecordIsOnFB = new BoolFeedback(() => RecordIsOn);
             IsoRecordIsOnFB = new BoolFeedback(() => IsoRecordIsOn);
             StreamIsOnFB = new BoolFeedback(() => StreamIsOn);
@@ -154,10 +155,10 @@ namespace PDT.OneBeyondAutomateVx.EPI
             LoginSuccessfulFB.LinkInputSig(trilist.BooleanInput[joinMap.AuthenticatedFB.JoinNumber]);
 
             trilist.SetSigFalseAction(joinMap.AutoSwitchOn.JoinNumber, () => SetAutoSwitch(true));
-            AutoSwitchIsOnFB.LinkInputSig(trilist.BooleanInput[joinMap.AutoSwitchOn.JoinNumber]);
+            CameraAutoModeIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.AutoSwitchOn.JoinNumber]);
 
             trilist.SetSigFalseAction(joinMap.AutoSwitchOff.JoinNumber, () => SetAutoSwitch(true));
-            AutoSwitchIsOnFB.LinkComplementInputSig(trilist.BooleanInput[joinMap.AutoSwitchOff.JoinNumber]);
+            CameraAutoModeIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.AutoSwitchOff.JoinNumber]);
 
             trilist.SetSigFalseAction(joinMap.RecordStart.JoinNumber, () => SetRecord(eRecordOperation.start));
             RecordIsOnFB.LinkInputSig(trilist.BooleanInput[joinMap.RecordStart.JoinNumber]);
@@ -288,7 +289,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
                 };
 
-            CamerasChanged += (o, a) =>
+            CameraSelected += (o, a) =>
                 {
                     UpdateCameras(trilist, joinMap);
                 };
@@ -951,6 +952,10 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var url = _apiPrefix + "Sleep";
 
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.Status == "OK" && res.Message == "VX went to sleep successfully")
+                _standbyStatus = StandbyStatus.Asleep;
+                //unfortunately API does not allow poll for standby status
         }
 
         public void SetWake()
@@ -958,6 +963,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var url = _apiPrefix + "Wake";
 
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            if (res.Status == "OK" && res.Message == "VX woke up successfully")
+                _standbyStatus = StandbyStatus.Awake;
         }
 
 
@@ -966,6 +974,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var url = _apiPrefix + "Restart";
 
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
+
+            //TODO - reset after success send restart cmd
+            //if (res.Status == "OK" && res.Message == "Restart command initiated")
+            //stop any polling
+            //clear token
+            //reset standbystatus
         }
 
 
@@ -1009,6 +1023,13 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
 
+    }
+
+    public enum StandbyStatus
+    {
+        Unknown = 0,
+        Asleep = 1,
+        Awake = 2
     }
 }
 
