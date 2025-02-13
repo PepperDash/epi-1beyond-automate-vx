@@ -61,8 +61,6 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
         private string _base64Login;
 
-        private StandbyStatus _standbyStatus = StandbyStatus.Unknown;
-
 
 		/// <summary>
 		/// Plugin device constructor for devices that need IBasicCommunication
@@ -992,10 +990,6 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var url = _apiPrefix + "Sleep";
 
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-            if (res.Status == "OK" && res.Message == "VX went to sleep successfully")
-                _standbyStatus = StandbyStatus.Asleep;
-                //unfortunately API does not allow poll for standby status
         }
 
         public void SetWake()
@@ -1003,9 +997,6 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var url = _apiPrefix + "Wake";
 
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-            if (res.Status == "OK" && res.Message == "VX woke up successfully")
-                _standbyStatus = StandbyStatus.Awake;
         }
 
 
@@ -1014,12 +1005,6 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var url = _apiPrefix + "Restart";
 
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-            //TODO - reset after success send restart cmd
-            //if (res.Status == "OK" && res.Message == "Restart command initiated")
-            //stop any polling
-            //clear token
-            //reset standbystatus
         }
 
 
@@ -1063,13 +1048,6 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
 
-    }
-
-    public enum StandbyStatus
-    {
-        Unknown = 0,
-        Asleep = 1,
-        Awake = 2
     }
 }
 
