@@ -874,7 +874,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         {
             var url = _apiPrefix + "CallCameraPreset";
 
-            var res = MakeRequest<ResponseObjectBase, CameraPreset>(url, new CameraPreset(camId.ToString(), presetId.ToString()));
+            var res = MakeRequest<ResponseObjectBase, CameraCmdPreset>(url, new CameraCmdPreset(camId.ToString(), presetId.ToString()));
 
             if (!string.IsNullOrEmpty(res.Message))
                 OnSuccessMessageReceived(res.Message);
@@ -884,7 +884,47 @@ namespace PDT.OneBeyondAutomateVx.EPI
         {
             var url = _apiPrefix + "SaveCameraPreset";
 
-            var res = MakeRequest<ResponseObjectBase, CameraPreset>(url, new CameraPreset(camId.ToString(), presetId.ToString()));
+            var res = MakeRequest<ResponseObjectBase, CameraCmdPreset>(url, new CameraCmdPreset(camId.ToString(), presetId.ToString()));
+
+            if (!string.IsNullOrEmpty(res.Message))
+                OnSuccessMessageReceived(res.Message);
+        }
+
+        public void StartCameraPanTilt(uint camId, uint ptDir)
+        {
+            var url = _apiPrefix + "StartPT";
+
+            var res = MakeRequest<ResponseObjectBase, CameraCmdPanTilt>(url, new CameraCmdPanTilt(camId.ToString(), ptDir.ToString()));
+
+            if (!string.IsNullOrEmpty(res.Message))
+                OnSuccessMessageReceived(res.Message);
+        }
+
+        public void StopCameraPanTilt(uint camId)
+        {
+            var url = _apiPrefix + "StopPT";
+
+            var res = MakeRequest<ResponseObjectBase, CameraCmdBase>(url, new CameraCmdBase(camId.ToString()));
+
+            if (!string.IsNullOrEmpty(res.Message))
+                OnSuccessMessageReceived(res.Message);
+        }
+
+        public void StartCameraZoom(uint camId, uint zDir)
+        {
+            var url = _apiPrefix + "StartZ";
+
+            var res = MakeRequest<ResponseObjectBase, CameraCmdZoom>(url, new CameraCmdZoom(camId.ToString(), zDir.ToString()));
+
+            if (!string.IsNullOrEmpty(res.Message))
+                OnSuccessMessageReceived(res.Message);
+        }
+
+        public void StopCameraZoom(uint camId)
+        {
+            var url = _apiPrefix + "StopZ";
+
+            var res = MakeRequest<ResponseObjectBase, CameraCmdBase>(url, new CameraCmdBase(camId.ToString()));
 
             if (!string.IsNullOrEmpty(res.Message))
                 OnSuccessMessageReceived(res.Message);

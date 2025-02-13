@@ -6,6 +6,7 @@ using Crestron.SimplSharp;
 using Newtonsoft.Json;
 
 
+
 namespace PDT.OneBeyondAutomateVx.EPI
 {
     public class ResponseObjectBase
@@ -19,7 +20,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         [JsonProperty("err", NullValueHandling = NullValueHandling.Ignore)]
         public string Error { get; set; }
 
-        [JsonProperty("results")]
+        [JsonProperty("results", NullValueHandling = NullValueHandling.Ignore)]
         public bool? Results { get; set; }
 
         [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
@@ -35,7 +36,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public bool CopyUnderway { get; set; }
 
         [JsonProperty("cameras", NullValueHandling = NullValueHandling.Ignore)]
-        public List<Camera> Cameras { get; set; }
+        public List<CameraInfo> Cameras { get; set; }
 
         [JsonProperty("layouts", NullValueHandling = NullValueHandling.Ignore)]
         public List<IdName> Layouts { get; set; }
@@ -64,7 +65,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
     }
 
-    public class Camera : ID
+    public class CameraInfo : ID
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -72,7 +73,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         [JsonProperty("ip")]
         public string IpAddress { get; set; }
 
-        public Camera() { }
+        public CameraInfo() { }
     }
 
     public class IdName : ID
@@ -107,19 +108,50 @@ namespace PDT.OneBeyondAutomateVx.EPI
             Address = id;
         }    
     }
-
-    public class CameraPreset
+    public class CameraCmdBase
     {
         [JsonProperty("cam")]
         public string CameraId { get; set; }
 
+        public CameraCmdBase(string camId)
+        {
+            CameraId = camId;
+        }
+    }
+
+    public class CameraCmdPreset: CameraCmdBase
+    {
         [JsonProperty("pre")]
         public string PresetId { get; set; }
 
-        public CameraPreset(string camId, string presetId)
+        public CameraCmdPreset(string camId, string presetId)
+            : base(camId)
         {
-            CameraId = camId;
             PresetId = PresetId;
+        }
+    }
+
+    public class CameraCmdPanTilt : CameraCmdBase
+    {
+        [JsonProperty("ptDir")]
+        public string PtDir { get; set; }
+
+        public CameraCmdPanTilt(string camId, string ptDir)
+            : base(camId)
+        {
+            PtDir = ptDir;
+        }
+    }
+
+    public class CameraCmdZoom : CameraCmdBase
+    {
+        [JsonProperty("zDir")]
+        public string ZDir { get; set; }
+
+        public CameraCmdZoom(string camId, string zDir)
+            : base(camId)
+        {
+            ZDir = zDir;
         }
     }
 

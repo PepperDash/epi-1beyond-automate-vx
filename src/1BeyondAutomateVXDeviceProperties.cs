@@ -329,9 +329,9 @@ namespace PDT.OneBeyondAutomateVx.EPI
         #region Available Cameras
         //event EventHandler CameraSelected;
 
-        private List<Camera> _cameras = new List<Camera>();
+        private List<CameraInfo> _cameras = new List<CameraInfo>();
 
-        public List<Camera> Cameras
+        public List<CameraInfo> Cameras
         {
             get
             {

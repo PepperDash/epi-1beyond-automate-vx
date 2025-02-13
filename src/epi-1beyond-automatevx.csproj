@@ -100,12 +100,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="1BeyondAutomateVXBridgeJoinMap.cs" />
+    <Compile Include="1BeyondAutomateVxCamera.cs" />
     <Compile Include="1BeyondAutomateVXConfigObject.cs" />
     <Compile Include="1BeyondAutomateVXFactory.cs" />
     <Compile Include="1BeyondAutomateVXDeviceProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="1BeyondAutomateVXDevice.cs" />
-    <Compile Include="ResponseObjects.cs" />
+    <Compile Include="ApiObjects\ApiObjects.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
