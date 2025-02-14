@@ -146,6 +146,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
         #endregion
+        #region IHasCameraPresets Members
     }
 
 
