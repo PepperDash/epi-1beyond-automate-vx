@@ -1,6 +1,4 @@
-﻿// For Basic SIMPL# Classes
-// For Basic SIMPL#Pro classes
-
+﻿using System.Collections.Generic;
 using Crestron.SimplSharpPro.DeviceSupport;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.Net.Http;
@@ -837,6 +835,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
         }
 
+        public OneBeyondCamera GetCamera(CameraInfo cameraInfo)
+        {
+            var key = string.Format("{0}-camera{1}", Key, cameraInfo.Id);
+            return new OneBeyondCamera(key, cameraInfo.Name, this, cameraInfo);
+        }
+
 
         public void GetCameras()
         {
@@ -844,8 +848,17 @@ namespace PDT.OneBeyondAutomateVx.EPI
 
             var res = MakeRequest<ResponseObjectBase, object>(url, null);
 
-            if (res.Cameras != null)
-                Cameras = res.Cameras;
+            //if (res.Cameras != null)
+            //    Cameras = res.Cameras;
+            if (res.Cameras == null) return;
+
+            Cameras = new List<CameraBase>();
+            foreach (CameraInfo cameraInfo in res.Cameras)
+            {
+                Cameras.Add(GetCamera(cameraInfo));
+            }
+            
+
         }
 
         public void GetCameraStatus()
