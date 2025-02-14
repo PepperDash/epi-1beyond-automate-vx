@@ -9,7 +9,7 @@ using PepperDash.Essentials.Devices.Common.Cameras;
 
 namespace PDT.OneBeyondAutomateVx.EPI
 {
-    internal class _1BeyondAutomateVxCamera : CameraBase, IHasCameraPtzControl, IBridgeAdvanced
+    public class OneBeyondCamera : CameraBase, IHasCameraPtzControl, IHasCameraPresets, IBridgeAdvanced
     {
         protected OneBeyondAutomateVX ParentDevice { get; private set; }
 
@@ -17,6 +17,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
         /// The ID of the camera
         /// </summary>
         public uint CameraId { get; private set; }
+
+        public string IpAddress { get; private set; }
 
         private bool isPanning;
 
@@ -33,15 +35,17 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
 
-        public _1BeyondAutomateVxCamera(string key, string name, OneBeyondAutomateVX parent, uint id)
+        public OneBeyondCamera(string key, string name, OneBeyondAutomateVX parent, CameraInfo cameraInfo)
             : base(key, name)
         {
             Capabilities = eCameraCapabilities.Pan | eCameraCapabilities.Tilt | eCameraCapabilities.Zoom;
 
             ParentDevice = parent;
 
-            CameraId = id;
+            CameraId = System.UInt16.Parse(cameraInfo.Id);
+            IpAddress = cameraInfo.IpAddress;
         }
+
 
 
 
@@ -146,7 +150,30 @@ namespace PDT.OneBeyondAutomateVx.EPI
         }
 
         #endregion
+
         #region IHasCameraPresets Members
+
+        public void PresetSelect(int preset)
+        {
+            ParentDevice.SetCameraPreset(CameraId, (uint)preset);
+        }
+
+        public void PresetStore(int preset, string description)
+        {
+            // [ ] TODO: add logic to prevent save to Reserved Presets
+            ParentDevice.SaveCameraPreset(CameraId, (uint)preset);
+        }
+
+        public List<CameraPreset> Presets
+        {
+            //get { throw new NotImplementedException(); }
+            // getting a camera preset list not an available API command
+            get { return null; }
+        }
+
+        public event EventHandler<EventArgs> PresetsListHasChanged;
+
+        #endregion
     }
 
 
