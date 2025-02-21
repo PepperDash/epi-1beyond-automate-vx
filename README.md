@@ -88,18 +88,37 @@ __If you do not make these changes to the nuspec file, the project will not gene
 <!-- START Interfaces Implemented -->
 ### Interfaces Implemented
 
+- IHasCameraPtzControl
+- IHasCameraPresets
+- IBridgeAdvanced
+- IHasCameras
+- IHasCameraAutoMode
 - ID
 <!-- END Interfaces Implemented -->
 <!-- START Base Classes -->
 ### Base Classes
 
-- EventArgs
-- JoinMapBaseAdvanced
+- CameraBase
 - EssentialsBridgeableDevice
+- JoinMapBaseAdvanced
+- EventArgs
 <!-- END Base Classes -->
 <!-- START Public Methods -->
 ### Public Methods
 
+- public void PositionHome()
+- public void PanLeft()
+- public void PanRight()
+- public void PanStop()
+- public void TiltUp()
+- public void TiltDown()
+- public void TiltStop()
+- public void ZoomIn()
+- public void ZoomOut()
+- public void ZoomStop()
+- public void LinkToApi(BasicTriList trilist, uint joinStart, string joinMapKey, EiscApiAdvanced bridge)
+- public void PresetSelect(int preset)
+- public void PresetStore(int preset, string description)
 - public void GetToken()
 - public void ClearToken()
 - public void GetAutoSwitchStatus()
@@ -120,11 +139,16 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - public void SetRoomConfig(uint id)
 - public void ForceSetRoomConfig(uint id)
 - public void GoHome()
+- public OneBeyondCamera GetCamera(CameraInfo cameraInfo)
 - public void GetCameras()
 - public void GetCameraStatus()
 - public void SetCamera(uint address)
 - public void SetCameraPreset(uint camId, uint presetId)
 - public void SaveCameraPreset(uint camId, uint presetId)
+- public void StartCameraPanTilt(uint camId, uint ptDir)
+- public void StopCameraPanTilt(uint camId)
+- public void StartCameraZoom(uint camId, uint zDir)
+- public void StopCameraZoom(uint camId)
 - public void ImportCameraPresets()
 - public void ExportCameraPresets()
 - public void CopyFiles(string dest, string logDest, bool delete)
@@ -137,12 +161,16 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - public void GetScenarios()
 - public void GetScenarioStatus()
 - public void SetScenario(uint id)
+- public void CameraAutoModeOff()
+- public void CameraAutoModeOn()
+- public void CameraAutoModeToggle()
+- public void SelectCamera(string key)
 <!-- END Public Methods -->
 <!-- START Bool Feedbacks -->
 ### Bool Feedbacks
 
 - LoginSuccessfulFB
-- AutoSwitchIsOnFB
+- CameraAutoModeIsOnFeedback
 - RecordIsOnFB
 - IsoRecordIsOnFB
 - StreamIsOnFB
@@ -154,5 +182,7 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - CameraAddressFB
 <!-- END Int Feedbacks -->
 <!-- START String Feedbacks -->
+### String Feedbacks
 
+- SelectedCameraFeedback
 <!-- END String Feedbacks -->
