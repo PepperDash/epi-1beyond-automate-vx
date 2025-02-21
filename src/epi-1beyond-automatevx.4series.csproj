@@ -8,7 +8,7 @@
 		<TargetFramework>net472</TargetFramework>
 		<RootNamespace>PDT.OneBeyondAutomateVx.EPI</RootNamespace>
 		<Deterministic>false</Deterministic>
-		<AssemblyTitle>PepperDash.Essentials.Plugin.1BeyondAutomateVX</AssemblyTitle>
+		<AssemblyTitle>PepperDash.Essentials.Plugins.1beyond.automate.vx</AssemblyTitle>
 		<Company>PepperDash Technologies</Company>
 		<Description>This software is a plugin designed to work as a part of PepperDash Essentials for Crestron control processors. This plugin allows for control of 1Beyond AutomateVX Camera server.</Description>
 		<Copyright>Copyright 2024</Copyright>
@@ -17,7 +17,7 @@
 		<InformationalVersion>$(Version)</InformationalVersion>
 		<OutputPath>4Series\bin\$(Configuration)\</OutputPath>
 		<Authors>PepperDash Technologies</Authors>
-		<PackageId>Pepperdash.Essentials.Plugin.4Series.1BeyondAutomateVX</PackageId>
+		<PackageId>PepperDash.Essentials.Plugins.1beyond.automate.vx</PackageId>
 		<PackageProjectUrl>https://github.com/PepperDash/epi-1beyond-automate-vx</PackageProjectUrl>
 		<PackageTags>crestron 4series 1beyond automateVX</PackageTags>
 	</PropertyGroup>
@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <None Remove="epi-1beyond-automatevx.projectinfo" />
+    <None Remove="PDT.1BeyondAutomateVX.projectinfo" />
   </ItemGroup>
 
   <ItemGroup>
