@@ -138,3 +138,4 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - public void GetScenarioStatus()
 - public void SetScenario(uint id)
 <!-- END Public Methods -->
+
