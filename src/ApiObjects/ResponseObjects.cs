@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace OneBeyondAutomateVxEpi.ApiObjects
@@ -40,19 +41,8 @@ namespace OneBeyondAutomateVxEpi.ApiObjects
 
 	public class ResultResponse : RootResponse
 	{
-		[JsonProperty("result")]
-		public bool Result { get; set; }
-	}
-
-	public class CameraResponse : RootResponse
-	{
-		[JsonProperty("cameras")]
-		public List<Camera> Cameras { get; set; }
-
-		public CameraResponse()
-		{
-			Cameras = new List<Camera>();
-		}
+		[JsonProperty("results")]
+		public bool Results { get; set; }
 	}
 
 	public class CameraAddressResponse : RootResponse

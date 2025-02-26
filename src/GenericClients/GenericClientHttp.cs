@@ -166,13 +166,13 @@ error: {2}
 		private void OnResponseRecieved(GenericClientResponseEventArgs args)
 		{
 
-			Debug.Console(AutomateVxDebug.Verbose, this, @"
-{0}
->>>>> OnResponseReceived: 
-args.Request = {1}
-args.Code = {2}
-args.ContentString = {3}
-{0}", Separator, args.Request, args.Code, args.ContentString);
+//            Debug.Console(AutomateVxDebug.Verbose, this, @"
+//{0}
+//>>>>> OnResponseReceived: 
+//args.Request = {1}
+//args.Code = {2}
+//args.ContentString = {3}
+//{0}", Separator, args.Request, args.Code, args.ContentString);
 
 			CheckRequestQueue();
 

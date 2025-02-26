@@ -1,0 +1,725 @@
+﻿[App 1] Using PepperDash_Core v1.3.3-hotfix-390
+.[13:58:22.810]App 1:Debug settings file migration not necessary. Using file at \user\debugSettings\program1
+2 RM Drive(s) Present.
+[13:58:23.309]App 1:Secrets provider 'default' added to SecretsManager
+[13:58:23.311]App 1:Secrets provider 'CrestronGlobalSecrets' added to SecretsManager
+
+ Application Loaded :01
+Initializing Program:01
+Friendly Name             : PepperDashEssentials
+Application Name          : PepperDashEssentials
+Program File              : PepperDashEssentials.dll
+Min Firmware Version      : 1.009.0029
+Program Tool              : SIMPL# Plugin
+Design Tool ID            : 5
+Program Tool ID           : 5
+Archive Name              :
+Compiled On               : 5/16/2024 5:45:06 PM
+Compiler Revision         : 1.16.1.31953
+PlugInVersion             : 2.0.58.0
+Include4.dat              : 2.20.042
+Program Initialized:01
+.[13:58:23.938]App 1:Determining Platform....
+[13:58:23.941]App 1:Starting Essentials v1.16.1 on 4-series Appliance
+[13:58:23.944]App 1:No previous directory found.  Using user/program1
+[13:58:23.952]App 1:Saving debug settings
+[Application 1], Do Not Start on Next Boot set to False
+[13:58:23.958]App 1:Getting Assemblies loaded with Essentials
+[13:58:23.995]App 1:Found 24 Assemblies
+[13:58:23.997]App 1:Loaded Assemblies:
+[13:58:23.998]App 1:Assembly: Crestron.SimplSharpPro.Shades.dll
+[13:58:23.998]App 1:Assembly: Crestron.SimplSharpPro.DM.dll
+[13:58:23.998]App 1:Assembly: SimplSharpTimerEventInterface.dll
+[13:58:23.998]App 1:Assembly: SimplSharpNewtonsoft.dll
+[13:58:23.998]App 1:Assembly: Crestron.SimplSharpPro.GeneralIO.dll
+[13:58:23.998]App 1:Assembly: PepperDash_Essentials_DM.dll
+[13:58:23.998]App 1:Assembly: Newtonsoft.Json.Compact.dll
+[13:58:23.999]App 1:Assembly: Essentials Devices Common.dll
+[13:58:23.999]App 1:Assembly: SimplSharpCWSHelperInterface.dll
+[13:58:23.999]App 1:Assembly: Crestron.SimplSharpPro.Remotes.dll
+[13:58:23.999]App 1:Assembly: Crestron.SimplSharpPro.EthernetCommunications.dll
+[13:58:23.999]App 1:Assembly: Crestron.SimplSharpPro.UI.dll
+[13:58:23.999]App 1:Assembly: SimplSharpCustomAttributesInterface.dll
+[13:58:24.000]App 1:Assembly: PepperDash_Essentials_Core.dll
+[13:58:24.000]App 1:Assembly: SimplSharpSQLHelperInterface.dll
+[13:58:24.000]App 1:Assembly: SimplSharpReflectionInterface.dll
+[13:58:24.000]App 1:Assembly: Crestron.SimplSharpPro.Fusion.dll
+[13:58:24.000]App 1:Assembly: Crestron.SimplSharpPro.ThreeSeriesCards.dll
+[13:58:24.000]App 1:Assembly: Crestron.SimplSharpPro.Lighting.dll
+[13:58:24.000]App 1:Assembly: Crestron.SimplSharpPro.DeviceSupport.dll
+[13:58:24.000]App 1:Assembly: Crestron.SimplSharpPro.Gateways.dll
+[13:58:24.001]App 1:Assembly: PepperDash_Core.dll
+[13:58:24.001]App 1:Assembly: PepperDashEssentials.dll
+[13:58:24.001]App 1:Assembly: SimplSharpHelperInterface.dll
+[13:58:24.402]App 1:Starting Essentials load from configuration
+[13:58:24.403]App 1:Verifying and/or creating folder structure
+[13:58:24.404]App 1:Checking for plugins
+[13:58:24.406]App 1:Plugins directory found, checking for plugins
+[13:58:24.408]App 1:Looking for .dll assemblies from plugins folder...
+[13:58:24.409]App 1:Done with .dll assemblies
+[13:58:24.412]App 1:Looking for .cplz archives from plugins folder...
+[13:58:24.445]App 1:Found cplz: epi-1beyond-automatevx.cplz. Unzipping into temp plugins directory
+[13:58:24.687]App 1:UnZip Result: ZR_OK
+[13:58:24.699]App 1:Checking if assembly: PepperDash.Essentials.Plugin.1BeyondAutomateVx.dll is loaded...
+[13:58:24.700]App 1:Assembly not loaded.
+[13:58:24.701]App 1:Found existing file in loadedPlugins: /user/program1/plugins/loadedAssemblies/PepperDash.Essentials.Plugin.1BeyondAutomateVx.dll Deleting and moving new file to replace it
+[13:58:24.716]App 1:Moved /user/program1/plugins/temp/PepperDash.Essentials.Plugin.1BeyondAutomateVx.dll to /user/program1/plugins/loadedAssemblies/PepperDash.Essentials.Plugin.1BeyondAutomateVx.dll
+[13:58:24.717]App 1:Checking if assembly: Crestron.SimplSharpPro.Shades.dll is loaded...
+[13:58:24.717]App 1:Assembly already loaded.
+[13:58:24.717]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.Shades.dll.  There is already an assembly with that name loaded.
+[13:58:24.717]App 1:Checking if assembly: Crestron.SimplSharpPro.DM.dll is loaded...
+[13:58:24.718]App 1:Assembly already loaded.
+[13:58:24.718]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.DM.dll.  There is already an assembly with that name loaded.
+[13:58:24.718]App 1:Checking if assembly: SimplSharpTimerEventInterface.dll is loaded...
+[13:58:24.718]App 1:Assembly already loaded.
+[13:58:24.719]App 1:Skipping assembly: /user/program1/plugins/temp/SimplSharpTimerEventInterface.dll.  There is already an assembly with that name loaded.
+[13:58:24.719]App 1:Checking if assembly: SimplSharpNewtonsoft.dll is loaded...
+[13:58:24.719]App 1:Assembly already loaded.
+[13:58:24.720]App 1:Skipping assembly: /user/program1/plugins/temp/SimplSharpNewtonsoft.dll.  There is already an assembly with that name loaded.
+[13:58:24.720]App 1:Checking if assembly: Crestron.SimplSharpPro.GeneralIO.dll is loaded...
+[13:58:24.720]App 1:Assembly already loaded.
+[13:58:24.721]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.GeneralIO.dll.  There is already an assembly with that name loaded.
+[13:58:24.721]App 1:Checking if assembly: PepperDash_Essentials_DM.dll is loaded...
+[13:58:24.721]App 1:Assembly already loaded.
+[13:58:24.721]App 1:Skipping assembly: /user/program1/plugins/temp/PepperDash_Essentials_DM.dll.  There is already an assembly with that name loaded.
+[13:58:24.722]App 1:Checking if assembly: Essentials Devices Common.dll is loaded...
+[13:58:24.722]App 1:Assembly already loaded.
+[13:58:24.722]App 1:Skipping assembly: /user/program1/plugins/temp/Essentials Devices Common.dll.  There is already an assembly with that name loaded.
+[13:58:24.722]App 1:Checking if assembly: Crestron.SimplSharpPro.Remotes.dll is loaded...
+[13:58:24.723]App 1:Assembly already loaded.
+[13:58:24.723]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.Remotes.dll.  There is already an assembly with that name loaded.
+[13:58:24.723]App 1:Checking if assembly: Crestron.SimplSharpPro.EthernetCommunications.dll is loaded...
+[13:58:24.723]App 1:Assembly already loaded.
+[13:58:24.724]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.EthernetCommunications.dll.  There is already an assembly with that name loaded.
+[13:58:24.724]App 1:Checking if assembly: Crestron.SimplSharpPro.UI.dll is loaded...
+[13:58:24.724]App 1:Assembly already loaded.
+[13:58:24.725]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.UI.dll.  There is already an assembly with that name loaded.
+[13:58:24.725]App 1:Checking if assembly: PepperDash_Essentials_Core.dll is loaded...
+[13:58:24.725]App 1:Assembly already loaded.
+[13:58:24.726]App 1:Skipping assembly: /user/program1/plugins/temp/PepperDash_Essentials_Core.dll.  There is already an assembly with that name loaded.
+[13:58:24.726]App 1:Checking if assembly: SimplSharpSQLHelperInterface.dll is loaded...
+[13:58:24.726]App 1:Assembly already loaded.
+[13:58:24.726]App 1:Skipping assembly: /user/program1/plugins/temp/SimplSharpSQLHelperInterface.dll.  There is already an assembly with that name loaded.
+[13:58:24.727]App 1:Checking if assembly: SimplSharpReflectionInterface.dll is loaded...
+[13:58:24.727]App 1:Assembly already loaded.
+[13:58:24.727]App 1:Skipping assembly: /user/program1/plugins/temp/SimplSharpReflectionInterface.dll.  There is already an assembly with that name loaded.
+[13:58:24.727]App 1:Checking if assembly: Crestron.SimplSharpPro.Fusion.dll is loaded...
+[13:58:24.728]App 1:Assembly already loaded.
+[13:58:24.728]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.Fusion.dll.  There is already an assembly with that name loaded.
+[13:58:24.728]App 1:Checking if assembly: Crestron.SimplSharpPro.ThreeSeriesCards.dll is loaded...
+[13:58:24.728]App 1:Assembly already loaded.
+[13:58:24.729]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.ThreeSeriesCards.dll.  There is already an assembly with that name loaded.
+[13:58:24.729]App 1:Checking if assembly: Crestron.SimplSharpPro.Lighting.dll is loaded...
+[13:58:24.729]App 1:Assembly already loaded.
+[13:58:24.730]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.Lighting.dll.  There is already an assembly with that name loaded.
+[13:58:24.730]App 1:Checking if assembly: Crestron.SimplSharpPro.DeviceSupport.dll is loaded...
+[13:58:24.730]App 1:Assembly already loaded.
+[13:58:24.731]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.DeviceSupport.dll.  There is already an assembly with that name loaded.
+[13:58:24.731]App 1:Checking if assembly: Crestron.SimplSharpPro.Gateways.dll is loaded...
+[13:58:24.731]App 1:Assembly already loaded.
+[13:58:24.732]App 1:Skipping assembly: /user/program1/plugins/temp/Crestron.SimplSharpPro.Gateways.dll.  There is already an assembly with that name loaded.
+[13:58:24.732]App 1:Checking if assembly: PepperDash_Core.dll is loaded...
+[13:58:24.732]App 1:Assembly already loaded.
+[13:58:24.733]App 1:Skipping assembly: /user/program1/plugins/temp/PepperDash_Core.dll.  There is already an assembly with that name loaded.
+[13:58:24.733]App 1:Checking if assembly: PepperDashEssentials.dll is loaded...
+[13:58:24.733]App 1:Assembly already loaded.
+[13:58:24.733]App 1:Skipping assembly: /user/program1/plugins/temp/PepperDashEssentials.dll.  There is already an assembly with that name loaded.
+[13:58:24.794]App 1:Done with .cplz archives
+[13:58:24.796]App 1:Loading assemblies from loadedPlugins folder...
+[13:58:24.802]App 1:Found 12 plugin assemblies to load
+[13:58:24.824]App 1:Loaded assembly 'QscQsysDspPlugin', version 2.1.1.30322
+[13:58:24.827]App 1:Loaded assembly 'PepperDash.Essentials.Plugin.1BeyondAutomateVx', version 1.0.0.29758
+[13:58:24.829]App 1:Loaded assembly 'ViscaCameraPlugin', version 1.0.1.29297
+[13:58:24.832]App 1:Loaded assembly 'PDT.CustomValues.EPI', version 1.0.1.40435
+[13:58:24.835]App 1:Loaded assembly 'PepperDashPluginSamsungMdcDisplay', version 1.3.2
+[13:58:24.838]App 1:Loaded assembly 'epi.utilities.deviceMonitor', version 1.2.2.33150
+[13:58:24.841]App 1:Loaded assembly 'EpsonProjectorEpi', version 2.0.6-beta-12
+[13:58:24.843]App 1:Loaded assembly 'NvxEpi', version 2.4.1
+[13:58:24.846]App 1:Loaded assembly 'epi-stb-contemporaryresearch', version 0.0.0-buildtype-buildnumber
+[13:58:24.849]App 1:Loaded assembly 'PepperDash.Essentials.Plugin.Utilities.Timer', version 1.2.0.27492
+[13:58:24.852]App 1:Loaded assembly 'PepperDashPluginSymetrixComposer', version 1.0.0.28822
+[13:58:24.855]App 1:Loaded assembly 'FlexEpi', version 3.0.2
+[13:58:24.855]App 1:All Plugins Loaded.
+[13:58:24.859]App 1:Loading Custom Plugin Types...
+.[13:58:24.877]App 1:LoadPlugin method found in QscDsp
+[13:58:24.883]App 1:MinimumEssentialsFrameworkVersion not found.  Loading plugin, but your mileage may vary.
+[13:58:24.883]App 1:Loading legacy plugin: QscQsysDspPlugin
+[13:58:24.898]App 1:Comparing running version '1.16.1' to minimum version '1.12.8'
+[13:58:24.900]App 1:Passed plugin passed dependency check (required version 1.12.8)
+[13:58:24.900]App 1:Loading plugin: PepperDash.Essentials.Plugin.1BeyondAutomateVx
+[13:58:24.906]App 1:Comparing running version '1.16.1' to minimum version '1.6.9'
+[13:58:24.907]App 1:Passed plugin passed dependency check (required version 1.6.9)
+[13:58:24.907]App 1:Loading plugin: ViscaCameraPlugin
+[13:58:24.912]App 1:Comparing running version '1.16.1' to minimum version '1.10.0'
+[13:58:24.912]App 1:Passed plugin passed dependency check (required version 1.10.0)
+[13:58:24.913]App 1:Loading plugin: PDT.CustomValues.EPI
+[13:58:24.918]App 1:Comparing running version '1.16.1' to minimum version '1.6.7'
+[13:58:24.919]App 1:Passed plugin passed dependency check (required version 1.6.7)
+[13:58:24.920]App 1:Loading plugin: PepperDashPluginSamsungMdcDisplay
+[13:58:24.924]App 1:Comparing running version '1.16.1' to minimum version '1.8.4'
+[13:58:24.925]App 1:Passed plugin passed dependency check (required version 1.8.4)
+[13:58:24.925]App 1:Loading plugin: epi.utilities.deviceMonitor
+[13:58:24.930]App 1:Comparing running version '1.16.1' to minimum version '1.8.1'
+[13:58:24.931]App 1:Passed plugin passed dependency check (required version 1.8.1)
+[13:58:24.931]App 1:Loading plugin: EpsonProjectorEpi
+[13:58:24.974]App 1:Comparing running version '1.16.1' to minimum version '1.9.0'
+[13:58:24.975]App 1:Passed plugin passed dependency check (required version 1.9.0)
+[13:58:24.975]App 1:Loading plugin: NvxEpi
+[13:58:24.981]App 1:Comparing running version '1.16.1' to minimum version '1.9.0'
+[13:58:24.981]App 1:Passed plugin passed dependency check (required version 1.9.0)
+[13:58:24.982]App 1:Loading plugin: NvxEpi
+[13:58:24.986]App 1:Comparing running version '1.16.1' to minimum version '1.9.0'
+[13:58:24.986]App 1:Passed plugin passed dependency check (required version 1.9.0)
+[13:58:24.987]App 1:Loading plugin: NvxEpi
+[13:58:24.997]App 1:Comparing running version '1.16.1' to minimum version '1.9.0'
+[13:58:24.997]App 1:Passed plugin passed dependency check (required version 1.9.0)
+[13:58:24.998]App 1:Loading plugin: NvxEpi
+[13:58:25.003]App 1:Comparing running version '1.16.1' to minimum version ''
+[13:58:25.003]App 1:Plugin does not specify a minimum version. Loading plugin may not work as expected. Proceeding with loading plugin
+[13:58:25.003]App 1:Passed plugin passed dependency check (required version )
+[13:58:25.004]App 1:Loading plugin: NvxEpi
+[13:58:25.008]App 1:Comparing running version '1.16.1' to minimum version '1.9.0'
+[13:58:25.009]App 1:Passed plugin passed dependency check (required version 1.9.0)
+[13:58:25.010]App 1:Loading plugin: NvxEpi
+[13:58:25.016]App 1:Comparing running version '1.16.1' to minimum version '1.9.0'
+[13:58:25.016]App 1:Passed plugin passed dependency check (required version 1.9.0)
+[13:58:25.017]App 1:Loading plugin: NvxEpi
+[13:58:25.026]App 1:Comparing running version '1.16.1' to minimum version '1.7.6'
+[13:58:25.026]App 1:Passed plugin passed dependency check (required version 1.7.6)
+[13:58:25.027]App 1:Loading plugin: epi-stb-contemporaryresearch
+[13:58:25.030]App 1:Comparing running version '1.16.1' to minimum version '1.10.3'
+[13:58:25.030]App 1:Passed plugin passed dependency check (required version 1.10.3)
+[13:58:25.031]App 1:Loading plugin: PepperDash.Essentials.Plugin.Utilities.Timer
+[13:58:25.037]App 1:Comparing running version '1.16.1' to minimum version ''
+[13:58:25.038]App 1:Plugin does not specify a minimum version. Loading plugin may not work as expected. Proceeding with loading plugin
+[13:58:25.038]App 1:Passed plugin passed dependency check (required version )
+[13:58:25.039]App 1:Loading plugin: PepperDashPluginSymetrixComposer
+[13:58:25.060]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.061]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.061]App 1:Loading plugin: FlexEpi
+[13:58:25.064]App 1:Comparing running version '1.16.1' to minimum version '1.6.7'
+[13:58:25.065]App 1:Passed plugin passed dependency check (required version 1.6.7)
+[13:58:25.065]App 1:Loading plugin: FlexEpi
+[13:58:25.070]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.071]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.071]App 1:Loading plugin: FlexEpi
+[13:58:25.073]App 1:Comparing running version '1.16.1' to minimum version ''
+[13:58:25.074]App 1:Plugin does not specify a minimum version. Loading plugin may not work as expected. Proceeding with loading plugin
+[13:58:25.074]App 1:Passed plugin passed dependency check (required version )
+[13:58:25.075]App 1:Loading plugin: FlexEpi
+[13:58:25.078]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.079]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.079]App 1:Loading plugin: FlexEpi
+[13:58:25.081]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.082]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.082]App 1:Loading plugin: FlexEpi
+[13:58:25.085]App 1:Comparing running version '1.16.1' to minimum version ''
+[13:58:25.085]App 1:Plugin does not specify a minimum version. Loading plugin may not work as expected. Proceeding with loading plugin
+[13:58:25.086]App 1:Passed plugin passed dependency check (required version )
+[13:58:25.086]App 1:Loading plugin: FlexEpi
+[13:58:25.090]App 1:Comparing running version '1.16.1' to minimum version ''
+[13:58:25.091]App 1:Plugin does not specify a minimum version. Loading plugin may not work as expected. Proceeding with loading plugin
+[13:58:25.091]App 1:Passed plugin passed dependency check (required version )
+[13:58:25.092]App 1:Loading plugin: FlexEpi
+[13:58:25.095]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.096]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.096]App 1:Loading plugin: FlexEpi
+[13:58:25.099]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.100]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.100]App 1:Loading plugin: FlexEpi
+[13:58:25.103]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.104]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.105]App 1:Loading plugin: FlexEpi
+[13:58:25.108]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.109]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.110]App 1:Loading plugin: FlexEpi
+[13:58:25.113]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.113]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.114]App 1:Loading plugin: FlexEpi
+[13:58:25.117]App 1:Comparing running version '1.16.1' to minimum version ''
+[13:58:25.117]App 1:Plugin does not specify a minimum version. Loading plugin may not work as expected. Proceeding with loading plugin
+[13:58:25.118]App 1:Passed plugin passed dependency check (required version )
+[13:58:25.118]App 1:Loading plugin: FlexEpi
+[13:58:25.121]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.121]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.122]App 1:Loading plugin: FlexEpi
+[13:58:25.128]App 1:Comparing running version '1.16.1' to minimum version '1.11.0'
+[13:58:25.128]App 1:Passed plugin passed dependency check (required version 1.11.0)
+[13:58:25.129]App 1:Loading plugin: FlexEpi
+[13:58:25.132]App 1:Done Loading Custom Plugin Types.
+[13:58:25.133]App 1:Folder structure verified. Loading config...
+[13:58:25.138]App 1:Loading unmerged system/template portal configuration file.
+[13:58:25.139]App 1:Attempting to load Local config file: '/user/program1/LocalConfig/*configurationFile*.json'
+[13:58:25.143]App 1:Directory not found:
+[13:58:25.143]App 1:Local Configuration file not present.
+[13:58:25.144]App 1:Attempting to load Portal config file: '/user/program1/*configurationFile*.json'
+[13:58:25.145]App 1:Searching in Directory '/user/program1'
+[13:58:25.146]App 1:For Config Files matching: '*configurationFile*.json'
+[13:58:25.147]App 1:1 config files found matching pattern
+[13:58:25.147]App 1:Found Portal config file: '/user/program1/*configurationFile*.json'
+[13:58:25.148]App 1:Loading config file: '/user/program1/automateVx-configurationFile-essentials.json'
+[13:58:25.253]App 1:MERGED CONFIG RESULT:
+{
+  "info": {},
+  "devices": [
+    {
+      "key": "processor",
+      "type": "cp4n",
+      "name": "Processor",
+      "group": "processor",
+      "supportedConfigModes": [
+        "compliance",
+        "essentials"
+      ],
+      "supportedSystemTypes": [
+        "hudType",
+        "presType",
+        "vtcType",
+        "custom"
+      ],
+      "supportsCompliance": true,
+      "properties": {
+        "numberOfComPorts": 6,
+        "numberOfIrPorts": 8,
+        "numberOfRelays": 8,
+        "numberOfDIOPorts": 8
+      }
+    },
+    {
+      "key": "camera-vx1",
+      "name": "AutomateVX Server",
+      "type": "oneBeyondAutomateVx",
+      "group": "pluginDevices",
+      "properties": {
+        "control": {
+          "method": "http",
+          "tcpSshProperties": {
+            "address": "172.22.46.58",
+            "port": 3579,
+            "username": "Admin",
+            "password": "AutomateVXAdmin",
+            "autoReconnect": false,
+            "autoReconnectIntervalMs": 5000
+          }
+        }
+      }
+    },
+    {
+      "key": "cameras-bridge",
+      "group": "api",
+      "type": "eiscApiAdvanced",
+      "properties": {
+        "control": {
+          "ipid": "a4",
+          "method": "ipidTcp",
+          "tcpSshProperties": {
+            "address": "127.0.0.2",
+            "port": 0
+          }
+        },
+        "devices": [
+          {
+            "deviceKey": "camera-vx1",
+            "joinStart": 501
+          }
+        ]
+      }
+    }
+  ],
+  "rooms": [],
+  "sourceLists": null,
+  "destinationLists": null,
+  "tieLines": [],
+  "joinMaps": {},
+  "global": null
+}
+[13:58:25.362]App 1:Successfully Loaded Merged Config
+[13:58:25.520]App 1:[systemMonitor] Adding SystemMonitorController.
+[13:58:25.549]App 1:Attempting to get program info for slot: 3
+[13:58:25.549]App 1:Attempting to get program info for slot: 1
+[13:58:25.549]App 1:Program 3 not registered. Setting default values for program information.
+[13:58:25.549]App 1:Attempting to get program info for slot: 2
+[13:58:25.549]App 1:Creating 3 EthernetStatusFeedbacks
+[13:58:25.551]App 1:Attempting to get program info for slot: 4
+[13:58:25.551]App 1:Program 4 not registered. Setting default values for program information.
+[13:58:25.551]App 1:Attempting to get program info for slot: 5
+[13:58:25.551]App 1:Program 5 not registered. Setting default values for program information.
+[13:58:25.552]App 1:Attempting to get program info for slot: 6
+[13:58:25.550]App 1:Creating EthernetStatusFeedback for Interface 0
+[13:58:25.552]App 1:Program 6 not registered. Setting default values for program information.
+[13:58:25.552]App 1:Attempting to get program info for slot: 7
+[13:58:25.552]App 1:Program 7 not registered. Setting default values for program information.
+[13:58:25.553]App 1:Attempting to get program info for slot: 8
+[13:58:25.553]App 1:Program 8 not registered. Setting default values for program information.
+[13:58:25.553]App 1:Attempting to get program info for slot: 9
+[13:58:25.553]App 1:Program 9 not registered. Setting default values for program information.
+[13:58:25.553]App 1:Attempting to get program info for slot: 10
+[13:58:25.553]App 1:Program 10 not registered. Setting default values for program information.
+[13:58:25.557]App 1:Ethernet Information for interface 0
+[13:58:25.557]App 1:Adapter Index: 0 Hostname: CO3E-B313-CP4N
+[13:58:25.561]App 1:Adapter Index: 0 Current IP Address: 10.126.144.12
+[13:58:25.564]App 1:Adapter Index: 0 Current Subnet Mask: 255.255.252.0
+[13:58:25.578]App 1:Program info for slot 1 successfully updated
+[13:58:25.581]App 1:Program info for slot 2 successfully updated
+[13:58:25.619]App 1:Adapter Index: 0 Current Router: 10.126.144.1
+[13:58:25.623]App 1:Adapter Index: 0 Static IP Address:
+[13:58:25.624]App 1:Adapter Index: 0 Static Subnet Mask:
+[13:58:25.625]App 1:Adapter Index: 0 Static Router:
+[13:58:25.671]App 1:Adapter Index: 0 DNS Servers: 10.0.245.245 (DHCP),10.131.0.100 (DHCP)
+[13:58:25.671]App 1:Adapter Index: 0 DHCP State: ON
+[13:58:25.672]App 1:Adapter Index: 0 Domain Name: eagle.usaa.com
+[13:58:25.673]App 1:Adapter Index: 0 MAC Address: C4:42:68:2C:3F:3B
+[13:58:25.679]App 1:Creating EthernetStatusFeedback for Interface 1
+[13:58:25.680]App 1:Ethernet Information for interface 1
+[13:58:25.680]App 1:Adapter Index: 1 Hostname: CO3E-B313-CP4N
+[13:58:25.681]App 1:Adapter Index: 1 Current IP Address: 172.22.0.1
+[13:58:25.681]App 1:Adapter Index: 1 Current Subnet Mask: 255.255.0.0
+[13:58:25.725]App 1:Adapter Index: 1 Current Router: 172.22.0.2
+[13:58:25.725]App 1:Adapter Index: 1 Static IP Address:
+[13:58:25.726]App 1:Adapter Index: 1 Static Subnet Mask:
+[13:58:25.726]App 1:Adapter Index: 1 Static Router:
+[13:58:25.726]App 1:Adapter Index: 1 DNS Servers: 172.22.0.2 (DHCP),
+[13:58:25.727]App 1:Adapter Index: 1 DHCP State: ON
+[13:58:25.729]App 1:Adapter Index: 1 Domain Name: CO3E-B313-CP4N.crestron
+[13:58:25.729]App 1:Adapter Index: 1 MAC Address: C4:42:68:2C:3F:39
+[13:58:25.730]App 1:Creating EthernetStatusFeedback for Interface 2
+[13:58:25.730]App 1:Ethernet Information for interface 2
+[13:58:25.731]App 1:Adapter Index: 2 Hostname: CO3E-B313-CP4N
+[13:58:25.731]App 1:Adapter Index: 2 Current IP Address: 172.22.0.1
+[13:58:25.732]App 1:Adapter Index: 2 Current Subnet Mask: 255.255.0.0
+[13:58:25.741]App 1:Adapter Index: 2 Current Router: 172.22.0.2
+[13:58:25.741]App 1:Adapter Index: 2 Static IP Address: 0.0.0.0
+[13:58:25.741]App 1:Adapter Index: 2 Static Subnet Mask: 0.0.0.0
+[13:58:25.741]App 1:Adapter Index: 2 Static Router: 0.0.0.0
+[13:58:25.742]App 1:Adapter Index: 2 DNS Servers: 172.22.0.2 (DHCP),
+[13:58:25.742]App 1:Adapter Index: 2 DHCP State: ON
+[13:58:25.742]App 1:Adapter Index: 2 Domain Name: CO3E-B313-CP4N.crestron
+[13:58:25.743]App 1:Adapter Index: 2 MAC Address: c4:42:68:2c:3f:3a
+.[13:58:25.988]App 1:Creating device 'processor', type 'cp4n'
+[13:58:25.990]App 1:************Processor is not DMPS type***************
+[13:58:25.991]App 1:Creating device 'camera-vx1', type 'oneBeyondAutomateVx'
+[13:58:25.995]App 1:Loading 'oneBeyondAutomateVx' from Essentials Core
+[13:58:26.005]App 1:typeName = onebeyondautomatevx
+[13:58:26.009]App 1:[camera-vx1] Factory Attempting to create new device from type: oneBeyondAutomateVx
+[13:58:26.057]App 1:[camera-vx1] building Http client
+[13:58:26.075]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> GenericClientHttps:
+Key = camera-vx1-http-client
+Host = http://172.22.46.58:3579
+Port = 3579
+Username = Admin
+Password = AutomateVXAdmin
+AuthBase64 = QWRtaW46QXV0b21hdGVWWEFkbWlu
+Token =
+--------------------------------------------------
+[13:58:26.096]App 1:[camera-vx1] Constructing new AutomateVX Server instance
+[13:58:26.099]App 1:Creating device 'cameras-bridge', type 'eiscApiAdvanced'
+[13:58:26.100]App 1:Loading 'eiscApiAdvanced' from Essentials Core
+[13:58:26.100]App 1:typeName = eiscapiadvanced
+[13:58:26.106]App 1:Factory Attempting to create new EiscApiAdvanced Device
+[13:58:26.163]App 1:All Devices Loaded.
+[13:58:26.167]App 1:All Tie Lines Loaded.
+[13:58:26.171]App 1:All Rooms Loaded.
+[13:58:26.174]App 1:No rooms configured to use system Logo server. Bypassing Logo server startup
+[13:58:26.180]App 1:****PreActivation starting...****
+[13:58:26.181]App 1:****PreActivation complete****
+[13:58:26.182]App 1:****Activation starting...****
+[13:58:26.244]App 1:****Activation complete****
+[13:58:26.245]App 1:****PostActivation starting...****
+[13:58:26.265]App 1:[cameras-bridge] Linking Devices...
+[13:58:26.265]App 1:[cameras-bridge] Linking Device: 'camera-vx1'
+[13:58:26.309]App 1:Setting Attribute Name: Authenticate
+[13:58:26.311]App 1:JoinName Attribute value: Authenticate
+[13:58:26.312]App 1:Setting Attribute Name: AutoSwitchOn
+[13:58:26.312]App 1:JoinName Attribute value: AutoSwitchOn
+[13:58:26.312]App 1:Setting Attribute Name: AutoSwitchOff
+[13:58:26.313]App 1:JoinName Attribute value: AutoSwitchOff
+[13:58:26.314]App 1:Setting Attribute Name: RecordStart
+[13:58:26.314]App 1:JoinName Attribute value: RecordStart
+[13:58:26.315]App 1:Setting Attribute Name: RecordPause
+[13:58:26.315]App 1:JoinName Attribute value: RecordPause
+[13:58:26.316]App 1:Setting Attribute Name: RecordStop
+[13:58:26.316]App 1:JoinName Attribute value: RecordStop
+[13:58:26.317]App 1:Setting Attribute Name: IsoRecordOn
+[13:58:26.318]App 1:JoinName Attribute value: IsoRecordOn
+[13:58:26.318]App 1:Setting Attribute Name: IsoRecordOff
+[13:58:26.319]App 1:JoinName Attribute value: IsoRecordOff
+[13:58:26.320]App 1:Setting Attribute Name: StreamOn
+[13:58:26.320]App 1:JoinName Attribute value: StreamOn
+[13:58:26.320]App 1:Setting Attribute Name: StreamOff
+[13:58:26.320]App 1:JoinName Attribute value: StreamOff
+[13:58:26.321]App 1:Setting Attribute Name: OutputOn
+[13:58:26.321]App 1:JoinName Attribute value: OutputOn
+[13:58:26.321]App 1:Setting Attribute Name: OutputOff
+[13:58:26.322]App 1:JoinName Attribute value: OutputOff
+[13:58:26.322]App 1:Setting Attribute Name: Sleep
+[13:58:26.322]App 1:JoinName Attribute value: Sleep
+[13:58:26.323]App 1:Setting Attribute Name: Wake
+[13:58:26.323]App 1:JoinName Attribute value: Wake
+[13:58:26.323]App 1:Setting Attribute Name: GoHome
+[13:58:26.324]App 1:JoinName Attribute value: GoHome
+[13:58:26.324]App 1:Setting Attribute Name: GetAutoSwitchStatus
+[13:58:26.324]App 1:JoinName Attribute value: GetAutoSwitchStatus
+[13:58:26.324]App 1:Setting Attribute Name: GetRecordStatus
+[13:58:26.325]App 1:JoinName Attribute value: GetRecordStatus
+[13:58:26.325]App 1:Setting Attribute Name: GetIsoRecordStatus
+[13:58:26.325]App 1:JoinName Attribute value: GetIsoRecordStatus
+[13:58:26.326]App 1:Setting Attribute Name: GetStreamStatus
+[13:58:26.326]App 1:JoinName Attribute value: GetStreamStatus
+[13:58:26.326]App 1:Setting Attribute Name: GetOutputStatus
+[13:58:26.327]App 1:JoinName Attribute value: GetOutputStatus
+[13:58:26.327]App 1:Setting Attribute Name: GetCurrentLayout
+[13:58:26.327]App 1:JoinName Attribute value: GetCurrentLayout
+[13:58:26.328]App 1:Setting Attribute Name: GetLayouts
+[13:58:26.328]App 1:JoinName Attribute value: GetLayouts
+[13:58:26.328]App 1:Setting Attribute Name: GetCameraStatus
+[13:58:26.329]App 1:JoinName Attribute value: GetCameraStatus
+[13:58:26.329]App 1:Setting Attribute Name: GetCameras
+[13:58:26.329]App 1:JoinName Attribute value: GetCameras
+[13:58:26.330]App 1:Setting Attribute Name: RecallCameraPreset
+[13:58:26.330]App 1:JoinName Attribute value: RecallCameraPreset
+[13:58:26.330]App 1:Setting Attribute Name: CopyFiles
+[13:58:26.331]App 1:JoinName Attribute value: CopyFiles
+[13:58:26.331]App 1:Setting Attribute Name: CopyFilesSuccesfulFB
+[13:58:26.331]App 1:JoinName Attribute value: CopyFilesSuccesfulFB
+[13:58:26.332]App 1:Setting Attribute Name: DeleteFiles
+[13:58:26.332]App 1:JoinName Attribute value: DeleteFiles
+[13:58:26.332]App 1:Setting Attribute Name: GetRoomConfigs
+[13:58:26.333]App 1:JoinName Attribute value: GetRoomConfigs
+[13:58:26.333]App 1:Setting Attribute Name: ChangeLayout
+[13:58:26.333]App 1:JoinName Attribute value: ChangeLayout
+[13:58:26.334]App 1:Setting Attribute Name: NumberOfLayouts
+[13:58:26.334]App 1:JoinName Attribute value: NumberOfLayouts
+[13:58:26.334]App 1:Setting Attribute Name: ChangeRoomConfig
+[13:58:26.335]App 1:JoinName Attribute value: ChangeRoomConfig
+[13:58:26.335]App 1:Setting Attribute Name: ForceChangeRoomConfig
+[13:58:26.336]App 1:JoinName Attribute value: ForceChangeRoomConfig
+[13:58:26.336]App 1:Setting Attribute Name: NumberOfRoomConfigs
+[13:58:26.336]App 1:JoinName Attribute value: NumberOfRoomConfigs
+[13:58:26.337]App 1:Setting Attribute Name: ChangeCamera
+[13:58:26.337]App 1:JoinName Attribute value: ChangeCamera
+[13:58:26.338]App 1:Setting Attribute Name: NumberOfCameras
+[13:58:26.338]App 1:JoinName Attribute value: NumberOfCameras
+[13:58:26.338]App 1:Setting Attribute Name: LiveCameraPreset
+[13:58:26.339]App 1:JoinName Attribute value: LiveCameraPreset
+[13:58:26.339]App 1:Setting Attribute Name: CameraPresetToRecall
+[13:58:26.339]App 1:JoinName Attribute value: CameraPresetToRecall
+[13:58:26.340]App 1:Setting Attribute Name: CameraToRecallPresetOn
+[13:58:26.340]App 1:JoinName Attribute value: CameraToRecallPresetOn
+[13:58:26.341]App 1:Setting Attribute Name: StorageSpaceAvailableGB
+[13:58:26.341]App 1:JoinName Attribute value: StorageSpaceAvailableGB
+[13:58:26.342]App 1:Setting Attribute Name: StorageSpaceTotalGB
+[13:58:26.343]App 1:JoinName Attribute value: StorageSpaceTotalGB
+[13:58:26.343]App 1:Setting Attribute Name: ErrorMessage
+[13:58:26.344]App 1:JoinName Attribute value: ErrorMessage
+[13:58:26.344]App 1:Setting Attribute Name: SuccessMessage
+[13:58:26.344]App 1:JoinName Attribute value: SuccessMessage
+[13:58:26.345]App 1:Setting Attribute Name: CopyFilesDestination
+[13:58:26.345]App 1:JoinName Attribute value: CopyFilesDestination
+[13:58:26.346]App 1:Setting Attribute Name: CopyLogDestination
+[13:58:26.346]App 1:JoinName Attribute value: CopyLogDestination
+[13:58:26.347]App 1:Setting Attribute Name: LayoutName
+[13:58:26.347]App 1:JoinName Attribute value: LayoutName
+[13:58:26.348]App 1:Setting Attribute Name: CameraNames
+[13:58:26.349]App 1:JoinName Attribute value: CameraNames
+[13:58:26.349]App 1:Setting Attribute Name: RoomConfigName
+[13:58:26.350]App 1:JoinName Attribute value: RoomConfigName
+[13:58:26.444]App 1:Linking to Trilist 'A4'
+[13:58:26.444]App 1:Linking to Bridge Type OneBeyondAutomateVx
+[13:58:26.501]App 1:[cameras-bridge] Linking Rooms...
+[13:58:26.503]App 1:[cameras-bridge] No rooms linked to this bridge.
+.....Update request from Slot-01.IP-ID-A4 in Program 02
+[13:58:31.521]App 1:[cameras-bridge] EISC registration successful
+[13:58:31.521]App 1:****PostActivation complete****
+[13:58:31.539]App 1:Mobile Control not enabled for this system
+[13:58:31.540]App 1:Essentials load complete
+-------------------------------------------------------------
+[13:58:31.544]App 1:Starting Essentials Web API on 4-series Appliance
+Update request from IP-ID-A4 in Program 01
+[13:58:31.598]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/Get-Token
+content:
+requestType: Post
+authHeaderValue: QWRtaW46QXV0b21hdGVWWEFkbWlu
+--------------------------------------------------
+[13:58:31.743]App 1:[essentialsWebApi] Starting server, registration was successful
+[13:58:31.746]App 1:[essentialsWebApi] --------------------------------------------------
+[13:58:31.749]App 1:[essentialsWebApi] Server:http(s)://10.126.144.12/cws/app01/api
+[13:58:31.750]App 1:[essentialsWebApi] Configured Routes:
+[13:58:31.756]App 1:[essentialsWebApi] ReportVersions: http(s)://10.126.144.12/cws/app01/api/reportversions
+[13:58:31.757]App 1:[essentialsWebApi] AppDebug: http(s)://10.126.144.12/cws/app01/api/appdebug
+[13:58:31.757]App 1:[essentialsWebApi] DevList: http(s)://10.126.144.12/cws/app01/api/devlist
+[13:58:31.757]App 1:[essentialsWebApi] DevProps: http(s)://10.126.144.12/cws/app01/api/devprops
+[13:58:31.758]App 1:[essentialsWebApi] DevJson: http(s)://10.126.144.12/cws/app01/api/devjson
+[13:58:31.758]App 1:[essentialsWebApi] SetDeviceStreamDebug: http(s)://10.126.144.12/cws/app01/api/setdevicestreamdebug
+[13:58:31.758]App 1:[essentialsWebApi] DisableAllStreamDebug: http(s)://10.126.144.12/cws/app01/api/disableallstreamdebug
+[13:58:31.759]App 1:[essentialsWebApi] ShowConfig: http(s)://10.126.144.12/cws/app01/api/showconfig
+[13:58:31.759]App 1:[essentialsWebApi] GetTypes: http(s)://10.126.144.12/cws/app01/api/gettypes
+[13:58:31.759]App 1:[essentialsWebApi] GetTypesByFilter: http(s)://10.126.144.12/cws/app01/api/gettypes/{filter}
+[13:58:31.759]App 1:[essentialsWebApi] GetJoinMapsForBridgeKey: http(s)://10.126.144.12/cws/app01/api/getjoinmap/{bridgeKey}
+[13:58:31.760]App 1:[essentialsWebApi] GetJoinMapsForDeviceKey: http(s)://10.126.144.12/cws/app01/api/getjoinmap/{bridgeKey}/{deviceKey}
+[13:58:31.760]App 1:[essentialsWebApi] GetFeedbacksForDeviceKey: http(s)://10.126.144.12/cws/app01/api/feedbacks/{deviceKey}
+[13:58:31.762]App 1:[essentialsWebApi] --------------------------------------------------
+[13:58:31.840]App 1:[cameras-bridge] EiscApiAdvanced change: UShort 501=1
+[13:58:31.842]App 1:[cameras-bridge] Executing Action: System.Action`1[System.UInt16]
+[13:58:31.852]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/ChangeLayout
+content: {"id":"A"}
+requestType: Post
+authHeaderValue: QWRtaW46QXV0b21hdGVWWEFkbWlu
+--------------------------------------------------
+[13:58:31.860]App 1:[cameras-bridge] EiscApiAdvanced change: UShort 503=1
+[13:58:31.860]App 1:[cameras-bridge] Executing Action: System.Action`1[System.UInt16]
+[13:58:31.866]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/ChangeRoomConfiguration
+content: {"id":1}
+requestType: Post
+authHeaderValue: QWRtaW46QXV0b21hdGVWWEFkbWlu
+--------------------------------------------------
+[13:58:31.866]App 1:[cameras-bridge] EiscApiAdvanced change: UShort 506=2
+[13:58:31.866]App 1:[cameras-bridge] Executing Action: System.Action`1[System.UInt16]
+[13:58:31.873]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/ManualSwitchCamera
+content: {"address":"2"}
+requestType: Post
+authHeaderValue: QWRtaW46QXV0b21hdGVWWEFkbWlu
+--------------------------------------------------
+[13:58:32.035]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 3
+[13:58:32.041]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was successful
+[13:58:32.047]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 2
+[13:58:32.048]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was successful
+[13:58:32.054]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 1
+[13:58:32.055]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was successful
+[13:58:32.062]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.062]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.069]App 1:[camera-vx1] OnResponseReceived: Request = ManualSwitchCamera > Code = 401 | ContentString = {"err":"Unauthorized","status":"Error"}
+[13:58:32.069]App 1:[camera-vx1] OnResponseReceived: Request = ChangeLayout > Code = 401 | ContentString = {"err":"Unauthorized","status":"Error"}
+[13:58:32.069]App 1:[camera-vx1] OnResponseReceived: Request = Get-Token > Code = 200 | ContentString = {"status":"OK","token":"POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie"}
+[13:58:32.069]App 1:[camera-vx1] OnResponseReceived: Request = ChangeRoomConfiguration > Code = 401 | ContentString = {"err":"Unauthorized","status":"Error"}
+[13:58:32.072]App 1:[camera-vx1] ResponseCode: 401
+[13:58:32.073]App 1:[camera-vx1] ResponseContent: {"err":"Unauthorized","status":"Error"}
+[13:58:32.074]App 1:[camera-vx1] OnResponseReceived: Code = 401, Content = {"err":"Unauthorized","status":"Error"}
+[13:58:32.076]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/AutoSwitchStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+--------------------------------------------------
+[13:58:32.077]App 1:[camera-vx1] ResponseErrorMessage: Unauthorized
+[13:58:32.077]App 1:[camera-vx1] ResponseErrorMessage: Unauthorized
+[13:58:32.085]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.085]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.086]App 1:[camera-vx1] OnResponseReceived: Request = AutoSwitchStatus > Code = 200 | ContentString = {"message":"AutoSwitching in Progress","results":true,"status":"OK"}
+[13:58:32.091]App 1:[camera-vx1] ResponseSuccessMessage: AutoSwitching in Progress
+[13:58:32.179]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/OutputStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+--------------------------------------------------
+
+Program(s) Started...
+[13:58:32.225]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.225]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.225]App 1:[camera-vx1] OnResponseReceived: Request = OutputStatus > Code = 200 | ContentString = {"status":"OK","results":true,"message":"Outputting in progress"}
+[13:58:32.226]App 1:[camera-vx1] ResponseSuccessMessage: Outputting in progress
+[13:58:32.282]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/GetRoomConfigs
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+--------------------------------------------------
+[13:58:32.293]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.294]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.294]App 1:[camera-vx1] OnResponseReceived: Request = GetRoomConfigs > Code = 200 | ContentString = {"status":"OK","message":"Room configs loaded successfully","roomConfigs":[{"id":1,"name":"Cheever B313"}]}
+[13:58:32.306]App 1:[camera-vx1] ResponseSuccessMessage: Room configs loaded successfully
+[13:58:32.384]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/GetLayouts
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+--------------------------------------------------
+[13:58:32.399]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.400]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.400]App 1:[camera-vx1] OnResponseReceived: Request = GetLayouts > Code = 200 | ContentString = {"status":"OK","message":"Layouts loaded successfully","layouts":[{"id":"A","name":"Full Screen"},{"id":"B","name":"Dynamic Q&A"},{"id":"C","name":"PiP"}]}
+[13:58:32.434]App 1:[camera-vx1] OnResponseReceived Exception Message: Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+[13:58:32.458]App 1:[camera-vx1] OnResponseReceived Stack Trace:   at System.Collections.Generic.List`1[T].get_Item (System.Int32 index) [0x00009] in <e008ef42803d426d9817f43ed5ac3eba>:0
+  at OneBeyondAutomateVxEpi.OneBeyondAutomateVx.UpdateLayoutNames (Crestron.SimplSharpPro.DeviceSupport.BasicTriList trilist, OneBeyondAutomateVxEpi.OneBeyondAutomateVxBridgeJoinMap joinMap) [0x0009f] in <331a38899d814e0aaa5eee6c5fa55a8f>:0
+  at OneBeyondAutomateVxEpi.OneBeyondAutomateVx.OnResponseReceived (System.Object sender, OneBeyondAutomateVxEpi.GenericClients.GenericClientResponseEventArgs args) [0x00648] in <331a38899d814e0aaa5eee6c5fa55a8f>:0
+[13:58:32.487]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/RoomConfigStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+--------------------------------------------------
+[13:58:32.496]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.497]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.497]App 1:[camera-vx1] OnResponseReceived: Request = RoomConfigStatus > Code = 200 | ContentString = {"status":"OK","message":"Current room configuration queried successfully","roomConfig":{"id":1,"name":"Cheever B313"}}
+[13:58:32.500]App 1:[camera-vx1] ResponseSuccessMessage: Current room configuration queried successfully
+[13:58:32.500]App 1:[camera-vx1] ResponseErrorMessage:
+[13:58:32.589]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/LayoutStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+--------------------------------------------------
+[13:58:32.604]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.604]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.604]App 1:[camera-vx1] OnResponseReceived: Request = LayoutStatus > Code = 200 | ContentString = {"status":"OK","message":"Current layout queried successfully","layout":{"id":"A","name":"Full Screen"}}
+[13:58:32.609]App 1:[camera-vx1] ResponseSuccessMessage: Current layout queried successfully
+[13:58:32.692]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/GetCameras
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+--------------------------------------------------
+[13:58:32.708]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.708]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.708]App 1:[camera-vx1] OnResponseReceived: Request = GetCameras > Code = 200 | ContentString = {"status":"OK","message":"cameras loaded successfully","cameras":[{"id":1,"model":"i20","ip":"172.22.114.11","asPTZ":"False"},{"id":2,"model":"p12","ip":"172.22.114.12","asPTZ":"False"},{"id":3,"model":"p12","ip":"172.22.114.13","asPTZ":"False"},{"id":4,"model":"p20","ip":"172.22.114.16","asPTZ":"False"},{"id":5,"model":"p20","ip":"172.22.114.15","asPTZ":"False"},{"id":6,"model":"p12","ip":"172.22.114.17","asPTZ":"False"},{"id":7,"model":"p12","ip":"172.22.114.14","asPTZ":"False"}]}
+[13:58:32.723]App 1:[camera-vx1] UpdateCameras: id 1, model i20, IP 172.22.114.11, AsPtz False
+[13:58:32.724]App 1:[camera-vx1] UpdateCameras: id 2, model p12, IP 172.22.114.12, AsPtz False
+[13:58:32.724]App 1:[camera-vx1] UpdateCameras: id 3, model p12, IP 172.22.114.13, AsPtz False
+[13:58:32.725]App 1:[camera-vx1] UpdateCameras: id 4, model p20, IP 172.22.114.16, AsPtz False
+[13:58:32.725]App 1:[camera-vx1] UpdateCameras: id 5, model p20, IP 172.22.114.15, AsPtz False
+[13:58:32.726]App 1:[camera-vx1] UpdateCameras: id 6, model p12, IP 172.22.114.17, AsPtz False
+[13:58:32.727]App 1:[camera-vx1] UpdateCameras: id 7, model p12, IP 172.22.114.14, AsPtz False
+[13:58:32.727]App 1:[camera-vx1] ResponseSuccessMessage: cameras loaded successfully
+[13:58:32.794]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/CameraStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+--------------------------------------------------
+[13:58:32.795]App 1:[camera-vx1] ResponseSuccessMessage:
+[13:58:32.808]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.Count = 0
+[13:58:32.808]App 1:[camera-vx1-http-client] CheckRequestQueue: _requestQueue.TryToDequeue was unsuccessful
+[13:58:32.808]App 1:[camera-vx1] OnResponseReceived: Request = CameraStatus > Code = 200 | ContentString = {"status":"OK","message":"Live camera address queried successfully.","address":"6","addresses":["6"]}
+[13:58:32.818]App 1:[camera-vx1] ResponseSuccessMessage: Live camera address queried successfully.
+[13:58:53.957]App 1:Debug settings file migration not necessary. Using file at \user\debugSettings\program1
+[13:58:53.958]App 1:Loading debug settings file from \user\debugSettings\program1

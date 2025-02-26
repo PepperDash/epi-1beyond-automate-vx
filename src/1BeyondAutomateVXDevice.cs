@@ -104,7 +104,6 @@ namespace OneBeyondAutomateVxEpi
 			get { return _autoSwitchIsOn; }
 			private set
 			{
-				if (value == _autoSwitchIsOn) return;
 				_autoSwitchIsOn = value;
 				AutoSwitchIsOnFeedback.FireUpdate();
 			}
@@ -657,14 +656,6 @@ namespace OneBeyondAutomateVxEpi
 					"OnResponseReceived: Request = {0} > Code = {1} | ContentString = {2}",
 					args.Request, args.Code, args.ContentString);
 
-				ResponseCode = args.Code;
-
-				//if (string.IsNullOrEmpty(args.ContentString))
-				//{
-				//    Debug.Console(AutomateVxDebug.Notice, this, "OnResponseReceived: args.ContentString is null or empty");
-				//    return;
-				//}
-
 				var request = args.Request.ToLower();
 				var content = args.ContentString;
 
@@ -691,7 +682,8 @@ namespace OneBeyondAutomateVxEpi
 						var response = ApiResponseParser.ParseResultResponse(content);
 						if (response.Status == "OK")
 						{
-							AutoSwitchIsOn = response.Result;
+							Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseRecieved: 'autoswitchstatus' results {0}", response.Results.ToString());
+							AutoSwitchIsOn = (response.Results == true);
 							ResponseSuccessMessage = response.Message;
 							return;
 						}
@@ -720,7 +712,7 @@ namespace OneBeyondAutomateVxEpi
 						var response = ApiResponseParser.ParseResultResponse(content);
 						if (response.Status == "OK")
 						{
-							OutputIsOn = response.Result;
+							OutputIsOn = response.Results;
 							ResponseSuccessMessage = response.Message;
 							return;
 						}
@@ -749,7 +741,7 @@ namespace OneBeyondAutomateVxEpi
 						var response = ApiResponseParser.ParseResultResponse(content);
 						if (response.Status == "OK")
 						{
-							StreamIsOn = response.Result;
+							StreamIsOn = response.Results;
 							ResponseSuccessMessage = response.Message;
 							return;
 						}
@@ -791,7 +783,7 @@ namespace OneBeyondAutomateVxEpi
 						var response = ApiResponseParser.ParseResultResponse(content);
 						if (response.Status == "OK")
 						{
-							IsoRecordIsOn = response.Result;
+							IsoRecordIsOn = response.Results;
 							ResponseSuccessMessage = response.Message;
 							return;
 						}
@@ -802,7 +794,7 @@ namespace OneBeyondAutomateVxEpi
 					}
 					case "getcameras":
 					{
-						var response = ApiResponseParser.ParseCameraResponse(content);
+						var response = ApiResponseParser.ParseRootResponse(content);
 						if (response.Status == "OK")
 						{
 							Cameras = response.Cameras;
@@ -955,8 +947,9 @@ namespace OneBeyondAutomateVxEpi
 					}
 					default:
 					{
+						ResponseCode = args.Code;
 						ResponseContent = content;
-						Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseReceived: ResponseContent = {0}", ResponseContent);
+						Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseReceived: Code = {0}, Content = {1}", ResponseCode, ResponseContent);
 
 						break;
 					}
@@ -1194,7 +1187,7 @@ namespace OneBeyondAutomateVxEpi
 		/// </summary>
 		public void GetRoomConfigStatus()
 		{
-			var url = string.Format("{0}/RoomConfigStatusResponse", ApiPath);
+			var url = string.Format("{0}/RoomConfigStatus", ApiPath);
 			_client.SendRequest("POST", url, string.Empty);
 		}
 

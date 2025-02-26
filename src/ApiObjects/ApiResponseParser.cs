@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace OneBeyondAutomateVxEpi.ApiObjects
 {
@@ -17,11 +18,6 @@ namespace OneBeyondAutomateVxEpi.ApiObjects
 		public static ResultResponse ParseResultResponse(string content)
 		{
 			return JsonConvert.DeserializeObject<ResultResponse>(content);
-		}
-
-		public static CameraResponse ParseCameraResponse(string content)
-		{
-			return JsonConvert.DeserializeObject<CameraResponse>(content);
 		}
 
 		public static CameraAddressResponse ParseCameraAddressResponse(string content)

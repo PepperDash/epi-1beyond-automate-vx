@@ -121,7 +121,7 @@ Token = {7}
 				: Token;
 
 			request.Header.SetHeaderValue("Authorization", authorizationHeaderValue);
-			
+
 			Debug.Console(AutomateVxDebug.Verbose, this, @"
 {0}
 >>>>> SendRequest
@@ -169,13 +169,13 @@ error: {2}
 		private void OnResponseRecieved(GenericClientResponseEventArgs args)
 		{
 
-			Debug.Console(AutomateVxDebug.Verbose, this, @"
-{0}
->>>>> OnResponseReceived: 
-args.Reqeuest = {1}
-args.Code = {2}
-args.ContentString = {3}
-{0}", Separator, args.Request, args.Code, args.ContentString);
+//            Debug.Console(AutomateVxDebug.Verbose, this, @"
+//{0}
+//>>>>> OnResponseReceived: 
+//args.Reqeuest = {1}
+//args.Code = {2}
+//args.ContentString = {3}
+//{0}", Separator, args.Request, args.Code, args.ContentString);
 
 			CheckRequestQueue();
 
