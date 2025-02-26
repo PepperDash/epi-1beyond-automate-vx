@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Globalization;
-using System.Text;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using OneBeyondAutomateVxEpi.ApiObjects;
 using PepperDash.Core;
 using PepperDash.Essentials.Core;
 using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
@@ -26,7 +24,8 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 		public int Port { get; private set; }
 		public string Username { get; private set; }
 		public string Password { get; private set; }
-		public string AuthorizationBase64 { get; set; }
+		public string AuthorizationBase64 { get; private set; }
+		public string Token { get; private set; }
 
 		/// <summary>
 		/// Constructor
@@ -54,7 +53,7 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 			
 			Username = controlConfig.TcpSshProperties.Username ?? "";
 			Password = controlConfig.TcpSshProperties.Password ?? "";
-			AuthorizationBase64 = EncodeBase64(Username, Password);
+			AuthorizationBase64 = GenericClientHelpers.EncodeBase64(key, Username, Password);
 
 			Debug.Console(AutomateVxDebug.Verbose, this, @"
 {0}
@@ -64,12 +63,14 @@ Host = {2}
 Port = {3}
 Username = {4}
 Password = {5}
-{0}", Separator, Key, Host, Port, Username, Password);
+AuthBase64 = {6}
+Token = {7}
+{0}", Separator, Key, Host, Port, Username, Password, AuthorizationBase64, Token);
 
 			_client = new HttpsClient
 			{
-				UserName = Username,
-				Password = Password,
+				//UserName = Username,
+				//Password = Password,
 				KeepAlive = false,
 				HostVerification = false,
 				PeerVerification = false
@@ -112,21 +113,23 @@ Password = {5}
 				ContentString = content
 			};
 
-			request.Header.SetHeaderValue("Content-Type", "application/json");
+			request.Header.ContentType = "application/json";
 			request.Header.SetHeaderValue("Content-Length", content.Length.ToString(CultureInfo.InvariantCulture));
 
-			if (!string.IsNullOrEmpty(AuthorizationBase64))
-			{
-				request.Header.SetHeaderValue("Authorization", AuthorizationBase64);
-			}
+			var authorizationHeaderValue = string.IsNullOrEmpty(Token)
+				? AuthorizationBase64
+				: Token;
 
+			request.Header.SetHeaderValue("Authorization", authorizationHeaderValue);
+			
 			Debug.Console(AutomateVxDebug.Verbose, this, @"
 {0}
 >>>>> SendRequest
 url: {1}
 content: {2}
 requestType: {3}
-{0}", Separator, request.Url, request.ContentString, request.RequestType);
+authHeaderValue: {4}
+{0}", Separator, request.Url, request.ContentString, request.RequestType, authorizationHeaderValue);
 
 			if (_client.ProcessBusy)
 				_requestQueue.Enqueue(() => RequestDispatch(request));
@@ -144,12 +147,16 @@ requestType: {3}
 					Debug.Console(AutomateVxDebug.Verbose, this, @"
 {0}
 >>>>> RequestDispatch
-error: {1}
-{0}", Separator, error);
+request: {1}
+error: {2}
+{0}", Separator, request, error);
 					return;
 				}
 
-				OnResponseRecieved(new GenericClientResponseEventArgs(request.ToString(), response.Code, response.ContentString));
+				var parts = request.Url.ToString().Split('/');
+				var requestPath = parts[parts.Length - 1];
+
+				OnResponseRecieved(new GenericClientResponseEventArgs(requestPath, response.Code, response.ContentString));
 			});
 		}
 
@@ -165,28 +172,44 @@ error: {1}
 			Debug.Console(AutomateVxDebug.Verbose, this, @"
 {0}
 >>>>> OnResponseReceived: 
-args.Code = {1}
-args.ContentString = {2}
-{0}", Separator, args.Code, args.ContentString);
+args.Reqeuest = {1}
+args.Code = {2}
+args.ContentString = {3}
+{0}", Separator, args.Request, args.Code, args.ContentString);
 
 			CheckRequestQueue();
 
+			switch (args.Code)
+			{
+				case 200:
+				{
+					if (args.Request.ToLower().Contains("get-token"))
+					{
+						var tokenResponse = ApiResponseParser.ParseTokenResponse(args.ContentString);
+						if (tokenResponse.Status == "OK")
+						{
+							Token = tokenResponse.Token;
+							ProcessSuccessResponse(args);
+							return;
+						}
+						
+						ProcessErrorResponse(args);
+						return;
+					}
 
-			if (args.Code != 200)
-				ProcessErrorResponse(args);
-			else
-				ProcessSuccessResponse(args);
+					ProcessSuccessResponse(args);
+					break;
+				}
+				default:
+				{
+					ProcessErrorResponse(args);
+					break;
+				}
+			}
 		}
 
 		private void ProcessSuccessResponse(GenericClientResponseEventArgs args)
 		{
-			var jToken = IsValidJson(args.ContentString);
-			if (jToken == null)
-			{
-				Debug.Console(AutomateVxDebug.Notice, this, "ProcessSuccessResponse: IsValidJson obj is null");
-				return;
-			}
-
 			// pass the response to the consuming class
 			var handler = ResponseReceived;
 			if (handler == null) return;
@@ -196,16 +219,6 @@ args.ContentString = {2}
 
 		private void ProcessErrorResponse(GenericClientResponseEventArgs args)
 		{
-			var jToken = IsValidJson(args.ContentString);
-			if (jToken == null)
-			{
-				Debug.Console(AutomateVxDebug.Notice, this, "ProcessErrorResponse: IsValidJson obj is null");
-				return;
-			}
-
-			var errorArray = jToken.SelectToken("errors");
-			if (errorArray == null) return;
-
 			// pass the response to the consuming class
 			var handler = ResponseReceived;
 			if (handler == null) return;
@@ -214,39 +227,6 @@ args.ContentString = {2}
 		}
 
 		#endregion
-
-		private JToken IsValidJson(string contentString)
-		{
-			if (string.IsNullOrEmpty(contentString)) return null;
-
-			contentString = contentString.Trim();
-			if ((!contentString.StartsWith("{") || !contentString.EndsWith("}")) &&
-				(!contentString.StartsWith("[") || !contentString.EndsWith("]"))) return null;
-
-			try
-			{
-				var jToken = JToken.Parse(contentString);
-				Debug.Console(AutomateVxDebug.Notice, this, "IsValidJson: obj {0}", jToken == null ? "is null" : "is not null");
-
-				return jToken;
-			}
-			catch (JsonReaderException jex)
-			{
-				Debug.Console(AutomateVxDebug.Notice, this, "IsValidJson JsonReaderException.Message: {0}", jex.Message);
-				Debug.Console(AutomateVxDebug.Verbose, this, "IsValidJson JsonReaderException.StackTrace: {0}", jex.StackTrace);
-				if (jex.InnerException != null) Debug.Console(AutomateVxDebug.Verbose, this, "IsValidJson JsonReaderException.InnerException: {0}", jex.InnerException);
-
-				return null;
-			}
-			catch (Exception ex)
-			{
-				Debug.Console(AutomateVxDebug.Notice, this, "IsValidJson Exception.Message: {0}", ex.Message);
-				Debug.Console(AutomateVxDebug.Verbose, this, "IsValidJson Exception.StackTrace: {0}", ex.StackTrace);
-				if (ex.InnerException != null) Debug.Console(AutomateVxDebug.Verbose, this, "IsValidJson Exception.InnerException: {0}", ex.InnerException);
-
-				return null;
-			}
-		}
 
 		// Checks request queue and issues next request
 		private void CheckRequestQueue()
@@ -258,29 +238,6 @@ args.ContentString = {2}
 			if (nextRequest != null)
 			{
 				nextRequest();
-			}
-		}
-
-		// encodes username and password, returning a Base64 encoded string
-		private string EncodeBase64(string username, string password)
-		{
-			if (string.IsNullOrEmpty(username))
-			{
-				return "";
-			}
-
-			try
-			{
-				var base64String =
-					Convert.ToBase64String(
-						Encoding.GetEncoding("ISO-8859-1")
-							.GetBytes(string.Format("{0}:{1}", username, password)));
-				return string.Format("Basic {0}", base64String);
-			}
-			catch (Exception err)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "EncodeBase64 Exception:\r{0}", err);
-				return "";
 			}
 		}
 	}

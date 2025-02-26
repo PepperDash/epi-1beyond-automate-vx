@@ -1,24 +1,25 @@
-﻿using Crestron.SimplSharp;
-using Crestron.SimplSharp.Net.Http;
-using Crestron.SimplSharp.Net.Https;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using Crestron.SimplSharp;
 using Crestron.SimplSharpPro.DeviceSupport;
 using Newtonsoft.Json;
+using OneBeyondAutomateVxEpi.ApiObjects;
+using OneBeyondAutomateVxEpi.GenericClients;
 using PepperDash.Core;
 using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
-using OneBeyondAutomateVxEpi.GenericClients;
-using System;
 
 
 namespace OneBeyondAutomateVxEpi
 {
-	/// <summary>
-	/// Plugin device template for third party devices that use IBasicCommunication
-	/// </summary>
-	/// 
-
 	public partial class OneBeyondAutomateVx : EssentialsBridgeableDevice
 	{
+		private const string ApiPath = "/api";
+
+		private BasicTriList _trilist;
+		private OneBeyondAutomateVxBridgeJoinMap _joinMap;
+		
 		private static readonly string Separator = new string('-', 50);
 
 		#region IRestfulComms
@@ -26,6 +27,9 @@ namespace OneBeyondAutomateVxEpi
 		private readonly IRestfulComms _client;
 
 		private int _responseCode;
+		private string _responseContent;
+		private string _responseSuccessMessage;
+		private string _responseErrorMessage;		
 
 		public int ResponseCode
 		{
@@ -33,13 +37,10 @@ namespace OneBeyondAutomateVxEpi
 			set
 			{
 				_responseCode = value;
-				ResponseCodeFeedback.FireUpdate();
+				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseCode: {0}", _responseCode);
+				//ResponseCodeFeedback.FireUpdate();
 			}
 		}
-
-		public IntFeedback ResponseCodeFeedback { get; private set; }
-
-		private string _responseContent;
 
 		public string ResponseContent
 		{
@@ -47,65 +48,186 @@ namespace OneBeyondAutomateVxEpi
 			set
 			{
 				_responseContent = value;
-				ResponseContentFeedback.FireUpdate();
+				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseContent: {0}", _responseContent);				
+				//ResponseContentFeedback.FireUpdate();
 			}
 		}
 
-		public StringFeedback ResponseContentFeedback { get; private set; }
-
-
-		private string _responseError;
-
-		public string ResponseError
+		public string ResponseSuccessMessage
 		{
-			get { return _responseError; }
+			get { return _responseSuccessMessage; }
 			set
 			{
-				_responseError = value;
-
-				ResponseErrorFeedback.FireUpdate();
+				_responseSuccessMessage = value;
+				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseSuccessMessage: {0}", _responseSuccessMessage);
+				ResponseSuccessMessageFeedback.FireUpdate();
 			}
 		}
 
-		public StringFeedback ResponseErrorFeedback { get; private set; }
+		public string ResponseErrorMessage
+		{
+			get { return _responseErrorMessage; }
+			set
+			{
+				_responseErrorMessage = value;
+				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseErrorMessage: {0}", _responseErrorMessage);
+				ResponseErrorMessageFeedback.FireUpdate();
+			}
+		}
 
+		public IntFeedback ResponseCodeFeedback { get; private set; }
+		public StringFeedback ResponseContentFeedback { get; private set; }
+		public StringFeedback ResponseSuccessMessageFeedback { get; private set; }
+		public StringFeedback ResponseErrorMessageFeedback { get; private set; }
 
 		#endregion
 
-		// Fields, propeties and feedbacks for device feedback            ********************
-		// located in separate file: 1BeyondAutomateVXDeviceProperties.cs ********************
-		//private OneBeyondAutomateVXConfigObject _config;
-
-		//private HttpClient _httpClient;
-
-		//private HttpsClient _httpsClient;
-
-		//private readonly int _httpPort = 3579; //default
-
-		//private readonly int _httpsPort = 4443; //default
-
-		//private string _url;
-
-		private const string ApiPath = "/api/";
-
-		//private bool _isHttps = false;
-
-		private string _token = null;
-
+		
+		private string _token;
 		public string Token
 		{
 			get { return _token; }
 			private set
 			{
-				if (value != _token)
-				{
-					_token = value;
-					LoginSuccessfulFb.FireUpdate();
-				}
+				if (value == _token) return;
+				_token = value;
+				LoginSuccessfulFeedback.FireUpdate();
+
+				if(!string.IsNullOrEmpty(_token))
+					Poll();
 			}
 		}
 
-		private readonly string _base64Login;
+		private bool _autoSwitchIsOn;
+		public bool AutoSwitchIsOn
+		{
+			get { return _autoSwitchIsOn; }
+			private set
+			{
+				if (value == _autoSwitchIsOn) return;
+				_autoSwitchIsOn = value;
+				AutoSwitchIsOnFeedback.FireUpdate();
+			}
+		}
+
+		private bool _outputIsOn;
+		public bool OutputIsOn
+		{
+			get { return _outputIsOn; }
+			private set
+			{
+				if (value == _outputIsOn) return;
+				_outputIsOn = value;
+				OutputIsOnFeedback.FireUpdate();
+			}
+		}
+
+		private bool _streamIsOn;
+		public bool StreamIsOn
+		{
+			get { return _streamIsOn; }
+			private set
+			{
+				if (value == _streamIsOn) return;
+				_streamIsOn = value;
+				StreamIsOnFeedback.FireUpdate();
+			}
+		}
+
+		private bool _recordIsOn;
+		public bool RecordIsOn
+		{
+			get { return _recordIsOn; }
+			private set
+			{
+				if (value == _recordIsOn) return;
+				_recordIsOn = value;
+				RecordIsOnFeedback.FireUpdate();
+			}
+		}
+
+		private bool _isoRecordIsOn;
+		public bool IsoRecordIsOn
+		{
+			get { return _isoRecordIsOn; }
+			private set
+			{
+				if (value == _isoRecordIsOn) return;
+				_isoRecordIsOn = value;
+				IsoRecordIsOnFeedback.FireUpdate();
+			}
+		}
+
+		private int _cameraAddress;
+		public int CameraAddress
+		{
+			get { return _cameraAddress; }
+			private set
+			{
+				if (value == _cameraAddress) return;
+				_cameraAddress = value;
+				CameraAddressFeedback.FireUpdate();
+			}
+		}
+
+		private NameWithIdString _currentLayout;
+		public NameWithIdString CurrentLayout
+		{
+			get { return _currentLayout; }
+			set
+			{
+				if (value == _currentLayout) return;
+				_currentLayout = value;
+				CurrentLayoutNameFeedback.FireUpdate();
+				CurrentLayoutIdFeedback.FireUpdate();
+			}
+		}
+
+		private NameWithIdInt _currentRoomConfig;
+		public NameWithIdInt CurrentRoomConfig
+		{
+			get { return _currentRoomConfig; }
+			set
+			{
+				if (value == _currentRoomConfig) return;
+				_currentRoomConfig = value;
+				CurrentRoomConfigNameFeedback.FireUpdate();
+				CurrentRoomConfigIdFeedback.FireUpdate();
+			}
+		}
+
+		private NameWithIdInt _currentScenario;
+		public NameWithIdInt CurrentScenario
+		{
+			get { return _currentScenario; }
+			set
+			{
+				if (value == _currentScenario) return;
+				_currentScenario = value;
+				CurrentScenarioNameFeedback.FireUpdate();
+				CurrentScenarioIdFeedback.FireUpdate();
+			}
+		}
+
+		public BoolFeedback LoginSuccessfulFeedback;
+		public BoolFeedback AutoSwitchIsOnFeedback;
+		public BoolFeedback RecordIsOnFeedback;
+		public BoolFeedback IsoRecordIsOnFeedback;
+		public BoolFeedback StreamIsOnFeedback;
+		public BoolFeedback OutputIsOnFeedback;
+		public IntFeedback CameraAddressFeedback;
+		public IntFeedback CameraCountFeedback;
+		public StringFeedback CurrentLayoutNameFeedback;
+		public IntFeedback CurrentLayoutIdFeedback;
+		public StringFeedback CurrentRoomConfigNameFeedback;
+		public IntFeedback CurrentRoomConfigIdFeedback;
+		public StringFeedback CurrentScenarioNameFeedback;
+		public IntFeedback CurrentScenarioIdFeedback;
+
+		public List<Camera> Cameras;
+		public List<NameWithIdString> Layouts;
+		public List<NameWithIdInt> RoomConfigs;
+		public List<NameWithIdInt> Scenarios; 
 
 
 		/// <summary>
@@ -118,55 +240,68 @@ namespace OneBeyondAutomateVxEpi
 		public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVXConfigObject config, IRestfulComms client)
 			: base(key, name)
 		{
+			Debug.Console(AutomateVxDebug.Trace, this, "Constructing new {0} instance", name);
 
 			AutomateVxDebug.ResetDebugLevels();
 
-			Debug.Console(AutomateVxDebug.Trace, this, "Constructing new {0} instance", name);
+			if (config == null || config.Control == null)
+			{
+				Debug.Console(AutomateVxDebug.Trace, this, "Configuration or control object is null, unable to construct new {0} instance.  Check configuration.", name);
+				return;
+			}
 
 			_client = client;
-			//_config = config;
+			if (_client == null)
+			{
+				Debug.Console(AutomateVxDebug.Trace, this, Debug.ErrorLogLevel.Error,
+					"Failed to construct '{1}' using method {0}",
+					config.Control.Method, name);
+				return;
+			}
 
-			// Encode the user:pass as base64
-			//_base64Login = System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(string.Format("{0}:{1}", _config.Control.TcpSshProperties.Username, _config.Control.TcpSshProperties.Password)));
-
-			//if (_config.Control.Method == eControlMethod.Http)
-			//{
-			//    if(_config.Control.TcpSshProperties.Port != 0)
-			//        _httpPort = _config.Control.TcpSshProperties.Port;
-
-			//    _url = string.Format("http://{0}:{1}", _config.Control.TcpSshProperties.Address, _httpPort);
-
-			//    Debug.Console(AutomateVxDebug.Trace, this, "Using HTTP for server at: {0} on port: {1}", _url, _httpPort);
-			//    _httpClient = new HttpClient();
-			//}
-			//else if (_config.Control.Method == eControlMethod.Https)
-			//{
-			//    if (_config.Control.TcpSshProperties.Port != 0)
-			//        _httpsPort = _config.Control.TcpSshProperties.Port;
-
-			//    _url = string.Format("https://{0}:{1}", _config.Control.TcpSshProperties.Address, _httpsPort);
-
-			//    Debug.Console(AutomateVxDebug.Trace, this, "Using HTTPS for server at: {0} on port: {1}", _url, _httpsPort);
-			//    _httpsClient = new HttpsClient();
-			//}
-
-			ResponseCodeFeedback = new IntFeedback(() => ResponseCode);
-			ResponseContentFeedback = new StringFeedback(() => ResponseContent);
-			ResponseErrorFeedback = new StringFeedback(() => ResponseError);
-
-			InitializeFeedbacks();
-
+			_client.ResponseReceived += OnResponseReceived;
+			
+			//ResponseCodeFeedback = new IntFeedback(() => ResponseCode);
+			//ResponseContentFeedback = new StringFeedback(() => ResponseContent);
+			ResponseSuccessMessageFeedback = new StringFeedback(() => ResponseSuccessMessage);
+			ResponseErrorMessageFeedback = new StringFeedback(() => ResponseErrorMessage);
+			
+			LoginSuccessfulFeedback = new BoolFeedback(() => !string.IsNullOrEmpty(Token));
+			AutoSwitchIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
+			RecordIsOnFeedback = new BoolFeedback(() => RecordIsOn);
+			IsoRecordIsOnFeedback = new BoolFeedback(() => IsoRecordIsOn);
+			StreamIsOnFeedback = new BoolFeedback(() => StreamIsOn);
+			OutputIsOnFeedback = new BoolFeedback(() => OutputIsOn);
+			CameraAddressFeedback = new IntFeedback(() => CameraAddress);
+			CameraCountFeedback = new IntFeedback(() => Cameras.Count);
+			CurrentLayoutNameFeedback = new StringFeedback(() => CurrentLayout.Name);
+			CurrentLayoutIdFeedback = new IntFeedback(ConvertLayoutIdToInt);
+			CurrentRoomConfigNameFeedback = new StringFeedback(() => CurrentRoomConfig.Name);
+			CurrentRoomConfigIdFeedback = new IntFeedback(() => CurrentRoomConfig.Id);
+			CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
+			CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
 		}
 
-		private void InitializeFeedbacks()
+		/// <summary>
+		/// Initialize EPI
+		/// </summary>
+		public override void Initialize()
 		{
-			LoginSuccessfulFb = new BoolFeedback(() => !string.IsNullOrEmpty(Token));
-			AutoSwitchIsOnFb = new BoolFeedback(() => AutoSwitchIsOn);
-			RecordIsOnFb = new BoolFeedback(() => RecordIsOn);
-			IsoRecordIsOnFb = new BoolFeedback(() => IsoRecordIsOn);
-			StreamIsOnFb = new BoolFeedback(() => StreamIsOn);
-			OutputIsOnFb = new BoolFeedback(() => OutputIsOn);
-			CameraAddressFB = new IntFeedback(() => CameraAddress);
+			GetToken();
+		}
+
+		/// <summary>
+		/// Update feedbakcs
+		/// </summary>
+		private void UpdateFeedbacks()
+		{
+			LoginSuccessfulFeedback.FireUpdate();
+			AutoSwitchIsOnFeedback.FireUpdate();
+			RecordIsOnFeedback.FireUpdate();
+			IsoRecordIsOnFeedback.FireUpdate();
+			StreamIsOnFeedback.FireUpdate();
+			OutputIsOnFeedback.FireUpdate();
+			CameraAddressFeedback.FireUpdate();
 		}
 
 
@@ -199,78 +334,32 @@ namespace OneBeyondAutomateVxEpi
 			Debug.Console(AutomateVxDebug.Notice, "Linking to Trilist '{0}'", trilist.ID.ToString("X"));
 			Debug.Console(AutomateVxDebug.Trace, "Linking to Bridge Type {0}", GetType().Name);
 
+			// store needed data
+			_trilist = trilist;
+			_joinMap = joinMap;
+
 			// Linked Feedbacks
+			//ResponseCodeFeedback.LinkInputSig(trilist.UShortInput[0]);
+			//ResponseContentFeedback.LinkInputSig(trilist.StringInput[0]);
+			ResponseSuccessMessageFeedback.LinkInputSig(trilist.StringInput[joinMap.SuccessMessage.JoinNumber]);
+			ResponseErrorMessageFeedback.LinkInputSig(trilist.StringInput[joinMap.ErrorMessage.JoinNumber]);
+
 			trilist.SetSigTrueAction(joinMap.Authenticate.JoinNumber, GetToken);
-			LoginSuccessfulFb.LinkInputSig(trilist.BooleanInput[joinMap.Authenticate.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.AutoSwitchOn.JoinNumber, () => SetAutoSwitch(true));
-			AutoSwitchIsOnFb.LinkInputSig(trilist.BooleanInput[joinMap.AutoSwitchOn.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.AutoSwitchOff.JoinNumber, () => SetAutoSwitch(true));
-			AutoSwitchIsOnFb.LinkComplementInputSig(trilist.BooleanInput[joinMap.AutoSwitchOff.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.RecordStart.JoinNumber, () => SetRecord(eRecordOperation.start));
-			RecordIsOnFb.LinkInputSig(trilist.BooleanInput[joinMap.RecordStart.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.RecordPause.JoinNumber, () => SetRecord(eRecordOperation.pause));
-
-			trilist.SetSigFalseAction(joinMap.RecordStop.JoinNumber, () => SetRecord(eRecordOperation.stop));
-			RecordIsOnFb.LinkComplementInputSig(trilist.BooleanInput[joinMap.RecordStop.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.IsoRecordOn.JoinNumber, () => SetIsoRecord(true));
-			IsoRecordIsOnFb.LinkInputSig(trilist.BooleanInput[joinMap.IsoRecordOn.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.IsoRecordOff.JoinNumber, () => SetIsoRecord(true));
-			IsoRecordIsOnFb.LinkComplementInputSig(trilist.BooleanInput[joinMap.IsoRecordOff.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.StreamOn.JoinNumber, () => SetStream(true));
-			StreamIsOnFb.LinkInputSig(trilist.BooleanInput[joinMap.StreamOn.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.StreamOff.JoinNumber, () => SetStream(true));
-			StreamIsOnFb.LinkComplementInputSig(trilist.BooleanInput[joinMap.StreamOff.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.OutputOn.JoinNumber, () => SetOutput(true));
-			OutputIsOnFb.LinkInputSig(trilist.BooleanInput[joinMap.OutputOn.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.OutputOff.JoinNumber, () => SetOutput(true));
-			OutputIsOnFb.LinkComplementInputSig(trilist.BooleanInput[joinMap.OutputOff.JoinNumber]);
+			LoginSuccessfulFeedback.LinkInputSig(trilist.BooleanInput[joinMap.Authenticate.JoinNumber]);
 
 			trilist.SetSigFalseAction(joinMap.Sleep.JoinNumber, SetSleep);
 			trilist.SetSigFalseAction(joinMap.Wake.JoinNumber, SetWake);
-
 			trilist.SetSigFalseAction(joinMap.GoHome.JoinNumber, GoHome);
 
-			trilist.SetSigFalseAction(joinMap.GetAutoSwitchStatus.JoinNumber, GetAutoSwitchStatus);
-			trilist.SetSigFalseAction(joinMap.GetRecordStatus.JoinNumber, GetRecordStatus);
-			trilist.SetSigFalseAction(joinMap.GetIsoRecordStatus.JoinNumber, GetIsoRecordStatus);
-			trilist.SetSigFalseAction(joinMap.GetStreamStatus.JoinNumber, GetStreamStatus);
-			trilist.SetSigFalseAction(joinMap.GetOutputStatus.JoinNumber, GetOutputStatus);
-			trilist.SetSigFalseAction(joinMap.GetCurrentLayout.JoinNumber, GetLayoutStatus);
-			trilist.SetSigFalseAction(joinMap.GetLayouts.JoinNumber, GetLayouts);
+			LinkAutoSwitchToApi(trilist, joinMap);
+			LinkRecordToApi(trilist, joinMap);
+			LinkIsoRecordToApi(trilist, joinMap);
+			LinkStreamAndOutputToApi(trilist, joinMap);
+			LinkCamerasToApi(trilist, joinMap);
+			LinkLayoutsToApi(trilist, joinMap);
+			LinkRoomConfigToApi(trilist, joinMap);
 
-			trilist.SetUShortSigAction(joinMap.ChangeLayout.JoinNumber, (l) =>
-			{
-				// Check for valid input (1-26)
-				if (l < 1 || l > 26)
-					return;
-
-				// convert the integer value passed in (1-26) to the equivalent alphabet character A-Z (capitalized)
-				int offset = 64; // decimal value to add as an offset to get the desired ASCII value
-				char layout = System.Convert.ToChar(offset + l);
-
-				SetLayout(layout.ToString());
-			});
-
-			trilist.SetUShortSigAction(joinMap.ChangeRoomConfig.JoinNumber, (rc) => SetRoomConfig(rc));
-			trilist.SetUShortSigAction(joinMap.ForceChangeRoomConfig.JoinNumber, (rc) => ForceSetRoomConfig(rc));
-
-			trilist.SetUShortSigAction(joinMap.ChangeCamera.JoinNumber, (c) => SetCamera(c));
-			CameraAddressFB.LinkInputSig(trilist.UShortInput[joinMap.ChangeCamera.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.GetCameraStatus.JoinNumber, GetCameraStatus);
-			trilist.SetSigFalseAction(joinMap.GetCameras.JoinNumber, GetCameras);
-
-			trilist.SetUShortSigAction(joinMap.LiveCameraPreset.JoinNumber, (p) => SetCameraPreset(CameraAddressFB.UShortValue, p));
+			trilist.SetUShortSigAction(joinMap.LiveCameraPreset.JoinNumber, (p) => SetCameraPreset(CameraAddressFeedback.UShortValue, p));
 
 			trilist.SetSigFalseAction(joinMap.RecallCameraPreset.JoinNumber, () =>
 				{
@@ -306,35 +395,25 @@ namespace OneBeyondAutomateVxEpi
 
 
 			// Subscribe to events as needed
-			ErrorMessageReceived += (o, a) =>
-				{
-					trilist.SetString(joinMap.ErrorMessage.JoinNumber, a.ErrorMessage);
-				};
+			//LayoutChanged += (o, a) => UpdateCurrentLayout(trilist, joinMap);
 
-			SuccessMessageReceived += (o, a) =>
-			{
-				trilist.SetString(joinMap.SuccessMessage.JoinNumber, a.SuccessMessage);
-			};
+			//LayoutsChanged += (o, a) => UpdateLayoutNames(trilist, joinMap);
 
-			LayoutChanged += (o, a) => UpdateCurrentLayout(trilist, joinMap);
+			//RoomConfigChanged += (o, a) => UpdateRoomConfig(trilist, joinMap);
 
-			LayoutsChanged += (o, a) => UpdateLayoutNames(trilist, joinMap);
+			//RoomConfigsChanged += (o, a) => UpdateRoomConfigNames(trilist, joinMap);
 
-			RoomConfigChanged += (o, a) => UpdateRoomConfig(trilist, joinMap);
-
-			RoomConfigsChanged += (o, a) => UpdateRoomConfigNames(trilist, joinMap);
-
-			CamerasChanged += (o, a) => UpdateCameras(trilist, joinMap);
+			//CamerasChanged += (o, a) => UpdateCameras(trilist, joinMap);
 
 			FileCopySuccessful += (o, a) => CrestronInvoke.BeginInvoke((i) =>
 			{
-				trilist.SetBool(joinMap.CopyFilesSuccesfulFB.JoinNumber, true);
+				trilist.SetBool(joinMap.CopyFilesSuccesfulFb.JoinNumber, true);
 				CrestronEnvironment.Sleep(100);
-				trilist.SetBool(joinMap.CopyFilesSuccesfulFB.JoinNumber, false);
+				trilist.SetBool(joinMap.CopyFilesSuccesfulFb.JoinNumber, false);
 			}, null);
 
 
-			RecordingSpaceAvailableChanged += (o, a) => UpdateAvailableSpace(trilist, joinMap);
+			//RecordingSpaceAvailableChanged += (o, a) => UpdateAvailableSpace(trilist, joinMap);
 
 			trilist.OnlineStatusChange += (o, a) =>
 			{
@@ -342,10 +421,104 @@ namespace OneBeyondAutomateVxEpi
 
 				//trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
 
-				SetInitialFbValues(trilist, joinMap);
+				UpdateFeedbacks();
 			};
 		}
 
+		private void LinkAutoSwitchToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			trilist.SetSigFalseAction(joinMap.GetAutoSwitchStatus.JoinNumber, GetAutoSwitchStatus);
+
+			trilist.SetSigFalseAction(joinMap.AutoSwitchOn.JoinNumber, () => SetAutoSwitch(true));
+			AutoSwitchIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.AutoSwitchOn.JoinNumber]);
+
+			trilist.SetSigFalseAction(joinMap.AutoSwitchOff.JoinNumber, () => SetAutoSwitch(false));
+			AutoSwitchIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.AutoSwitchOff.JoinNumber]);
+		}
+
+		private void LinkRecordToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			trilist.SetSigFalseAction(joinMap.GetRecordStatus.JoinNumber, GetRecordStatus);
+			
+			trilist.SetSigFalseAction(joinMap.RecordStart.JoinNumber, () => SetRecord(ERecordOperation.Start));
+			RecordIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.RecordStart.JoinNumber]);
+
+			trilist.SetSigFalseAction(joinMap.RecordStop.JoinNumber, () => SetRecord(ERecordOperation.Stop));
+			RecordIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.RecordStop.JoinNumber]);
+
+			trilist.SetSigFalseAction(joinMap.RecordPause.JoinNumber, () => SetRecord(ERecordOperation.Pause));
+		}
+
+		private void LinkIsoRecordToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			trilist.SetSigFalseAction(joinMap.GetIsoRecordStatus.JoinNumber, GetIsoRecordStatus);
+			
+			trilist.SetSigFalseAction(joinMap.IsoRecordOn.JoinNumber, () => SetIsoRecord(true));
+			IsoRecordIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.IsoRecordOn.JoinNumber]);
+
+			trilist.SetSigFalseAction(joinMap.IsoRecordOff.JoinNumber, () => SetIsoRecord(false));
+			IsoRecordIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.IsoRecordOff.JoinNumber]);
+		}
+
+		private void LinkStreamAndOutputToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			// stream
+			trilist.SetSigFalseAction(joinMap.GetStreamStatus.JoinNumber, GetStreamStatus);
+			
+			trilist.SetSigFalseAction(joinMap.StreamOn.JoinNumber, () => SetStream(true));
+			StreamIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.StreamOn.JoinNumber]);
+
+			trilist.SetSigFalseAction(joinMap.StreamOff.JoinNumber, () => SetStream(false));
+			StreamIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.StreamOff.JoinNumber]);
+
+			// output
+			trilist.SetSigFalseAction(joinMap.GetOutputStatus.JoinNumber, GetOutputStatus);
+
+			trilist.SetSigFalseAction(joinMap.OutputOn.JoinNumber, () => SetOutput(true));
+			OutputIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.OutputOn.JoinNumber]);
+
+			trilist.SetSigFalseAction(joinMap.OutputOff.JoinNumber, () => SetOutput(false));
+			OutputIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.OutputOff.JoinNumber]);
+		}
+
+		private void LinkCamerasToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			trilist.SetSigFalseAction(joinMap.GetCameraStatus.JoinNumber, GetCameraStatus);
+			trilist.SetSigFalseAction(joinMap.GetCameras.JoinNumber, GetCameras);
+
+			CameraCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfCameras.JoinNumber]);
+
+			trilist.SetUShortSigAction(joinMap.ChangeCamera.JoinNumber, (c) => SetCamera(c));
+			CameraAddressFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeCamera.JoinNumber]);
+
+			//var joinBase = joinMap.CameraNames.JoinNumber;
+			//var joinSpan = joinMap.CameraNames.JoinSpan;
+
+			//for (var i = 0; i <= joinSpan; i++)
+			//{
+			//    var join = (uint)(joinBase + i);
+			//    CameraNamesFeedback.Add(new StringFeedback((i+1).ToString(), string.Empty));
+			//    Debug.Console(AutomateVxDebug.Verbose, this, "LinkCamerasToApi: joinBase {0}, joinSpan {1}, join {2}",
+			//        joinBase, joinSpan, join);
+			//    CameraNamesFeedback[i].LinkInputSig(trilist.StringInput[join]);
+			//}
+		}
+
+		private void LinkLayoutsToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			trilist.SetSigFalseAction(joinMap.GetCurrentLayout.JoinNumber, GetLayoutStatus);
+			trilist.SetSigFalseAction(joinMap.GetLayouts.JoinNumber, GetLayouts);
+			trilist.SetUShortSigAction(joinMap.ChangeLayout.JoinNumber, SetLayout);
+
+			CurrentLayoutNameFeedback.LinkInputSig(trilist.StringInput[joinMap.LayoutName.JoinNumber]);
+			CurrentLayoutIdFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeLayout.JoinNumber]);
+		}
+
+		private void LinkRoomConfigToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			trilist.SetUShortSigAction(joinMap.ChangeRoomConfig.JoinNumber, (rc) => SetRoomConfig(rc));
+			trilist.SetUShortSigAction(joinMap.ForceChangeRoomConfig.JoinNumber, (rc) => ForceSetRoomConfig(rc));
+		}
 
 		private void SetInitialFbValues(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
@@ -357,30 +530,30 @@ namespace OneBeyondAutomateVxEpi
 			UpdateAvailableSpace(trilist, joinMap);
 		}
 
+
 		private void UpdateCurrentLayout(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
-			if (Layout == null || Layout.Id == null)
+			if (Layouts == null)
 			{
 				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateCurrentLayout: Layout or Layout.Id is null");
 				return;
 			}
 
-			// convert from the letter A-Z back to 1-26
-			char c = System.Convert.ToChar(Layout.Id);
-			var val = (int)c;
-
-			trilist.SetUshort(joinMap.ChangeLayout.JoinNumber, (ushort)val);
+			var c = Convert.ToChar(CurrentLayout.Id);
+			var index = (int) c;
+			trilist.SetUshort(joinMap.ChangeLayout.JoinNumber, (ushort)index);
 		}
 
 		private void UpdateLayoutNames(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
+			trilist.SetUshort(joinMap.NumberOfLayouts.JoinNumber, (ushort)Layouts.Count);
+
 			if (Layouts == null)
 			{
 				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateLayoutNames: Layouts is null");
 				return;
 			}
 
-			trilist.SetUshort(joinMap.NumberOfLayouts.JoinNumber, (ushort)Layouts.Count);
 
 			if (Layouts.Count == 0)
 			{
@@ -401,15 +574,7 @@ namespace OneBeyondAutomateVxEpi
 
 		private void UpdateRoomConfig(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
-			if (RoomConfig == null || RoomConfig.Id == null)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateRoomConfig: RoomConfig or RoomConfig.Id is null");
-				return;
-			}
-
-			var roomConfig = System.Convert.ToUInt16(RoomConfig.Id);
-
-			trilist.SetUshort(joinMap.ChangeRoomConfig.JoinNumber, roomConfig);
+			
 		}
 
 		private void UpdateRoomConfigNames(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
@@ -448,78 +613,354 @@ namespace OneBeyondAutomateVxEpi
 			}
 
 			trilist.SetUshort(joinMap.NumberOfCameras.JoinNumber, (ushort)Cameras.Count);
+
+			if (Cameras.Count == 0) return;
+
+			var joinBase = joinMap.CameraNames.JoinNumber;
+			var joinSpan = joinMap.CameraNames.JoinSpan;
+
+			foreach (var camera in Cameras)
+			{
+				var join = joinBase + camera.Id - 1;
+				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateCameras: id {0}, model {1}, IP {2}, AsPtz {3}",
+					camera.Id, camera.Model, camera.Ip, camera.AsPt);
+				trilist.SetString((uint)join, camera.Model);		
+			}
 		}
 
 		private void UpdateAvailableSpace(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
-			if (RecordingSpace == null || RecordingSpace.AvailableGigabytes == null || RecordingSpace.TotalGigabytes == null)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateAvailableSpace: RecordingSpace is null");
-				return;
-			}
+			//if (RecordingSpace == null || RecordingSpace.AvailableGigabytes == null || RecordingSpace.TotalGigabytes == null)
+			//{
+			//    Debug.Console(AutomateVxDebug.Verbose, this, "UpdateAvailableSpace: RecordingSpace is null");
+			//    return;
+			//}
 
-			var availableSpace = System.Convert.ToUInt16(RecordingSpace.AvailableGigabytes);
+			//var availableSpace = System.Convert.ToUInt16(RecordingSpace.AvailableGigabytes);
 
-			trilist.SetUshort(joinMap.StorageSpaceAvailableGB.JoinNumber, (ushort)availableSpace);
+			//trilist.SetUshort(joinMap.StorageSpaceAvailableGb.JoinNumber, (ushort)availableSpace);
 
-			var totalSpace = System.Convert.ToUInt16(RecordingSpace.TotalGigabytes);
+			//var totalSpace = System.Convert.ToUInt16(RecordingSpace.TotalGigabytes);
 
-			trilist.SetUshort(joinMap.StorageSpaceTotalGB.JoinNumber, (ushort)totalSpace);
+			//trilist.SetUshort(joinMap.StorageSpaceTotalGb.JoinNumber, (ushort)totalSpace);
 		}
 
 
 		#endregion
 
-
-		private HttpClientRequest GetHttpRequest(string url, Crestron.SimplSharp.Net.Http.RequestType type)
-		{
-			Debug.Console(AutomateVxDebug.Verbose, this, "GetHttpRequest: url = {0}, type = {1}", url, type.ToString());
-			var req = new HttpClientRequest();
-			req.Url.Parse(url);
-			req.RequestType = type;
-
-			return req;
-		}
-
-		private HttpsClientRequest GetHttpsRequest(string url, Crestron.SimplSharp.Net.Https.RequestType type)
-		{
-			Debug.Console(AutomateVxDebug.Verbose, this, "GetHttpsRequest: url = {0}, type = {1}", url, type.ToString());
-			var req = new HttpsClientRequest();
-			req.Url.Parse(url);
-			req.RequestType = type;
-
-			return req;
-		}
-
+		
 		private void OnResponseReceived(object sender, GenericClientResponseEventArgs args)
 		{
 			try
 			{
 				Debug.Console(AutomateVxDebug.Verbose, this,
-					"OnResponseReceived: Code = {0} | ContentString = {1}",
-					args.Code, args.ContentString);
+					"OnResponseReceived: Request = {0} > Code = {1} | ContentString = {2}",
+					args.Request, args.Code, args.ContentString);
 
 				ResponseCode = args.Code;
 
-				if (string.IsNullOrEmpty(args.ContentString))
-				{
-					Debug.Console(AutomateVxDebug.Notice, this, "OnResponseReceived: args.ContentString is null or empty");
-					return;
-				}
-
-				ResponseContent = args.ContentString;
-				Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseReceived: ResponseContent = {0}", ResponseContent);
-
-				//var jToken = IsValidJson(args.ContentString);
-				//if (jToken == null)
+				//if (string.IsNullOrEmpty(args.ContentString))
 				//{
-				//    Debug.Console(AutomateVxDebug.Notice, this, "OnResponseReceived: IsValidJson failed, passing ContentString as string");
+				//    Debug.Console(AutomateVxDebug.Notice, this, "OnResponseReceived: args.ContentString is null or empty");
 				//    return;
 				//}
 
-				//var feedback = JsonConvert.DeserializeObject<RootDevObject>(ResponseContent);
-				//Debug.Console(AutomateVxDebug.Notice, "OnResponseReceived: Begin parsing deserialized JSON objects");
+				var request = args.Request.ToLower();
+				var content = args.ContentString;
 
+				switch (request)
+				{
+					case "get-token":
+					{
+						var response = ApiResponseParser.ParseTokenResponse(content);
+						if (response.Status == "OK")
+						{
+							Token = response.Token;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+						
+						// if not OK, clear the token
+						ResponseErrorMessage = response.Error;
+						ClearToken();
+
+						break;
+					}
+					case "autoswitchstatus":
+					{
+						var response = ApiResponseParser.ParseResultResponse(content);
+						if (response.Status == "OK")
+						{
+							AutoSwitchIsOn = response.Result;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+							
+						break;
+					}
+					case "startautoswitch":
+					case "stopautoswitch":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							GetAutoSwitchStatus();
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "outputstatus":
+					{
+						var response = ApiResponseParser.ParseResultResponse(content);
+						if (response.Status == "OK")
+						{
+							OutputIsOn = response.Result;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "startouput":
+					case "stopoutput":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							GetOutputStatus();
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "streamstatus":
+					{
+						var response = ApiResponseParser.ParseResultResponse(content);
+						if (response.Status == "OK")
+						{
+							StreamIsOn = response.Result;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "startstream":
+					case "stopstream":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							GetStreamStatus();
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "recordstatus":
+					{
+						var response = ApiResponseParser.ParseRecordStatusResponse(content);
+						if (response.Status == "OK")
+						{
+							RecordIsOn = (response.RecordState != 1);
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "isorecordstatus":
+					{
+						var response = ApiResponseParser.ParseResultResponse(content);
+						if (response.Status == "OK")
+						{
+							IsoRecordIsOn = response.Result;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "getcameras":
+					{
+						var response = ApiResponseParser.ParseCameraResponse(content);
+						if (response.Status == "OK")
+						{
+							Cameras = response.Cameras;
+							UpdateCameras(_trilist, _joinMap);
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+						break;
+					}
+					case "camerastatus":
+					{
+						var response = ApiResponseParser.ParseCameraAddressResponse(content);
+						if (response.Status == "OK")
+						{
+							CameraAddress = Convert.ToInt16(response.Address);
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "manualswitchcamera":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							GetCameraStatus();
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "getlayouts":
+					{
+						var response = ApiResponseParser.ParseLayoutsResponse(content);
+						if (response.Status == "OK")
+						{
+							Layouts = response.Layouts;
+							UpdateLayoutNames(_trilist, _joinMap);
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "layoutstatus":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							CurrentLayout = response.Layout;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "changelayout":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							GetLayoutStatus();
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "getroomconfigs":
+					{
+						var response = ApiResponseParser.ParseRoomConfigsResponse(content);
+						if (response.Status == "OK")
+						{
+							RoomConfigs = response.RoomConfigs;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "roomconfigstatus":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							CurrentRoomConfig = response.RoomConfig;
+							ResponseSuccessMessage = response.Message;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "getscenarios":
+					{
+						var response = ApiResponseParser.ParseScenariosResponse(content);
+						if (response.Status == "OK")
+						{
+							Scenarios = response.Scenarios;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "scenariostatus":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							CurrentScenario = response.Scenario;
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Error;
+
+						break;
+					}
+					case "gotoscenario":
+					{
+						var response = ApiResponseParser.ParseRootResponse(content);
+						if (response.Status == "OK")
+						{
+							GetScenarioStatus();
+							ResponseSuccessMessage = response.Message;
+							return;
+						}
+
+						ResponseErrorMessage = response.Message;
+						break;
+					}
+					default:
+					{
+						ResponseContent = content;
+						Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseReceived: ResponseContent = {0}", ResponseContent);
+
+						break;
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -529,487 +970,368 @@ namespace OneBeyondAutomateVxEpi
 			}
 		}
 
-
 		/// <summary>
-		/// Makes a request of the correct type and returns the data from the response
+		/// Clear existing token
 		/// </summary>
-		/// <param name="url"></param>
-		/// <param name="reqData"></param>
-		/// <returns></returns>
-		//private TResponse MakeRequest<TResponse, TRequest>(string url, TRequest reqData) where TResponse : new()
-		//{
-		//    Debug.Console(AutomateVxDebug.Verbose, this, "MakeRequest: url = {0}, reqdata = {1}", url, reqData.ToString());
-
-		//    var resData = new TResponse();
-		//    var authHeader = !string.IsNullOrEmpty(Token) ? Token : _base64Login;
-
-		//    if (!_isHttps)
-		//    {
-		//        var req = GetHttpRequest(url, Crestron.SimplSharp.Net.Http.RequestType.Post);
-
-
-		//        req.Header.AddHeader(new HttpHeader("Authorization", authHeader));
-		//        req.Header.ContentType = "application/json";
-		//        if (reqData != null)
-		//            req.ContentString = JsonConvert.SerializeObject(reqData);
-
-		//        _httpClient.DispatchAsync(req, (res, e) => {
-		//            switch (res.Code)
-		//            {
-		//                case 200:
-		//                {
-		//                    Debug.Console(AutomateVxDebug.Verbose, this, "Successful Request");
-
-		//                    var content = JsonConvert.DeserializeObject<TResponse>(res.ContentString);
-
-		//                    if (content != null && !CheckForError(content as ResponseObjectBase))
-		//                    {
-		//                        resData = content;
-		//                    }
-		//                    break;
-		//                }
-		//                case 404:
-		//                {
-		//                    Debug.Console(AutomateVxDebug.Verbose, this, "Request path not found");
-		//                    break;
-		//                }
-		//                default:
-		//                {
-		//                    Debug.Console(AutomateVxDebug.Verbose, this, "Request Error: {0}", e);
-		//                    OnErrorMessageReceived(e.ToString());
-		//                    break;
-		//                }
-		//            }
-
-		//        });
-		//    }
-		//    else
-		//    {
-		//        var req = GetHttpsRequest(url, Crestron.SimplSharp.Net.Https.RequestType.Post);
-
-		//        req.Header.AddHeader(new HttpsHeader("Authorization", authHeader));
-		//        req.Header.ContentType = "application/json";
-		//        if (reqData != null)
-		//            req.ContentString = JsonConvert.SerializeObject(reqData);
-
-		//        _httpsClient.DispatchAsync(req, (res, e) =>
-		//        {
-		//            switch (res.Code)
-		//            {
-		//                case 200:
-		//                {
-		//                    Debug.Console(AutomateVxDebug.Verbose, this, "Successful Request: {0}", req.Url);
-		//                    Debug.Console(AutomateVxDebug.Verbose, this, @"Response: \n{0}", res.ContentString);
-
-		//                    var content = JsonConvert.DeserializeObject<TResponse>(res.ContentString);
-
-		//                    if (content != null && !CheckForError(content as ResponseObjectBase))
-		//                    {
-		//                        resData = content;
-		//                    }
-		//                    break;
-		//                }
-		//                case 404:
-		//                {
-
-		//                    Debug.Console(AutomateVxDebug.Verbose, this, "Failed Request: {0}", req.Url);
-		//                    Debug.Console(AutomateVxDebug.Verbose, this, "Request path not found");
-		//                    break;
-		//                }
-		//                default:
-		//                {
-		//                    OnErrorMessageReceived(e.ToString());
-		//                    break;
-		//                }
-		//            }
-
-		//        });
-		//    }
-
-		//    return resData;
-		//}
-
-		/// <summary>
-		/// Checks for error message and fires event if found
-		/// </summary>
-		/// <param name="res"></param>
-		private bool CheckForError(ResponseObjectBase res)
+		public void ClearToken()
 		{
-			if (res.Status.ToLower() == "error")
-			{
-				if (!string.IsNullOrEmpty(res.Error))
-				{
-					// Check for login credentials error and clear token
-					if (res.Error == "Incorrect Username or Password")
-					{
-						ClearToken();
-					}
-
-					OnErrorMessageReceived(res.Error);
-					return true;
-				}
-			}
-
-			LoginSuccessfulFb.FireUpdate();
-
-			return false;
+			Token = null;
 		}
-
 
 		/// <summary>
 		/// Attempts to get an authorization token
 		/// </summary>
 		public void GetToken()
 		{
-			var url = string.Format("{0}{1}", _url, "Get-Token");
-			Debug.Console(AutomateVxDebug.Verbose, this, "GetToken: url = {0}", url);
-			var data = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (!string.IsNullOrEmpty(data.Token))
-			{
-				Token = data.Token;
-				Debug.Console(AutomateVxDebug.Verbose, this, "GetToken: Token = {0}", Token);
-			}
-			else if (!string.IsNullOrEmpty(data.Error))
-				Debug.Console(AutomateVxDebug.Trace, this, data.Error);
+			_client.SendRequest("POST", "Get-Token", string.Empty);
 		}
 
-		public void ClearToken()
+		/// <summary>
+		/// Poll device
+		/// </summary>
+		public void Poll()
 		{
-			Token = null;
+			GetAutoSwitchStatus();
+			CrestronEnvironment.Sleep(100);
+			GetOutputStatus();
+			CrestronEnvironment.Sleep(100);
+			GetRoomConfigs();
+			CrestronEnvironment.Sleep(100);
+			GetLayouts();
+			CrestronEnvironment.Sleep(100);
+			GetRoomConfigStatus();
+			CrestronEnvironment.Sleep(100);
+			GetLayoutStatus();
+			CrestronEnvironment.Sleep(100);
+			GetCameras();
+			CrestronEnvironment.Sleep(100);
+			GetCameraStatus();
 		}
 
+		/// <summary>
+		/// Get current auto switch status
+		/// </summary>
 		public void GetAutoSwitchStatus()
 		{
-			var url = ApiPath + "AutoSwitchStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Results == null) return;
-
-			if (res.Results != true)
-				AutoSwitchIsOn = false;
-			else
-				AutoSwitchIsOn = true;
-
+			var url = string.Format("{0}/AutoSwitchStatus", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
+		/// <summary>
+		/// Set auto switch status
+		/// </summary>
+		/// <param name="state">bool</param>
 		public void SetAutoSwitch(bool state)
 		{
-			var url = "";
-
-			if (state)
-			{
-				url = ApiPath + "StartAutoSwitch";
-			}
-			else
-			{
-				url = ApiPath + "StopAutoSwitch";
-			}
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Message != "AutoSwitching Started Successfully")
-				AutoSwitchIsOn = false;
-			else
-				AutoSwitchIsOn = true;
+			var url = state 
+				? string.Format("{0}/StartAutoSwitch", ApiPath) 
+				: string.Format("{0}/StopAutoSwitch", ApiPath);
+			
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-
+		/// <summary>
+		/// Get current record status
+		/// </summary>
 		public void GetRecordStatus()
 		{
-			var url = ApiPath + "RecordStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Results != true)
-				RecordIsOn = false;
-			else
-				RecordIsOn = true;
+			var url = string.Format("{0}/RecordStatusResponse", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-		public enum eRecordOperation
+		/// <summary>
+		/// Record operation states
+		/// </summary>
+		public enum ERecordOperation
 		{
-			start = 0,
-			stop = 1,
-			pause = 2,
+			Start = 0,
+			Stop = 1,
+			Pause = 2,
 		}
 
-		public void SetRecord(eRecordOperation operation)
+		/// <summary>
+		/// Set the record operation state
+		/// </summary>
+		/// <param name="operation">ERecordOperatoin</param>
+		public void SetRecord(ERecordOperation operation)
 		{
-			var url = "";
+			var url = string.Empty;
 
-			if (operation == eRecordOperation.start)
+			switch (operation)
 			{
-				url = ApiPath + "StartRecord";
-			}
-			else if (operation == eRecordOperation.pause)
-			{
-				url = ApiPath + "PauseRecord";
-			}
-			else if (operation == eRecordOperation.stop)
-			{
-				url = ApiPath + "StopRecord";
+				case ERecordOperation.Start:
+					url = string.Format("{0}/StartRecord", ApiPath);
+					break;
+				case ERecordOperation.Pause:
+					url = string.Format("{0}/PauseRecord", ApiPath);
+					break;
+				case ERecordOperation.Stop:
+					url = string.Format("{0}/StopRecord", ApiPath);
+					break;
 			}
 
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Message != "Record Started Successfully")
-				RecordIsOn = false;
-			else
-				RecordIsOn = true;
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-
+		/// <summary>
+		/// Get ISO Record state
+		/// </summary>
 		public void GetIsoRecordStatus()
 		{
-			var url = ApiPath + "ISORecordStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Results != true)
-				IsoRecordIsOn = false;
-			else
-				IsoRecordIsOn = true;
+			var url = string.Format("{0}/ISORecordStatus", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
+		/// <summary>
+		/// Set the ISO Record state
+		/// </summary>
+		/// <param name="state"></param>
 		public void SetIsoRecord(bool state)
 		{
-			var method = "";
+			var url = (state) 
+				? string.Format("{0}/StartISORecord", ApiPath)
+				: string.Format("{0}/StopISORecord", ApiPath);
 
-			if (state)
-			{
-				method = ApiPath + "StartISORecord";
-			}
-			else
-			{
-				method = ApiPath + "StopISORecord";
-			}
-
-			var res = MakeRequest<ResponseObjectBase, object>(method, null);
-
-			if (res.Message != "Started ISO Recording Successfully")
-				IsoRecordIsOn = false;
-			else
-				IsoRecordIsOn = true;
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-
+		/// <summary>
+		/// Get the current stream state
+		/// </summary>
 		public void GetStreamStatus()
 		{
-			var url = ApiPath + "StreamStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Results != true)
-				StreamIsOn = false;
-			else
-				StreamIsOn = true;
+			var url = string.Format("{0}/StreamStatus", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
+		/// <summary>
+		/// Set the stream state
+		/// </summary>
+		/// <param name="state">bool</param>
 		public void SetStream(bool state)
 		{
-			var url = "";
+			var url = (state)
+				? string.Format("{0}/StartStream", ApiPath)
+				: string.Format("{0}/StopStream", ApiPath);
 
-			if (state)
-			{
-				url = ApiPath + "StartStream";
-			}
-			else
-			{
-				url = ApiPath + "StopStream";
-			}
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Message != "Streaming Started Successfully")
-				StreamIsOn = false;
-			else
-				StreamIsOn = true;
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-
+		/// <summary>
+		/// Get the current output state
+		/// </summary>
 		public void GetOutputStatus()
 		{
-			var url = ApiPath + "OutputStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Results != true)
-				OutputIsOn = false;
-			else
-				OutputIsOn = true;
+			var url = string.Format("{0}/OutputStatus", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
+		/// <summary>
+		/// Set the output state
+		/// </summary>
+		/// <param name="state"></param>
 		public void SetOutput(bool state)
 		{
-			var url = "";
+			var url = (state)
+				? string.Format("{0}/StartOutput", ApiPath)
+				: string.Format("{0}/StopOutput", ApiPath);
 
-			if (state)
-			{
-				url = ApiPath + "StartOutput";
-			}
-			else
-			{
-				url = ApiPath + "StopOutput";
-			}
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Message != "Outputing Started Successfully")
-				OutputIsOn = false;
-			else
-				OutputIsOn = true;
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-
+		/// <summary>
+		/// Get the configured layouts
+		/// </summary>
 		public void GetLayouts()
 		{
-			var url = ApiPath + "GetLayouts";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Layouts != null)
-				Layouts = res.Layouts;
+			var url = string.Format("{0}/GetLayouts", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);		
 		}
 
-
+		/// <summary>
+		/// Get the current layout
+		/// </summary>
 		public void GetLayoutStatus()
 		{
-			var url = ApiPath + "LayoutStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Layout != null)
-				Layout = res.Layout;
+			var url = string.Format("{0}/LayoutStatus", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-
-
-		public void SetLayout(string layout)
+		/// <summary>
+		/// Set the layout
+		/// </summary>
+		/// <param name="layout"></param>
+		public void SetLayout(ushort layout)
 		{
-			var url = ApiPath + "ChangeLayout";
+			// Check for valid input (1-26)
+			if (layout < 1 || layout > 26)
+				return;
 
-			var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(layout));
+			var c = ConvertLayoutIdToString(layout);
 
-			if (res.Layout != null)
-				Layout = res.Layout;
+			var url = string.Format("{0}/ChangeLayout", ApiPath);
+			var jo = new
+			{
+				id = c
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
 
+		private char ConvertLayoutIdToString(int id)
+		{
+			return (char)(id + 64);
+		}
 
+		private int ConvertLayoutIdToInt()
+		{
+			var id = CurrentLayout.Id.ToCharArray();
+			return Convert.ToInt16(id[0]) - 64;
+		}
+
+		/// <summary>
+		/// Get current room configuration 
+		/// </summary>
 		public void GetRoomConfigStatus()
 		{
-			var url = ApiPath + "RoomConfigStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Layout != null)
-				RoomConfig = res.Layout;
+			var url = string.Format("{0}/RoomConfigStatusResponse", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
+		/// <summary>
+		/// Get the available room configurations
+		/// </summary>
 		public void GetRoomConfigs()
 		{
-			var url = ApiPath + "GetRoomConfigs";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Layouts != null)
-				RoomConfigs = res.Layouts;
+			var url = string.Format("{0}/GetRoomConfigs", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-		public void SetRoomConfig(uint id)
+		/// <summary>
+		/// Set the room configuration
+		/// </summary>
+		/// <param name="configId"></param>
+		public void SetRoomConfig(uint configId)
 		{
-			var url = ApiPath + "ChangeRoomConfig";
-
-			var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(id.ToString()));
-
-			if (res.Layout != null)
-				RoomConfig = res.Layout;
+			var url = string.Format("{0}/ChangeRoomConfiguration", ApiPath);
+			var jo = new
+			{
+				id = configId
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
 
-		public void ForceSetRoomConfig(uint id)
+		/// <summary>
+		/// Force set the room configuration
+		/// </summary>
+		/// <param name="configId"></param>
+		public void ForceSetRoomConfig(uint configId)
 		{
-			var url = ApiPath + "ForceChangeRoomConfig";
-
-			var res = MakeRequest<ResponseObjectBase, ID>(url, new ID(id.ToString()));
-
-			if (res.Layout != null)
-				RoomConfig = res.Layout;
+			var url = string.Format("{0}/ForceChangeRoomConfig", ApiPath);
+			var jo = new
+			{
+				id = configId
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
 
+		/// <summary>
+		/// Set all cameras to the home position
+		/// </summary>
 		public void GoHome()
 		{
-			var url = ApiPath + "GoHome";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
+			var url = string.Format("{0}/GoHome", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-
+		/// <summary>
+		/// Get the available cameras
+		/// </summary>
 		public void GetCameras()
 		{
-			var url = ApiPath + "GetCameras";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Cameras != null)
-				Cameras = res.Cameras;
+			var url = string.Format("{0}/GetCameras", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
+		/// <summary>
+		/// Get the camera status
+		/// </summary>
 		public void GetCameraStatus()
 		{
-			var url = ApiPath + "CameraStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Address != null)
-				CameraAddress = System.Convert.ToInt32(res.Address);
+			var url = string.Format("{0}/CameraStatus", ApiPath);
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
-		public void SetCamera(uint address)
+		/// <summary>
+		/// Manually switch the camera
+		/// </summary>
+		/// <param name="cameraAddress"></param>
+		public void SetCamera(uint cameraAddress)
 		{
-			var url = ApiPath + "ManualSwitchCamera";
-
-			var res = MakeRequest<ResponseObjectBase, CamAddress>(url, new CamAddress(address.ToString()));
-
-			if (res.Layout != null)
-				RoomConfig = res.Layout;
+			var url = string.Format("{0}/ManualSwitchCamera", ApiPath);
+			var jo = new
+			{
+				address = cameraAddress.ToString()
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
 
+		/// <summary>
+		/// Recall camera preset
+		/// </summary>
+		/// <param name="camId"></param>
+		/// <param name="presetId"></param>
 		public void SetCameraPreset(uint camId, uint presetId)
 		{
-			var url = ApiPath + "CallCameraPreset";
-
-			var res = MakeRequest<ResponseObjectBase, CameraPreset>(url, new CameraPreset(camId.ToString(), presetId.ToString()));
-
-			if (!string.IsNullOrEmpty(res.Message))
-				OnSuccessMessageReceived(res.Message);
+			var url = string.Format("{0}/CallCameraPreset", ApiPath);
+			var jo = new
+			{
+				cam = camId.ToString(),
+				pre = presetId.ToString()
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
 
+		/// <summary>
+		/// Save camera preset
+		/// </summary>
+		/// <param name="camId"></param>
+		/// <param name="presetId"></param>
 		public void SaveCameraPreset(uint camId, uint presetId)
 		{
-			var url = ApiPath + "SaveCameraPreset";
-
-			var res = MakeRequest<ResponseObjectBase, CameraPreset>(url, new CameraPreset(camId.ToString(), presetId.ToString()));
-
-			if (!string.IsNullOrEmpty(res.Message))
-				OnSuccessMessageReceived(res.Message);
+			var url = string.Format("{0}/SaveCameraPreset", ApiPath);
+			var jo = new
+			{
+				cam = camId.ToString(),
+				pre = presetId.ToString()
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
 
-
+		/// <summary>
+		/// Import camera presets
+		/// </summary>
 		public void ImportCameraPresets()
 		{
-			var url = ApiPath + "ImportCameraPresets";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
+			var url = string.Format("{0}/ImportCameraPresets", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
 
+		/// <summary>
+		/// Export camera presets
+		/// </summary>
 		public void ExportCameraPresets()
 		{
-			var url = ApiPath + "ExportCameraPresets";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
+			var url = string.Format("{0}/ExportCameraPresets", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
-
 
 		/// <summary>
 		/// Copy Files on teh device
@@ -1019,104 +1341,121 @@ namespace OneBeyondAutomateVxEpi
 		/// <param name="delete">If true, delete source files after copy</param>
 		public void CopyFiles(string dest, string logDest, bool delete)
 		{
-			var url = ApiPath + "CopyFiles";
-
-			var res = MakeRequest<ResponseObjectBase, FilesParams>(url, new FilesParams(dest, logDest, delete));
-
-			if (res.Status == "OK" && res.Message == "Successfully backed up information")
-				OnFileCopySuccessful();
+			var url = string.Format("{0}/CopyFiles", ApiPath);
+			var jo = new
+			{
+				destination = dest,
+				logDestination = logDest,
+				deleteSource = delete
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
 
-		public void GetStorageSpaceAvailable()
+		/// <summary>
+		/// Get available storage space
+		/// </summary>
+		/// <param name="driveLetters"></param>
+		public void GetStorageSpaceAvailable(string driveLetters)
 		{
-			var url = ApiPath + "StorageSpaceAvail";
+			if (String.IsNullOrEmpty(driveLetters))
+			{
+				driveLetters = "C:\\, D:\\, L:\\";
+			}
 
-			// TODO: Test the formatting of this command, API documentation is not clear on the value of the drives to send
-			// https://sdkcon78221.crestron.com/sdk/Automate-VX-API/Content/Topics/Automate-API/API-Reference/StorageSpaceAvail-API.htm
-			var res = MakeRequest<ResponseObjectBase, DrivesParams>(url, new DrivesParams("C:\\, D:\\, L:\\"));
-
-			if (res.Drives != null)
-				Drives = res.Drives;
+			var url = string.Format("{0}/StorageSpaceAvail", ApiPath);
+			var jo = new
+			{
+				drives = driveLetters
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
 
+		/// <summary>
+		/// Get available recording space available
+		/// </summary>
 		public void GetRecordingSpaceAvailable()
 		{
-			var url = ApiPath + "RecodingSpaceAvail";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.AvailableGigabytes != null && res.TotalGigabytes != null)
-			{
-				RecordingSpace = new RecordingSpace(res.AvailableGigabytes, res.TotalGigabytes);
-			}
+			var url = string.Format("{0}/RecodingSpaceAvail", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
 
-
+		/// <summary>
+		/// Set the system to the sleep state
+		/// </summary>
 		public void SetSleep()
 		{
-			var url = ApiPath + "Sleep";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
+			var url = string.Format("{0}/Sleep", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
 
+		/// <summary>
+		/// Wake the system from sleep state
+		/// </summary>
 		public void SetWake()
 		{
-			var url = ApiPath + "Wake";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
+			var url = string.Format("{0}/Wke", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
 
-
+		/// <summary>
+		/// Restart the system
+		/// </summary>
 		public void Restart()
 		{
-			var url = ApiPath + "Restart";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
+			var url = string.Format("{0}/Restart", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
 
-
+		/// <summary>
+		/// Close the wirecast
+		/// </summary>
 		public void SetCloseWirecast()
 		{
-			var url = ApiPath + "CloseWirecast";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
+			var url = string.Format("{0}/CloseWirecast", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
 
-
+		/// <summary>
+		/// Get available scenarios
+		/// </summary>
 		public void GetScenarios()
 		{
-			var url = ApiPath + "GetScenarios";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Scenarios != null)
-				Scenarios = res.Scenarios;
+			var url = string.Format("{0}/GetScenarios", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
 
-
+		/// <summary>
+		/// Get current scenario status
+		/// </summary>
 		public void GetScenarioStatus()
 		{
-			var url = ApiPath + "ScenarioStatus";
-
-			var res = MakeRequest<ResponseObjectBase, object>(url, null);
-
-			if (res.Scenario != null)
-				Scenario = res.Scenario;
+			var url = string.Format("{0}/ScenarioStatus", ApiPath);
+			var content = string.Empty;
+			_client.SendRequest("POST", url, content);
 		}
 
-		public void SetScenario(uint id)
+		/// <summary>
+		/// Set the scenario
+		/// </summary>
+		/// <param name="scenarioId"></param>
+		public void SetScenario(uint scenarioId)
 		{
-			var path = ApiPath + "ChangeScenario";
-
-			_client.SendRequest("GET", path, "");
-
-			var res = MakeRequest<ResponseObjectBase, ID>(path, new ID(id.ToString()));
-
-			if (res.Scenario != null)
-				Scenario = res.Scenario;
+			var url = string.Format("{0}/GoToScenario", ApiPath);
+			var jo = new
+			{
+				id = scenarioId
+			};
+			var content = JsonConvert.SerializeObject(jo);
+			_client.SendRequest("POST", url, content);
 		}
-
-
 	}
 }
 

@@ -374,7 +374,7 @@ namespace OneBeyondAutomateVxEpi
             });
 
         [JoinName("CopyFilesSuccesfulFB")]
-        public JoinDataComplete CopyFilesSuccesfulFB = new JoinDataComplete(
+        public JoinDataComplete CopyFilesSuccesfulFb = new JoinDataComplete(
             new JoinData
             {
                 JoinNumber = 27,
@@ -401,14 +401,26 @@ namespace OneBeyondAutomateVxEpi
                 JoinType = eJoinType.Digital
             });
 
+		[JoinName("GetRoomConfigs")]
+		public JoinDataComplete GetRoomConfigs = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 28,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Query for available room configs",
+				JoinCapabilities = eJoinCapabilities.FromSIMPL,
+				JoinType = eJoinType.Digital
+			});
+
         #endregion
 
 
 		#region Analog
 
-		// TODO [ ] Add analog joins below plugin being developed
-
-        [JoinName("ChangeLayout")]
+		[JoinName("ChangeLayout")]
         public JoinDataComplete ChangeLayout = new JoinDataComplete(
             new JoinData
             {
@@ -550,7 +562,7 @@ namespace OneBeyondAutomateVxEpi
             });
 
         [JoinName("StorageSpaceAvailableGB")]
-        public JoinDataComplete StorageSpaceAvailableGB = new JoinDataComplete(
+        public JoinDataComplete StorageSpaceAvailableGb = new JoinDataComplete(
             new JoinData
             {
                 JoinNumber = 11,
@@ -564,7 +576,7 @@ namespace OneBeyondAutomateVxEpi
             });
 
         [JoinName("StorageSpaceTotalGB")]
-        public JoinDataComplete StorageSpaceTotalGB = new JoinDataComplete(
+        public JoinDataComplete StorageSpaceTotalGb = new JoinDataComplete(
             new JoinData
             {
                 JoinNumber = 12,
@@ -627,7 +639,7 @@ namespace OneBeyondAutomateVxEpi
         public JoinDataComplete CopyLogDestination = new JoinDataComplete(
             new JoinData
             {
-                JoinNumber = 3,
+                JoinNumber = 4,
                 JoinSpan = 1
             },
             new JoinMetadata
@@ -642,7 +654,7 @@ namespace OneBeyondAutomateVxEpi
             new JoinData
             {
                 JoinNumber = 5,
-                JoinSpan =  26,
+                JoinSpan =  26
             },
             new JoinMetadata
             {
@@ -650,6 +662,21 @@ namespace OneBeyondAutomateVxEpi
                 JoinCapabilities = eJoinCapabilities.ToSIMPL,
                 JoinType = eJoinType.Serial
             });
+
+		[JoinName("CameraNames")]
+		public JoinDataComplete CameraNames = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 31,
+				JoinSpan = 8
+			}, 
+			new JoinMetadata
+			{
+				Description = "Name of each camera 1-8",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			}
+			);
 
         [JoinName("RoomConfigName")]
         public JoinDataComplete RoomConfigName = new JoinDataComplete(

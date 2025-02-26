@@ -104,13 +104,15 @@
     <Compile Include="1BeyondAutomateVxDebug.cs" />
     <Compile Include="1BeyondAutomateVXFactory.cs" />
     <Compile Include="1BeyondAutomateVXDeviceProperties.cs" />
+    <Compile Include="ApiObjects\ApiResponseParser.cs" />
+    <Compile Include="GenericClients\GenericClientHelpers.cs" />
     <Compile Include="GenericClients\GenericClientEventArgs.cs" />
     <Compile Include="GenericClients\GenericClientHttp.cs" />
     <Compile Include="GenericClients\GenericClientHttps.cs" />
     <Compile Include="GenericClients\IRestfulComms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="1BeyondAutomateVXDevice.cs" />
-    <Compile Include="ResponseObjects.cs" />
+    <Compile Include="ApiObjects\ResponseObjects.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
