@@ -10,8 +10,8 @@ namespace OneBeyondAutomateVxEpi
 		public static void ResetDebugLevels()
 		{
 			Trace = 0;
-			Notice = 0;
-			Verbose = 0;
+			Notice = 1;
+			Verbose = 2;
 		}
 
 		public static void SetDebugLevels(uint level)
