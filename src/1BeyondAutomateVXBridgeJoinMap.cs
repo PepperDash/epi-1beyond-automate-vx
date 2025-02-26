@@ -1,25 +1,16 @@
 ﻿using PepperDash.Essentials.Core;
 
-namespace PDT.OneBeyondAutomateVx.EPI
+namespace OneBeyondAutomateVxEpi
 {
 	/// <summary>
 	/// Plugin device Bridge Join Map
 	/// </summary>
-	/// <remarks>
-	/// Rename the class to match the device plugin being developed.  Reference Essentials JoinMaps, if one exists for the device plugin being developed
-	/// </remarks>
-	/// <see cref="PepperDash.Essentials.Core.Bridges"/>
-	/// <example>
-	/// "EssentialsPluginBridgeJoinMapTemplate" renamed to "SamsungMdcBridgeJoinMap"
-	/// </example>
 	public class OneBeyondAutomateVxBridgeJoinMap : JoinMapBaseAdvanced
 	{
 		#region Digital
 
-		// TODO [ ] Add digital joins below plugin being developed
-
-		[JoinName("AuthenticatedFB")]
-        public JoinDataComplete AuthenticatedFB = new JoinDataComplete(
+		[JoinName("Authenticate")]
+        public JoinDataComplete Authenticate = new JoinDataComplete(
 			new JoinData
 			{
 				JoinNumber = 1,
@@ -27,8 +18,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
 			},
 			new JoinMetadata
 			{
-				Description = "Successfully authenticated to Automate VX server",
-				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				Description = "Authenticates with Automate VX server and reports when authenticated",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
 				JoinType = eJoinType.Digital
 			});
 
@@ -680,7 +671,6 @@ namespace PDT.OneBeyondAutomateVx.EPI
 		/// <summary>
 		/// Plugin device BridgeJoinMap constructor
 		/// </summary>
-		/// <param name="joinStart">This will be the join it starts on the EISC bridge</param>
         public OneBeyondAutomateVxBridgeJoinMap(uint joinStart)
             : base(joinStart, typeof(OneBeyondAutomateVxBridgeJoinMap))
 		{

@@ -7,8 +7,8 @@
     <ProjectGuid>{9D249E47-8F95-4437-A6BB-563510287AD1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PDT.OneBeyondAutomateVx.EPI</RootNamespace>
-    <AssemblyName>PDT.OneBeyondAutomateVx.EPI</AssemblyName>
+    <RootNamespace>OneBeyondAutomateVxEpi</RootNamespace>
+    <AssemblyName>PepperDash.Essentials.Plugin.1BeyondAutomateVx</AssemblyName>
     <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92300};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>WindowsCE</PlatformFamilyName>
     <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
@@ -101,8 +101,13 @@
   <ItemGroup>
     <Compile Include="1BeyondAutomateVXBridgeJoinMap.cs" />
     <Compile Include="1BeyondAutomateVXConfigObject.cs" />
+    <Compile Include="1BeyondAutomateVxDebug.cs" />
     <Compile Include="1BeyondAutomateVXFactory.cs" />
     <Compile Include="1BeyondAutomateVXDeviceProperties.cs" />
+    <Compile Include="GenericClients\GenericClientEventArgs.cs" />
+    <Compile Include="GenericClients\GenericClientHttp.cs" />
+    <Compile Include="GenericClients\GenericClientHttps.cs" />
+    <Compile Include="GenericClients\IRestfulComms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="1BeyondAutomateVXDevice.cs" />
     <Compile Include="ResponseObjects.cs" />

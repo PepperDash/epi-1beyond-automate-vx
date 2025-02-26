@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Crestron.SimplSharp;
-using PepperDash.Essentials.Core;
 using PepperDash.Core;
+using PepperDash.Essentials.Core;
 
-namespace PDT.OneBeyondAutomateVx.EPI
+namespace OneBeyondAutomateVxEpi
 {
-    public partial class OneBeyondAutomateVX
+    public partial class OneBeyondAutomateVx
     {
         // Constructors, methods and some fields located in ******************************
         // separate file: 1BeyondAutomateVXDevice.cs        ******************************
 
-        public BoolFeedback LoginSuccessfulFB;
+        public BoolFeedback LoginSuccessfulFb;
 
         event EventHandler<ErrorEventArgs> ErrorMessageReceived;
 
@@ -32,7 +29,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var handler = ErrorMessageReceived;
             if (handler != null)
             {
-                Debug.Console(1, this, "Error: {0}", error);
+                Debug.Console(AutomateVxDebug.Notice, this, "Error: {0}", error);
                 handler(this, new ErrorEventArgs(error));
             }
         }
@@ -55,7 +52,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
             var handler = SuccessMessageReceived;
             if (handler != null)
             {
-                Debug.Console(0, this, "Success: {0}", msg);
+                Debug.Console(AutomateVxDebug.Trace, this, "Success: {0}", msg);
                 handler(this, new SuccessEventArgs(msg));
             }
         }
@@ -71,11 +68,11 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 if (value == _autoSwitchIsOn) return;
                 
                 _autoSwitchIsOn = value;
-                AutoSwitchIsOnFB.FireUpdate();          
+                AutoSwitchIsOnFb.FireUpdate();          
             }
         }
 
-        public BoolFeedback AutoSwitchIsOnFB;
+        public BoolFeedback AutoSwitchIsOnFb;
         #endregion
 
         #region Recording
@@ -89,12 +86,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 if (value != _recordIsOn)
                 {
                     _recordIsOn = value;
-                    RecordIsOnFB.FireUpdate();
+                    RecordIsOnFb.FireUpdate();
                 }
             }
         }
 
-        public BoolFeedback RecordIsOnFB;
+        public BoolFeedback RecordIsOnFb;
         #endregion
 
         #region ISO Recording
@@ -109,12 +106,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 if (value != _isoRecordIsOn)
                 {
                     _isoRecordIsOn = value;
-                    IsoRecordIsOnFB.FireUpdate();
+                    IsoRecordIsOnFb.FireUpdate();
                 }
             }
         }
 
-        public BoolFeedback IsoRecordIsOnFB;
+        public BoolFeedback IsoRecordIsOnFb;
         #endregion
 
         #region Streaming
@@ -129,12 +126,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 if (value != _streamIsOn)
                 {
                     _streamIsOn = value;
-                    StreamIsOnFB.FireUpdate();
+                    StreamIsOnFb.FireUpdate();
                 }
             }
         }
 
-        public BoolFeedback StreamIsOnFB;
+        public BoolFeedback StreamIsOnFb;
         #endregion
 
         #region Output
@@ -149,12 +146,12 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 if (value != _outputIsOn)
                 {
                     _outputIsOn = value;
-                    OutputIsOnFB.FireUpdate();
+                    OutputIsOnFb.FireUpdate();
                 }
             }
         }
 
-        public BoolFeedback OutputIsOnFB;
+        public BoolFeedback OutputIsOnFb;
 
 
         #endregion
@@ -168,7 +165,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         {
             get
             {
-                return _layouts;
+				return _layouts;
             }
             private set
             {

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Crestron.SimplSharp;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 
-namespace PDT.OneBeyondAutomateVx.EPI
+namespace OneBeyondAutomateVxEpi
 {
     public class ResponseObjectBase
     {
@@ -82,6 +78,11 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public string Name { get; set; }
 
         public IdName() { }
+
+	    public IdName(string name)
+	    {
+		    Name = name;
+	    }
     }
 
     public class ID
@@ -119,7 +120,7 @@ namespace PDT.OneBeyondAutomateVx.EPI
         public CameraPreset(string camId, string presetId)
         {
             CameraId = camId;
-            PresetId = PresetId;
+			PresetId = presetId;
         }
     }
 

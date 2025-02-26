@@ -1,0 +1,58 @@
+{
+	"system": {
+		"info": {}
+	},
+	"template": {
+		"devices": [
+			{
+				"key": "processor",
+				"type": "cp4n",
+				"name": "Processor",
+				"group": "processor",
+				"supportedConfigModes": [ "compliance", "essentials" ],
+				"supportedSystemTypes": [ "hudType", "presType", "vtcType", "custom" ],
+				"supportsCompliance": true,
+				"properties": {
+					"numberOfComPorts": 6,
+					"numberOfIrPorts": 8,
+					"numberOfRelays": 8,
+					"numberOfDIOPorts": 8
+				}
+			},
+			{
+				"key": "camera-vx1",
+				"name": "AutomateVX Server",
+				"type": "oneBeyondAutomateVx",
+				"group": "pluginDevices",
+				"properties": {
+					"control": {
+						"method": "https",
+						"tcpSshProperties": {
+							"address": "172.22.46.58",
+							"port": 4443,
+							"username": "Admin",	
+							"password": "AutomateVXAdmin",
+							"autoReconnect": false,
+							"autoReconnectIntervalMs": 5000
+						}
+					}
+				}
+			},
+			{
+				"key": "cameras-bridge",
+				"group": "api",
+				"type": "eiscApiAdvanced",
+				"properties": {
+					"control": { "ipid": "a4", "method": "ipidTcp", "tcpSshProperties": { "address": "127.0.0.2", "port": 0 } },
+					"devices": [ 
+						{ "deviceKey": "camera-vx1", "joinStart": 501 } 
+					]
+				}
+			}
+		],
+		"info": {},
+		"rooms": [],
+		"tieLines": [],
+		"joinMaps": {}
+	}
+}
