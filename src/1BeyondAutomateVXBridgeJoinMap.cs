@@ -621,6 +621,8 @@ namespace OneBeyondAutomateVxEpi
 
 
 		#region Serial
+
+
         [JoinName("ErrorMessage")]
         public JoinDataComplete ErrorMessage = new JoinDataComplete(
 			new JoinData
@@ -677,37 +679,79 @@ namespace OneBeyondAutomateVxEpi
                 JoinType = eJoinType.Serial
             });
 
-        [JoinName("LayoutName")]
-        public JoinDataComplete LayoutName = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 5,
-                JoinSpan =  26
-            },
-            new JoinMetadata
-            {
-                Description = "Name of each layout [A-Z]",
-                JoinCapabilities = eJoinCapabilities.ToSIMPL,
-                JoinType = eJoinType.Serial
-            });
+		[JoinName("CurrentLayoutName")]
+		public JoinDataComplete CurrentLayoutName = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 11,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Current layout name.",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		[JoinName("CurrentRoomConfigName")]
+		public JoinDataComplete CurrentRoomConfigName = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 12,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Current room config name.",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		[JoinName("CurrentScenarioName")]
+		public JoinDataComplete CurrentScenarioName = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 13,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Current scenario name.",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.Serial
+			});
 
 		[JoinName("CameraNames")]
 		public JoinDataComplete CameraNames = new JoinDataComplete(
 			new JoinData
 			{
 				JoinNumber = 31,
-				JoinSpan = 8
+				JoinSpan = 12
 			}, 
 			new JoinMetadata
 			{
-				Description = "Name of each camera 1-8",
+				Description = "Name of each camera 1-12",
 				JoinCapabilities = eJoinCapabilities.ToSIMPL,
 				JoinType = eJoinType.Serial
-			}
-			);
+			});
 
-        [JoinName("RoomConfigName")]
-        public JoinDataComplete RoomConfigName = new JoinDataComplete(
+		[JoinName("LayoutNames")]
+		public JoinDataComplete LayoutNames = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 51,
+				JoinSpan = 26
+			},
+			new JoinMetadata
+			{
+				Description = "Name of each layout [A-Z]",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+
+        [JoinName("RoomConfigNames")]
+        public JoinDataComplete RoomConfigNames = new JoinDataComplete(
             new JoinData
             {
                 JoinNumber = 101,

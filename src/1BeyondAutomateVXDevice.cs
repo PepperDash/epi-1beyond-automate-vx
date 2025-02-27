@@ -517,8 +517,8 @@ namespace OneBeyondAutomateVxEpi
 			trilist.SetUShortSigAction(joinMap.ChangeLayout.JoinNumber, SetLayout);
 
 			LayoutsCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfLayouts.JoinNumber]);
-			CurrentLayoutNameFeedback.LinkInputSig(trilist.StringInput[joinMap.LayoutName.JoinNumber]);
 			CurrentLayoutIdFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeLayout.JoinNumber]);
+			CurrentLayoutNameFeedback.LinkInputSig(trilist.StringInput[joinMap.CurrentLayoutName.JoinNumber]);
 		}
 
 		private void LinkRoomConfigToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
@@ -527,6 +527,8 @@ namespace OneBeyondAutomateVxEpi
 			trilist.SetUShortSigAction(joinMap.ForceChangeRoomConfig.JoinNumber, (rc) => ForceSetRoomConfig(rc));
 
 			RoomConfigsCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfRoomConfigs.JoinNumber]);
+			CurrentRoomConfigIdFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeRoomConfig.JoinNumber]);
+			CurrentRoomConfigNameFeedback.LinkInputSig(trilist.StringInput[joinMap.CurrentRoomConfigName.JoinNumber]);
 		}
 
 		private void LinkScenariosToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
@@ -534,6 +536,8 @@ namespace OneBeyondAutomateVxEpi
 			trilist.SetUShortSigAction(joinMap.ChangeScenario.JoinNumber, (s) => SetScenario(s));
 			
 			ScenariosCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfScenarios.JoinNumber]);
+			CurrentScenarioIdFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeScenario.JoinNumber]);
+			CurrentScenarioNameFeedback.LinkInputSig(trilist.StringInput[joinMap.CurrentScenarioName.JoinNumber]);
 		}
 
 		private void SetInitialFbValues(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
@@ -577,14 +581,14 @@ namespace OneBeyondAutomateVxEpi
 				return;
 			}
 
-			for (uint i = 0; i < joinMap.LayoutName.JoinSpan; i++)
+			for (uint i = 0; i < joinMap.LayoutNames.JoinSpan; i++)
 			{
 				var name = "";
 
 				if (Layouts.Count < i - 1)
 					name = Layouts[(int)i].Name;
 
-				trilist.SetString(joinMap.LayoutName.JoinNumber + i, name);
+				trilist.SetString(joinMap.LayoutNames.JoinNumber + i, name);
 			}
 		}
 
@@ -609,14 +613,14 @@ namespace OneBeyondAutomateVxEpi
 				return;
 			}
 
-			for (uint i = 0; i < joinMap.RoomConfigName.JoinSpan; i++)
+			for (uint i = 0; i < joinMap.RoomConfigNames.JoinSpan; i++)
 			{
 				var name = "";
 
 				if (RoomConfigs.Count < i - 1)
 					name = RoomConfigs[(int)i].Name;
 
-				trilist.SetString(joinMap.RoomConfigName.JoinNumber + i, name);
+				trilist.SetString(joinMap.RoomConfigNames.JoinNumber + i, name);
 			}
 		}
 
@@ -1009,15 +1013,21 @@ namespace OneBeyondAutomateVxEpi
 			CrestronEnvironment.Sleep(100);
 			GetOutputStatus();
 			CrestronEnvironment.Sleep(100);
+			GetStreamStatus();
+			CrestronEnvironment.Sleep(100);
 			GetRoomConfigs();
 			CrestronEnvironment.Sleep(100);
 			GetLayouts();
+			CrestronEnvironment.Sleep(100);
+			GetScenarios();
+			CrestronEnvironment.Sleep(100);
+			GetCameras();
 			CrestronEnvironment.Sleep(100);
 			GetRoomConfigStatus();
 			CrestronEnvironment.Sleep(100);
 			GetLayoutStatus();
 			CrestronEnvironment.Sleep(100);
-			GetCameras();
+			GetScenarioStatus();
 			CrestronEnvironment.Sleep(100);
 			GetCameraStatus();
 		}
