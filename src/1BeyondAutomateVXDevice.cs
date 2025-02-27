@@ -356,53 +356,6 @@ namespace OneBeyondAutomateVxEpi
 			LinkRoomConfigToApi(trilist, joinMap);
 			LinkScenariosToApi(trilist, joinMap);
 
-			//trilist.SetUShortSigAction(joinMap.LiveCameraPreset.JoinNumber, (p) => SetCameraPreset(CameraAddressFeedback.UShortValue, p));
-
-			//trilist.SetSigFalseAction(joinMap.RecallCameraPreset.JoinNumber, () =>
-			//    {
-			//        var camId = trilist.GetUshort(joinMap.CameraToRecallPresetOn.JoinNumber);
-			//        var presetId = trilist.GetUshort(joinMap.CameraPresetToRecall.JoinNumber);
-
-			//        if (camId == 0 || presetId == 0)
-			//        {
-			//            Debug.Console(AutomateVxDebug.Trace, this,
-			//                "Unable to recall preset.  Please specify values for both CameraToRecallPresetOn and CameraPresetToRecall analog joins");
-			//            return;
-			//        }
-
-			//        SetCameraPreset(camId, presetId);
-			//    });
-
-			//trilist.SetSigFalseAction(joinMap.CopyFiles.JoinNumber, () =>
-			//    {
-			//        var destFolder = trilist.GetString(joinMap.CopyFilesDestination.JoinNumber);
-			//        var logFolder = trilist.GetString(joinMap.CopyLogDestination.JoinNumber);
-			//        var delete = trilist.GetBool(joinMap.DeleteFiles.JoinNumber);
-
-			//        if (string.IsNullOrEmpty(destFolder))
-			//        {
-			//            Debug.Console(AutomateVxDebug.Trace, this, "Destination folder must be specified to copy files");
-			//            return;
-			//        }
-
-			//        CopyFiles(destFolder, logFolder, delete);
-
-			//    });
-
-
-
-			// Subscribe to events as needed
-
-			//FileCopySuccessful += (o, a) => CrestronInvoke.BeginInvoke((i) =>
-			//{
-			//    trilist.SetBool(joinMap.CopyFilesSuccesfulFb.JoinNumber, true);
-			//    CrestronEnvironment.Sleep(100);
-			//    trilist.SetBool(joinMap.CopyFilesSuccesfulFb.JoinNumber, false);
-			//}, null);
-
-
-			//RecordingSpaceAvailableChanged += (o, a) => UpdateAvailableSpace(trilist, joinMap);
-
 			trilist.OnlineStatusChange += (o, a) =>
 			{
 				if (!a.DeviceOnLine) return;
@@ -517,6 +470,22 @@ namespace OneBeyondAutomateVxEpi
 			trilist.SetSigFalseAction(joinMap.GetCameraStatus.JoinNumber, GetCameraStatus);
 			trilist.SetSigFalseAction(joinMap.GetCameras.JoinNumber, GetCameras);
 			trilist.SetUShortSigAction(joinMap.ChangeCamera.JoinNumber, (c) => SetCamera(c));
+			trilist.SetUShortSigAction(joinMap.LiveCameraPreset.JoinNumber, (p) => SetCameraPreset((uint)CameraAddress, p));
+			trilist.SetSigFalseAction(joinMap.RecallCameraPreset.JoinNumber, () =>
+				{
+					var camId = trilist.GetUshort(joinMap.CameraToRecallPresetOn.JoinNumber);
+					var presetId = trilist.GetUshort(joinMap.CameraPresetToRecall.JoinNumber);
+
+					if (camId == 0 || presetId == 0)
+					{
+						Debug.Console(AutomateVxDebug.Trace, this,
+							"Unable to recall preset.  Please specify values for both CameraToRecallPresetOn and CameraPresetToRecall analog joins");
+						return;
+					}
+
+					SetCameraPreset(camId, presetId);
+				});
+
 
 			CamerasCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfCameras.JoinNumber]);
 			CameraAddressFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeCamera.JoinNumber]);
