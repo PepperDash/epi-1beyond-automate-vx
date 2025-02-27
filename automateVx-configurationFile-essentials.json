@@ -25,6 +25,7 @@
 				"type": "oneBeyondAutomateVx",
 				"group": "pluginDevices",
 				"properties": {
+					"comment": "http = port 3579, https = port 4443",
 					"control": {
 						"method": "https",
 						"tcpSshProperties": {

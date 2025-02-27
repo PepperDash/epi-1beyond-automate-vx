@@ -215,13 +215,17 @@ namespace OneBeyondAutomateVxEpi
 		public BoolFeedback StreamIsOnFeedback;
 		public BoolFeedback OutputIsOnFeedback;
 		public IntFeedback CameraAddressFeedback;
-		public IntFeedback CameraCountFeedback;
+		public IntFeedback CamerasCountFeedback;
+		public IntFeedback LayoutsCountFeedback;
 		public StringFeedback CurrentLayoutNameFeedback;
 		public IntFeedback CurrentLayoutIdFeedback;
+		public IntFeedback RoomConfigsCountFeedback;
 		public StringFeedback CurrentRoomConfigNameFeedback;
 		public IntFeedback CurrentRoomConfigIdFeedback;
+		public IntFeedback ScenariosCountFeedback;
 		public StringFeedback CurrentScenarioNameFeedback;
 		public IntFeedback CurrentScenarioIdFeedback;
+
 
 		public List<Camera> Cameras;
 		public List<NameWithIdString> Layouts;
@@ -272,11 +276,14 @@ namespace OneBeyondAutomateVxEpi
 			StreamIsOnFeedback = new BoolFeedback(() => StreamIsOn);
 			OutputIsOnFeedback = new BoolFeedback(() => OutputIsOn);
 			CameraAddressFeedback = new IntFeedback(() => CameraAddress);
-			CameraCountFeedback = new IntFeedback(() => Cameras.Count);
+			CamerasCountFeedback = new IntFeedback(() => Cameras.Count);
+			LayoutsCountFeedback = new IntFeedback(() => Layouts.Count);
 			CurrentLayoutNameFeedback = new StringFeedback(() => CurrentLayout.Name);
 			CurrentLayoutIdFeedback = new IntFeedback(ConvertLayoutIdToInt);
+			RoomConfigsCountFeedback = new IntFeedback(() => RoomConfigs.Count);
 			CurrentRoomConfigNameFeedback = new StringFeedback(() => CurrentRoomConfig.Name);
 			CurrentRoomConfigIdFeedback = new IntFeedback(() => CurrentRoomConfig.Id);
+			ScenariosCountFeedback = new IntFeedback(() => Scenarios.Count);
 			CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
 			CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
 		}
@@ -357,6 +364,7 @@ namespace OneBeyondAutomateVxEpi
 			LinkCamerasToApi(trilist, joinMap);
 			LinkLayoutsToApi(trilist, joinMap);
 			LinkRoomConfigToApi(trilist, joinMap);
+			LinkScenariosToApi(trilist, joinMap);
 
 			trilist.SetUShortSigAction(joinMap.LiveCameraPreset.JoinNumber, (p) => SetCameraPreset(CameraAddressFeedback.UShortValue, p));
 
@@ -484,10 +492,9 @@ namespace OneBeyondAutomateVxEpi
 		{
 			trilist.SetSigFalseAction(joinMap.GetCameraStatus.JoinNumber, GetCameraStatus);
 			trilist.SetSigFalseAction(joinMap.GetCameras.JoinNumber, GetCameras);
-
-			CameraCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfCameras.JoinNumber]);
-
 			trilist.SetUShortSigAction(joinMap.ChangeCamera.JoinNumber, (c) => SetCamera(c));
+
+			CamerasCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfCameras.JoinNumber]);			
 			CameraAddressFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeCamera.JoinNumber]);
 
 			//var joinBase = joinMap.CameraNames.JoinNumber;
@@ -509,6 +516,7 @@ namespace OneBeyondAutomateVxEpi
 			trilist.SetSigFalseAction(joinMap.GetLayouts.JoinNumber, GetLayouts);
 			trilist.SetUShortSigAction(joinMap.ChangeLayout.JoinNumber, SetLayout);
 
+			LayoutsCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfLayouts.JoinNumber]);
 			CurrentLayoutNameFeedback.LinkInputSig(trilist.StringInput[joinMap.LayoutName.JoinNumber]);
 			CurrentLayoutIdFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeLayout.JoinNumber]);
 		}
@@ -517,6 +525,15 @@ namespace OneBeyondAutomateVxEpi
 		{
 			trilist.SetUShortSigAction(joinMap.ChangeRoomConfig.JoinNumber, (rc) => SetRoomConfig(rc));
 			trilist.SetUShortSigAction(joinMap.ForceChangeRoomConfig.JoinNumber, (rc) => ForceSetRoomConfig(rc));
+
+			RoomConfigsCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfRoomConfigs.JoinNumber]);
+		}
+
+		private void LinkScenariosToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			trilist.SetUShortSigAction(joinMap.ChangeScenario.JoinNumber, (s) => SetScenario(s));
+			
+			ScenariosCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfScenarios.JoinNumber]);
 		}
 
 		private void SetInitialFbValues(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
@@ -798,6 +815,7 @@ namespace OneBeyondAutomateVxEpi
 						if (response.Status == "OK")
 						{
 							Cameras = response.Cameras;
+							CamerasCountFeedback.FireUpdate();
 							UpdateCameras(_trilist, _joinMap);
 							ResponseSuccessMessage = response.Message;
 							return;
@@ -840,6 +858,7 @@ namespace OneBeyondAutomateVxEpi
 						if (response.Status == "OK")
 						{
 							Layouts = response.Layouts;
+							LayoutsCountFeedback.FireUpdate();
 							UpdateLayoutNames(_trilist, _joinMap);
 							ResponseSuccessMessage = response.Message;
 							return;
@@ -883,6 +902,7 @@ namespace OneBeyondAutomateVxEpi
 						if (response.Status == "OK")
 						{
 							RoomConfigs = response.RoomConfigs;
+							RoomConfigsCountFeedback.FireUpdate();
 							ResponseSuccessMessage = response.Message;
 							return;
 						}
@@ -910,6 +930,7 @@ namespace OneBeyondAutomateVxEpi
 						if (response.Status == "OK")
 						{
 							Scenarios = response.Scenarios;
+							ScenariosCountFeedback.FireUpdate();
 							ResponseSuccessMessage = response.Message;
 							return;
 						}
@@ -1390,7 +1411,7 @@ namespace OneBeyondAutomateVxEpi
 		/// </summary>
 		public void SetWake()
 		{
-			var url = string.Format("{0}/Wke", ApiPath);
+			var url = string.Format("{0}/Wake", ApiPath);
 			var content = string.Empty;
 			_client.SendRequest("POST", url, content);
 		}

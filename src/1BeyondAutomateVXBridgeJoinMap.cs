@@ -589,6 +589,34 @@ namespace OneBeyondAutomateVxEpi
                 JoinType = eJoinType.Analog
             });
 
+		[JoinName("ChangeScenario")]
+		public JoinDataComplete ChangeScenario = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 13,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Specifies the desired scenario and provides feedback for current scenario.",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.Analog
+			});
+
+		[JoinName("NumberOfScenarios")]
+		public JoinDataComplete NumberOfScenarios = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 14,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Reports the number of scenarios stored on the Automate server",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Analog
+			});
+
 		#endregion
 
 
