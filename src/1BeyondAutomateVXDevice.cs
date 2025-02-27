@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Crestron.SimplSharp;
 using Crestron.SimplSharpPro.DeviceSupport;
 using Newtonsoft.Json;
@@ -13,14 +12,9 @@ using PepperDash.Essentials.Core.Bridges;
 
 namespace OneBeyondAutomateVxEpi
 {
-	public partial class OneBeyondAutomateVx : EssentialsBridgeableDevice
+	public class OneBeyondAutomateVx : EssentialsBridgeableDevice
 	{
 		private const string ApiPath = "/api";
-
-		private BasicTriList _trilist;
-		private OneBeyondAutomateVxBridgeJoinMap _joinMap;
-		
-		private static readonly string Separator = new string('-', 50);
 
 		#region IRestfulComms
 
@@ -29,7 +23,7 @@ namespace OneBeyondAutomateVxEpi
 		private int _responseCode;
 		private string _responseContent;
 		private string _responseSuccessMessage;
-		private string _responseErrorMessage;		
+		private string _responseErrorMessage;
 
 		public int ResponseCode
 		{
@@ -48,7 +42,7 @@ namespace OneBeyondAutomateVxEpi
 			set
 			{
 				_responseContent = value;
-				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseContent: {0}", _responseContent);				
+				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseContent: {0}", _responseContent);
 				//ResponseContentFeedback.FireUpdate();
 			}
 		}
@@ -82,7 +76,6 @@ namespace OneBeyondAutomateVxEpi
 
 		#endregion
 
-		
 		private string _token;
 		public string Token
 		{
@@ -93,7 +86,7 @@ namespace OneBeyondAutomateVxEpi
 				_token = value;
 				LoginSuccessfulFeedback.FireUpdate();
 
-				if(!string.IsNullOrEmpty(_token))
+				if (!string.IsNullOrEmpty(_token))
 					Poll();
 			}
 		}
@@ -226,12 +219,15 @@ namespace OneBeyondAutomateVxEpi
 		public StringFeedback CurrentScenarioNameFeedback;
 		public IntFeedback CurrentScenarioIdFeedback;
 
+		public List<Camera> Cameras { get; set; }
+		public List<NameWithIdString> Layouts { get; set; }
+		public List<NameWithIdInt> RoomConfigs { get; set; }
+		public List<NameWithIdInt> Scenarios { get; set; }
 
-		public List<Camera> Cameras;
-		public List<NameWithIdString> Layouts;
-		public List<NameWithIdInt> RoomConfigs;
-		public List<NameWithIdInt> Scenarios; 
-
+		public event EventHandler CamerasChanged;
+		public event EventHandler LayoutsChanged;
+		public event EventHandler RoomConfigsChanged;
+		public event EventHandler ScenariosChanged;
 
 		/// <summary>
 		/// Plugin device constructor for devices that need IBasicCommunication
@@ -245,47 +241,59 @@ namespace OneBeyondAutomateVxEpi
 		{
 			Debug.Console(AutomateVxDebug.Trace, this, "Constructing new {0} instance", name);
 
-			AutomateVxDebug.ResetDebugLevels();
-
-			if (config == null || config.Control == null)
+			try
 			{
-				Debug.Console(AutomateVxDebug.Trace, this, "Configuration or control object is null, unable to construct new {0} instance.  Check configuration.", name);
-				return;
-			}
+				AutomateVxDebug.ResetDebugLevels();
 
-			_client = client;
-			if (_client == null)
+				_client = client;
+				if (_client == null)
+				{
+					Debug.Console(AutomateVxDebug.Trace, this, Debug.ErrorLogLevel.Error,
+						"Failed to construct '{1}' using method {0}",
+						config.Control.Method, name);
+					return;
+				}
+
+				//ResponseCodeFeedback = new IntFeedback(() => ResponseCode);
+				//ResponseContentFeedback = new StringFeedback(() => ResponseContent);
+				ResponseSuccessMessageFeedback = new StringFeedback(() => ResponseSuccessMessage);
+				ResponseErrorMessageFeedback = new StringFeedback(() => ResponseErrorMessage);
+
+				LoginSuccessfulFeedback = new BoolFeedback(() => !string.IsNullOrEmpty(Token));
+				AutoSwitchIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
+				RecordIsOnFeedback = new BoolFeedback(() => RecordIsOn);
+				IsoRecordIsOnFeedback = new BoolFeedback(() => IsoRecordIsOn);
+				StreamIsOnFeedback = new BoolFeedback(() => StreamIsOn);
+				OutputIsOnFeedback = new BoolFeedback(() => OutputIsOn);
+				CameraAddressFeedback = new IntFeedback(() => CameraAddress);
+				CamerasCountFeedback = new IntFeedback(() => Cameras.Count);
+				LayoutsCountFeedback = new IntFeedback(() => Layouts.Count);
+				CurrentLayoutNameFeedback = new StringFeedback(() => CurrentLayout.Name);
+				CurrentLayoutIdFeedback = new IntFeedback(() => ConvertIdToInt(CurrentLayout.Id));
+				RoomConfigsCountFeedback = new IntFeedback(() => RoomConfigs.Count);
+				CurrentRoomConfigNameFeedback = new StringFeedback(() => CurrentRoomConfig.Name);
+				CurrentRoomConfigIdFeedback = new IntFeedback(() => CurrentRoomConfig.Id);
+				ScenariosCountFeedback = new IntFeedback(() => Scenarios.Count);
+				CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
+				CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
+
+				if (Cameras == null)
+					Cameras = new List<Camera>();
+				if (Layouts == null)
+					Layouts = new List<NameWithIdString>();
+				if (RoomConfigs == null)
+					RoomConfigs = new List<NameWithIdInt>();
+				if (Scenarios == null)
+					Scenarios = new List<NameWithIdInt>();
+
+				_client.ResponseReceived += OnResponseReceived;
+			}
+			catch (Exception ex)
 			{
-				Debug.Console(AutomateVxDebug.Trace, this, Debug.ErrorLogLevel.Error,
-					"Failed to construct '{1}' using method {0}",
-					config.Control.Method, name);
-				return;
+				Debug.Console(AutomateVxDebug.Notice, this, Debug.ErrorLogLevel.Error, "OneBeyondAutomateVx Exception Message: {0}", ex.Message);
+				Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "OneBeyondAutomateVx Stack Trace: {0}", ex.StackTrace);
+				if (ex.InnerException != null) Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "OneBeyondAutomateVx Inner Exception {0}", ex.InnerException);
 			}
-
-			_client.ResponseReceived += OnResponseReceived;
-			
-			//ResponseCodeFeedback = new IntFeedback(() => ResponseCode);
-			//ResponseContentFeedback = new StringFeedback(() => ResponseContent);
-			ResponseSuccessMessageFeedback = new StringFeedback(() => ResponseSuccessMessage);
-			ResponseErrorMessageFeedback = new StringFeedback(() => ResponseErrorMessage);
-			
-			LoginSuccessfulFeedback = new BoolFeedback(() => !string.IsNullOrEmpty(Token));
-			AutoSwitchIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
-			RecordIsOnFeedback = new BoolFeedback(() => RecordIsOn);
-			IsoRecordIsOnFeedback = new BoolFeedback(() => IsoRecordIsOn);
-			StreamIsOnFeedback = new BoolFeedback(() => StreamIsOn);
-			OutputIsOnFeedback = new BoolFeedback(() => OutputIsOn);
-			CameraAddressFeedback = new IntFeedback(() => CameraAddress);
-			CamerasCountFeedback = new IntFeedback(() => Cameras.Count);
-			LayoutsCountFeedback = new IntFeedback(() => Layouts.Count);
-			CurrentLayoutNameFeedback = new StringFeedback(() => CurrentLayout.Name);
-			CurrentLayoutIdFeedback = new IntFeedback(ConvertLayoutIdToInt);
-			RoomConfigsCountFeedback = new IntFeedback(() => RoomConfigs.Count);
-			CurrentRoomConfigNameFeedback = new StringFeedback(() => CurrentRoomConfig.Name);
-			CurrentRoomConfigIdFeedback = new IntFeedback(() => CurrentRoomConfig.Id);
-			ScenariosCountFeedback = new IntFeedback(() => Scenarios.Count);
-			CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
-			CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
 		}
 
 		/// <summary>
@@ -294,20 +302,6 @@ namespace OneBeyondAutomateVxEpi
 		public override void Initialize()
 		{
 			GetToken();
-		}
-
-		/// <summary>
-		/// Update feedbakcs
-		/// </summary>
-		private void UpdateFeedbacks()
-		{
-			LoginSuccessfulFeedback.FireUpdate();
-			AutoSwitchIsOnFeedback.FireUpdate();
-			RecordIsOnFeedback.FireUpdate();
-			IsoRecordIsOnFeedback.FireUpdate();
-			StreamIsOnFeedback.FireUpdate();
-			OutputIsOnFeedback.FireUpdate();
-			CameraAddressFeedback.FireUpdate();
 		}
 
 
@@ -331,7 +325,6 @@ namespace OneBeyondAutomateVxEpi
 			}
 
 			var customJoins = JoinMapHelper.TryGetJoinMapAdvancedForDevice(joinMapKey);
-
 			if (customJoins != null)
 			{
 				joinMap.SetCustomJoinData(customJoins);
@@ -339,10 +332,6 @@ namespace OneBeyondAutomateVxEpi
 
 			Debug.Console(AutomateVxDebug.Notice, "Linking to Trilist '{0}'", trilist.ID.ToString("X"));
 			Debug.Console(AutomateVxDebug.Trace, "Linking to Bridge Type {0}", GetType().Name);
-
-			// store needed data
-			_trilist = trilist;
-			_joinMap = joinMap;
 
 			// Linked Feedbacks
 			//ResponseCodeFeedback.LinkInputSig(trilist.UShortInput[0]);
@@ -360,64 +349,56 @@ namespace OneBeyondAutomateVxEpi
 			LinkAutoSwitchToApi(trilist, joinMap);
 			LinkRecordToApi(trilist, joinMap);
 			LinkIsoRecordToApi(trilist, joinMap);
-			LinkStreamAndOutputToApi(trilist, joinMap);
+			LinkOutputToApi(trilist, joinMap);
+			LinkStreamToApi(trilist, joinMap);
 			LinkCamerasToApi(trilist, joinMap);
 			LinkLayoutsToApi(trilist, joinMap);
 			LinkRoomConfigToApi(trilist, joinMap);
 			LinkScenariosToApi(trilist, joinMap);
 
-			trilist.SetUShortSigAction(joinMap.LiveCameraPreset.JoinNumber, (p) => SetCameraPreset(CameraAddressFeedback.UShortValue, p));
+			//trilist.SetUShortSigAction(joinMap.LiveCameraPreset.JoinNumber, (p) => SetCameraPreset(CameraAddressFeedback.UShortValue, p));
 
-			trilist.SetSigFalseAction(joinMap.RecallCameraPreset.JoinNumber, () =>
-				{
-					var camId = trilist.GetUshort(joinMap.CameraToRecallPresetOn.JoinNumber);
-					var presetId = trilist.GetUshort(joinMap.CameraPresetToRecall.JoinNumber);
+			//trilist.SetSigFalseAction(joinMap.RecallCameraPreset.JoinNumber, () =>
+			//    {
+			//        var camId = trilist.GetUshort(joinMap.CameraToRecallPresetOn.JoinNumber);
+			//        var presetId = trilist.GetUshort(joinMap.CameraPresetToRecall.JoinNumber);
 
-					if (camId == 0 || presetId == 0)
-					{
-						Debug.Console(AutomateVxDebug.Trace, this,
-							"Unable to recall preset.  Please specify values for both CameraToRecallPresetOn and CameraPresetToRecall analog joins");
-						return;
-					}
+			//        if (camId == 0 || presetId == 0)
+			//        {
+			//            Debug.Console(AutomateVxDebug.Trace, this,
+			//                "Unable to recall preset.  Please specify values for both CameraToRecallPresetOn and CameraPresetToRecall analog joins");
+			//            return;
+			//        }
 
-					SetCameraPreset(camId, presetId);
-				});
+			//        SetCameraPreset(camId, presetId);
+			//    });
 
-			trilist.SetSigFalseAction(joinMap.CopyFiles.JoinNumber, () =>
-				{
-					var destFolder = trilist.GetString(joinMap.CopyFilesDestination.JoinNumber);
-					var logFolder = trilist.GetString(joinMap.CopyLogDestination.JoinNumber);
-					var delete = trilist.GetBool(joinMap.DeleteFiles.JoinNumber);
+			//trilist.SetSigFalseAction(joinMap.CopyFiles.JoinNumber, () =>
+			//    {
+			//        var destFolder = trilist.GetString(joinMap.CopyFilesDestination.JoinNumber);
+			//        var logFolder = trilist.GetString(joinMap.CopyLogDestination.JoinNumber);
+			//        var delete = trilist.GetBool(joinMap.DeleteFiles.JoinNumber);
 
-					if (string.IsNullOrEmpty(destFolder))
-					{
-						Debug.Console(AutomateVxDebug.Trace, this, "Destination folder must be specified to copy files");
-						return;
-					}
+			//        if (string.IsNullOrEmpty(destFolder))
+			//        {
+			//            Debug.Console(AutomateVxDebug.Trace, this, "Destination folder must be specified to copy files");
+			//            return;
+			//        }
 
-					CopyFiles(destFolder, logFolder, delete);
+			//        CopyFiles(destFolder, logFolder, delete);
 
-				});
+			//    });
 
 
 
 			// Subscribe to events as needed
-			//LayoutChanged += (o, a) => UpdateCurrentLayout(trilist, joinMap);
 
-			//LayoutsChanged += (o, a) => UpdateLayoutNames(trilist, joinMap);
-
-			//RoomConfigChanged += (o, a) => UpdateRoomConfig(trilist, joinMap);
-
-			//RoomConfigsChanged += (o, a) => UpdateRoomConfigNames(trilist, joinMap);
-
-			//CamerasChanged += (o, a) => UpdateCameras(trilist, joinMap);
-
-			FileCopySuccessful += (o, a) => CrestronInvoke.BeginInvoke((i) =>
-			{
-				trilist.SetBool(joinMap.CopyFilesSuccesfulFb.JoinNumber, true);
-				CrestronEnvironment.Sleep(100);
-				trilist.SetBool(joinMap.CopyFilesSuccesfulFb.JoinNumber, false);
-			}, null);
+			//FileCopySuccessful += (o, a) => CrestronInvoke.BeginInvoke((i) =>
+			//{
+			//    trilist.SetBool(joinMap.CopyFilesSuccesfulFb.JoinNumber, true);
+			//    CrestronEnvironment.Sleep(100);
+			//    trilist.SetBool(joinMap.CopyFilesSuccesfulFb.JoinNumber, false);
+			//}, null);
 
 
 			//RecordingSpaceAvailableChanged += (o, a) => UpdateAvailableSpace(trilist, joinMap);
@@ -426,66 +407,109 @@ namespace OneBeyondAutomateVxEpi
 			{
 				if (!a.DeviceOnLine) return;
 
-				//trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
+				if (LoginSuccessfulFeedback != null)
+					LoginSuccessfulFeedback.FireUpdate();
 
-				UpdateFeedbacks();
+				if (AutoSwitchIsOnFeedback != null)
+					AutoSwitchIsOnFeedback.FireUpdate();
+
+				if (RecordIsOnFeedback != null)
+					RecordIsOnFeedback.FireUpdate();
+
+				if (IsoRecordIsOnFeedback != null)
+					IsoRecordIsOnFeedback.FireUpdate();
+
+				if (OutputIsOnFeedback != null)
+					OutputIsOnFeedback.FireUpdate();
+
+				if (StreamIsOnFeedback != null)
+					StreamIsOnFeedback.FireUpdate();
+
+				if (CamerasCountFeedback != null)
+					CamerasCountFeedback.FireUpdate();
+
+				if (CameraAddressFeedback != null)
+					CameraAddressFeedback.FireUpdate();
+
+				if (LayoutsCountFeedback != null)
+					LayoutsCountFeedback.FireUpdate();
+
+				if (CurrentLayoutIdFeedback != null)
+					CurrentLayoutIdFeedback.FireUpdate();
+
+				if (CurrentLayoutNameFeedback != null)
+					CurrentLayoutNameFeedback.FireUpdate();
+
+				if (RoomConfigsCountFeedback != null)
+					RoomConfigsCountFeedback.FireUpdate();
+
+				if (CurrentRoomConfigIdFeedback != null)
+					CurrentRoomConfigIdFeedback.FireUpdate();
+
+				if (CurrentRoomConfigNameFeedback != null)
+					CurrentRoomConfigNameFeedback.FireUpdate();
+
+				if (ScenariosCountFeedback != null)
+					ScenariosCountFeedback.FireUpdate();
+
+				if (CurrentScenarioIdFeedback != null)
+					CurrentScenarioIdFeedback.FireUpdate();
+
+				if (CurrentScenarioNameFeedback != null)
+					CurrentScenarioNameFeedback.FireUpdate();
 			};
 		}
 
 		private void LinkAutoSwitchToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
 			trilist.SetSigFalseAction(joinMap.GetAutoSwitchStatus.JoinNumber, GetAutoSwitchStatus);
-
 			trilist.SetSigFalseAction(joinMap.AutoSwitchOn.JoinNumber, () => SetAutoSwitch(true));
-			AutoSwitchIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.AutoSwitchOn.JoinNumber]);
-
 			trilist.SetSigFalseAction(joinMap.AutoSwitchOff.JoinNumber, () => SetAutoSwitch(false));
+
+			AutoSwitchIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.AutoSwitchOn.JoinNumber]);
 			AutoSwitchIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.AutoSwitchOff.JoinNumber]);
 		}
 
 		private void LinkRecordToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
 			trilist.SetSigFalseAction(joinMap.GetRecordStatus.JoinNumber, GetRecordStatus);
-			
 			trilist.SetSigFalseAction(joinMap.RecordStart.JoinNumber, () => SetRecord(ERecordOperation.Start));
-			RecordIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.RecordStart.JoinNumber]);
-
 			trilist.SetSigFalseAction(joinMap.RecordStop.JoinNumber, () => SetRecord(ERecordOperation.Stop));
-			RecordIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.RecordStop.JoinNumber]);
-
 			trilist.SetSigFalseAction(joinMap.RecordPause.JoinNumber, () => SetRecord(ERecordOperation.Pause));
+
+			RecordIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.RecordStart.JoinNumber]);
+			RecordIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.RecordStop.JoinNumber]);
 		}
 
 		private void LinkIsoRecordToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
 			trilist.SetSigFalseAction(joinMap.GetIsoRecordStatus.JoinNumber, GetIsoRecordStatus);
-			
 			trilist.SetSigFalseAction(joinMap.IsoRecordOn.JoinNumber, () => SetIsoRecord(true));
-			IsoRecordIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.IsoRecordOn.JoinNumber]);
-
 			trilist.SetSigFalseAction(joinMap.IsoRecordOff.JoinNumber, () => SetIsoRecord(false));
+
+			IsoRecordIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.IsoRecordOn.JoinNumber]);
 			IsoRecordIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.IsoRecordOff.JoinNumber]);
 		}
 
-		private void LinkStreamAndOutputToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		private void LinkOutputToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			trilist.SetSigFalseAction(joinMap.GetOutputStatus.JoinNumber, GetOutputStatus);
+			trilist.SetSigFalseAction(joinMap.OutputOn.JoinNumber, () => SetOutput(true));
+			trilist.SetSigFalseAction(joinMap.OutputOff.JoinNumber, () => SetOutput(false));
+
+			OutputIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.OutputOn.JoinNumber]);
+			OutputIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.OutputOff.JoinNumber]);
+		}
+
+		private void LinkStreamToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
 			// stream
 			trilist.SetSigFalseAction(joinMap.GetStreamStatus.JoinNumber, GetStreamStatus);
-			
 			trilist.SetSigFalseAction(joinMap.StreamOn.JoinNumber, () => SetStream(true));
-			StreamIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.StreamOn.JoinNumber]);
-
 			trilist.SetSigFalseAction(joinMap.StreamOff.JoinNumber, () => SetStream(false));
+
+			StreamIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.StreamOn.JoinNumber]);
 			StreamIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.StreamOff.JoinNumber]);
-
-			// output
-			trilist.SetSigFalseAction(joinMap.GetOutputStatus.JoinNumber, GetOutputStatus);
-
-			trilist.SetSigFalseAction(joinMap.OutputOn.JoinNumber, () => SetOutput(true));
-			OutputIsOnFeedback.LinkInputSig(trilist.BooleanInput[joinMap.OutputOn.JoinNumber]);
-
-			trilist.SetSigFalseAction(joinMap.OutputOff.JoinNumber, () => SetOutput(false));
-			OutputIsOnFeedback.LinkComplementInputSig(trilist.BooleanInput[joinMap.OutputOff.JoinNumber]);
 		}
 
 		private void LinkCamerasToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
@@ -494,20 +518,10 @@ namespace OneBeyondAutomateVxEpi
 			trilist.SetSigFalseAction(joinMap.GetCameras.JoinNumber, GetCameras);
 			trilist.SetUShortSigAction(joinMap.ChangeCamera.JoinNumber, (c) => SetCamera(c));
 
-			CamerasCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfCameras.JoinNumber]);			
+			CamerasCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfCameras.JoinNumber]);
 			CameraAddressFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeCamera.JoinNumber]);
 
-			//var joinBase = joinMap.CameraNames.JoinNumber;
-			//var joinSpan = joinMap.CameraNames.JoinSpan;
-
-			//for (var i = 0; i <= joinSpan; i++)
-			//{
-			//    var join = (uint)(joinBase + i);
-			//    CameraNamesFeedback.Add(new StringFeedback((i+1).ToString(), string.Empty));
-			//    Debug.Console(AutomateVxDebug.Verbose, this, "LinkCamerasToApi: joinBase {0}, joinSpan {1}, join {2}",
-			//        joinBase, joinSpan, join);
-			//    CameraNamesFeedback[i].LinkInputSig(trilist.StringInput[join]);
-			//}
+			CamerasChanged += (o, a) => OnCamerasChanged(trilist, joinMap);
 		}
 
 		private void LinkLayoutsToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
@@ -519,6 +533,8 @@ namespace OneBeyondAutomateVxEpi
 			LayoutsCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfLayouts.JoinNumber]);
 			CurrentLayoutIdFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeLayout.JoinNumber]);
 			CurrentLayoutNameFeedback.LinkInputSig(trilist.StringInput[joinMap.CurrentLayoutName.JoinNumber]);
+
+			LayoutsChanged += (o, a) => OnLayoutsChanged(trilist, joinMap);
 		}
 
 		private void LinkRoomConfigToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
@@ -529,146 +545,23 @@ namespace OneBeyondAutomateVxEpi
 			RoomConfigsCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfRoomConfigs.JoinNumber]);
 			CurrentRoomConfigIdFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeRoomConfig.JoinNumber]);
 			CurrentRoomConfigNameFeedback.LinkInputSig(trilist.StringInput[joinMap.CurrentRoomConfigName.JoinNumber]);
+
+			RoomConfigsChanged += (o, a) => OnRoomConfigsChanged(trilist, joinMap);
 		}
 
 		private void LinkScenariosToApi(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
 		{
 			trilist.SetUShortSigAction(joinMap.ChangeScenario.JoinNumber, (s) => SetScenario(s));
-			
+
 			ScenariosCountFeedback.LinkInputSig(trilist.UShortInput[joinMap.NumberOfScenarios.JoinNumber]);
 			CurrentScenarioIdFeedback.LinkInputSig(trilist.UShortInput[joinMap.ChangeScenario.JoinNumber]);
 			CurrentScenarioNameFeedback.LinkInputSig(trilist.StringInput[joinMap.CurrentScenarioName.JoinNumber]);
+
+			ScenariosChanged += (o, a) => OnScenariosChanged(trilist, joinMap);
 		}
-
-		private void SetInitialFbValues(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
-		{
-			UpdateCurrentLayout(trilist, joinMap);
-			UpdateLayoutNames(trilist, joinMap);
-			UpdateRoomConfig(trilist, joinMap);
-			UpdateRoomConfigNames(trilist, joinMap);
-			UpdateCameras(trilist, joinMap);
-			UpdateAvailableSpace(trilist, joinMap);
-		}
-
-
-		private void UpdateCurrentLayout(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
-		{
-			if (Layouts == null)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateCurrentLayout: Layout or Layout.Id is null");
-				return;
-			}
-
-			var c = Convert.ToChar(CurrentLayout.Id);
-			var index = (int) c;
-			trilist.SetUshort(joinMap.ChangeLayout.JoinNumber, (ushort)index);
-		}
-
-		private void UpdateLayoutNames(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
-		{
-			trilist.SetUshort(joinMap.NumberOfLayouts.JoinNumber, (ushort)Layouts.Count);
-
-			if (Layouts == null)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateLayoutNames: Layouts is null");
-				return;
-			}
-
-
-			if (Layouts.Count == 0)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateLayoutNames: Layouts.Count == 0");
-				return;
-			}
-
-			for (uint i = 0; i < joinMap.LayoutNames.JoinSpan; i++)
-			{
-				var name = "";
-
-				if (Layouts.Count < i - 1)
-					name = Layouts[(int)i].Name;
-
-				trilist.SetString(joinMap.LayoutNames.JoinNumber + i, name);
-			}
-		}
-
-		private void UpdateRoomConfig(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
-		{
-			
-		}
-
-		private void UpdateRoomConfigNames(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
-		{
-			if (RoomConfigs == null)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateRoomConfigNames: RoomConfig is null");
-				return;
-			}
-
-			trilist.SetUshort(joinMap.NumberOfRoomConfigs.JoinNumber, (ushort)RoomConfigs.Count);
-
-			if (RoomConfigs.Count == 0)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateRoomConfigNames: RoomConfigs.Count == 0");
-				return;
-			}
-
-			for (uint i = 0; i < joinMap.RoomConfigNames.JoinSpan; i++)
-			{
-				var name = "";
-
-				if (RoomConfigs.Count < i - 1)
-					name = RoomConfigs[(int)i].Name;
-
-				trilist.SetString(joinMap.RoomConfigNames.JoinNumber + i, name);
-			}
-		}
-
-		private void UpdateCameras(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
-		{
-			if (Cameras == null)
-			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateCameras: Cameras is null");
-				return;
-			}
-
-			trilist.SetUshort(joinMap.NumberOfCameras.JoinNumber, (ushort)Cameras.Count);
-
-			if (Cameras.Count == 0) return;
-
-			var joinBase = joinMap.CameraNames.JoinNumber;
-			var joinSpan = joinMap.CameraNames.JoinSpan;
-
-			foreach (var camera in Cameras)
-			{
-				var join = joinBase + camera.Id - 1;
-				Debug.Console(AutomateVxDebug.Verbose, this, "UpdateCameras: id {0}, model {1}, IP {2}, AsPtz {3}",
-					camera.Id, camera.Model, camera.Ip, camera.AsPt);
-				trilist.SetString((uint)join, camera.Model);		
-			}
-		}
-
-		private void UpdateAvailableSpace(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
-		{
-			//if (RecordingSpace == null || RecordingSpace.AvailableGigabytes == null || RecordingSpace.TotalGigabytes == null)
-			//{
-			//    Debug.Console(AutomateVxDebug.Verbose, this, "UpdateAvailableSpace: RecordingSpace is null");
-			//    return;
-			//}
-
-			//var availableSpace = System.Convert.ToUInt16(RecordingSpace.AvailableGigabytes);
-
-			//trilist.SetUshort(joinMap.StorageSpaceAvailableGb.JoinNumber, (ushort)availableSpace);
-
-			//var totalSpace = System.Convert.ToUInt16(RecordingSpace.TotalGigabytes);
-
-			//trilist.SetUshort(joinMap.StorageSpaceTotalGb.JoinNumber, (ushort)totalSpace);
-		}
-
 
 		#endregion
 
-		
 		private void OnResponseReceived(object sender, GenericClientResponseEventArgs args)
 		{
 			try
@@ -683,308 +576,406 @@ namespace OneBeyondAutomateVxEpi
 				switch (request)
 				{
 					case "get-token":
-					{
-						var response = ApiResponseParser.ParseTokenResponse(content);
-						if (response.Status == "OK")
 						{
-							Token = response.Token;
-							ResponseSuccessMessage = response.Message;
-							return;
-						}
-						
-						// if not OK, clear the token
-						ResponseErrorMessage = response.Error;
-						ClearToken();
+							var response = ApiResponseParser.ParseTokenResponse(content);
+							if (response.Status == "OK")
+							{
+								Token = response.Token;
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
 
-						break;
-					}
+							// if not OK, clear the token
+							ResponseErrorMessage = response.Error;
+							ClearToken();
+
+							break;
+						}
 					case "autoswitchstatus":
-					{
-						var response = ApiResponseParser.ParseResultResponse(content);
-						if (response.Status == "OK")
 						{
-							Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseRecieved: 'autoswitchstatus' results {0}", response.Results.ToString());
-							AutoSwitchIsOn = (response.Results == true);
-							ResponseSuccessMessage = response.Message;
-							return;
-						}
+							var response = ApiResponseParser.ParseResultResponse(content);
+							if (response.Status == "OK")
+							{
+								Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseRecieved: 'autoswitchstatus' results {0}", response.Results.ToString());
+								AutoSwitchIsOn = (response.Results == true);
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
 
-						ResponseErrorMessage = response.Error;
-							
-						break;
-					}
+							ResponseErrorMessage = response.Error;
+
+							break;
+						}
 					case "startautoswitch":
 					case "stopautoswitch":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							GetAutoSwitchStatus();
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								GetAutoSwitchStatus();
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "outputstatus":
-					{
-						var response = ApiResponseParser.ParseResultResponse(content);
-						if (response.Status == "OK")
 						{
-							OutputIsOn = response.Results;
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseResultResponse(content);
+							if (response.Status == "OK")
+							{
+								OutputIsOn = response.Results;
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "startouput":
 					case "stopoutput":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							GetOutputStatus();
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								GetOutputStatus();
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "streamstatus":
-					{
-						var response = ApiResponseParser.ParseResultResponse(content);
-						if (response.Status == "OK")
 						{
-							StreamIsOn = response.Results;
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseResultResponse(content);
+							if (response.Status == "OK")
+							{
+								StreamIsOn = response.Results;
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "startstream":
 					case "stopstream":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							GetStreamStatus();
-							return;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								GetStreamStatus();
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "recordstatus":
-					{
-						var response = ApiResponseParser.ParseRecordStatusResponse(content);
-						if (response.Status == "OK")
 						{
-							RecordIsOn = (response.RecordState != 1);
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRecordStatusResponse(content);
+							if (response.Status == "OK")
+							{
+								RecordIsOn = (response.RecordState != 1);
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "isorecordstatus":
-					{
-						var response = ApiResponseParser.ParseResultResponse(content);
-						if (response.Status == "OK")
 						{
-							IsoRecordIsOn = response.Results;
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseResultResponse(content);
+							if (response.Status == "OK")
+							{
+								IsoRecordIsOn = response.Results;
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "getcameras":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							Cameras = response.Cameras;
-							CamerasCountFeedback.FireUpdate();
-							UpdateCameras(_trilist, _joinMap);
-							ResponseSuccessMessage = response.Message;
-							return;
-						}
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								Cameras = response.Cameras;
+								CamerasCountFeedback.FireUpdate();
 
-						ResponseErrorMessage = response.Error;
-						break;
-					}
+								var handler = CamerasChanged;
+								if (handler != null)
+								{
+									handler(this, null);
+								}
+
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+							break;
+						}
 					case "camerastatus":
-					{
-						var response = ApiResponseParser.ParseCameraAddressResponse(content);
-						if (response.Status == "OK")
 						{
-							CameraAddress = Convert.ToInt16(response.Address);
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseCameraAddressResponse(content);
+							if (response.Status == "OK")
+							{
+								CameraAddress = Convert.ToInt16(response.Address);
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "manualswitchcamera":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							GetCameraStatus();
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								GetCameraStatus();
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "getlayouts":
-					{
-						var response = ApiResponseParser.ParseLayoutsResponse(content);
-						if (response.Status == "OK")
 						{
-							Layouts = response.Layouts;
-							LayoutsCountFeedback.FireUpdate();
-							UpdateLayoutNames(_trilist, _joinMap);
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseLayoutsResponse(content);
+							if (response.Status == "OK")
+							{
+								Layouts = response.Layouts;
+								LayoutsCountFeedback.FireUpdate();
+
+								var handler = LayoutsChanged;
+								if (handler != null)
+								{
+									handler(this, null);
+								}
+
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "layoutstatus":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							CurrentLayout = response.Layout;
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								CurrentLayout = response.Layout;
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "changelayout":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							GetLayoutStatus();
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								GetLayoutStatus();
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "getroomconfigs":
-					{
-						var response = ApiResponseParser.ParseRoomConfigsResponse(content);
-						if (response.Status == "OK")
 						{
-							RoomConfigs = response.RoomConfigs;
-							RoomConfigsCountFeedback.FireUpdate();
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRoomConfigsResponse(content);
+							if (response.Status == "OK")
+							{
+								RoomConfigs = response.RoomConfigs;
+								RoomConfigsCountFeedback.FireUpdate();
+
+								var handler = RoomConfigsChanged;
+								if (handler != null)
+								{
+									handler(this, null);
+								}
+
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "roomconfigstatus":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							CurrentRoomConfig = response.RoomConfig;
-							ResponseSuccessMessage = response.Message;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								CurrentRoomConfig = response.RoomConfig;
+								ResponseSuccessMessage = response.Message;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "getscenarios":
-					{
-						var response = ApiResponseParser.ParseScenariosResponse(content);
-						if (response.Status == "OK")
 						{
-							Scenarios = response.Scenarios;
-							ScenariosCountFeedback.FireUpdate();
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseScenariosResponse(content);
+							if (response.Status == "OK")
+							{
+								Scenarios = response.Scenarios;
+								ScenariosCountFeedback.FireUpdate();
+
+								var handler = ScenariosChanged;
+								if (handler != null)
+								{
+									handler(this, null);
+								}
+
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "scenariostatus":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							CurrentScenario = response.Scenario;
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								CurrentScenario = response.Scenario;
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Error;
+
+							break;
 						}
-
-						ResponseErrorMessage = response.Error;
-
-						break;
-					}
 					case "gotoscenario":
-					{
-						var response = ApiResponseParser.ParseRootResponse(content);
-						if (response.Status == "OK")
 						{
-							GetScenarioStatus();
-							ResponseSuccessMessage = response.Message;
-							return;
+							var response = ApiResponseParser.ParseRootResponse(content);
+							if (response.Status == "OK")
+							{
+								GetScenarioStatus();
+								ResponseSuccessMessage = response.Message;
+								return;
+							}
+
+							ResponseErrorMessage = response.Message;
+							break;
 						}
-
-						ResponseErrorMessage = response.Message;
-						break;
-					}
 					default:
-					{
-						ResponseCode = args.Code;
-						ResponseContent = content;
-						Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseReceived: Code = {0}, Content = {1}", ResponseCode, ResponseContent);
+						{
+							ResponseCode = args.Code;
+							ResponseContent = content;
+							Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseReceived: Code = {0}, Content = {1}", ResponseCode, ResponseContent);
 
-						break;
-					}
+							break;
+						}
 				}
 			}
 			catch (Exception ex)
 			{
+				Debug.Console(AutomateVxDebug.Notice, this, Debug.ErrorLogLevel.Error, "OnResponseReceived Exception Message for request: {0}", args.Request);
 				Debug.Console(AutomateVxDebug.Notice, this, Debug.ErrorLogLevel.Error, "OnResponseReceived Exception Message: {0}", ex.Message);
 				Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "OnResponseReceived Stack Trace: {0}", ex.StackTrace);
 				if (ex.InnerException != null) Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "OnResponseReceived Inner Exception {0}", ex.InnerException);
+			}
+		}
+
+		private void OnCamerasChanged(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			if (Cameras == null || Cameras.Count == 0)
+			{
+				Debug.Console(AutomateVxDebug.Verbose, this, "OnCamerasChanged: Cameras is null or has not entries");
+				return;
+			}
+
+			foreach (var camera in Cameras)
+			{
+				var join = (uint)(joinMap.CameraModels.JoinNumber + camera.Id) - 1;
+				var name = string.IsNullOrEmpty(camera.Model) 
+					? "" : 
+					string.Format("Camera {0} ({1})", camera.Id, camera.Model);
+
+				trilist.SetString(join, name);
+			}
+		}
+
+		private void OnLayoutsChanged(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			if (Layouts == null || Layouts.Count == 0)
+			{
+				Debug.Console(AutomateVxDebug.Verbose, this, "OnLayoutsChanged: Layouts is null or has not entries.");
+				return;
+			}
+
+			foreach (var layout in Layouts)
+			{
+				var index = ConvertIdToInt(layout.Id);
+				var join = (joinMap.LayoutNames.JoinNumber + (uint)index) - 1;
+				var name = layout.Name ?? "";
+
+				trilist.SetString(join, name);
+			}
+		}
+
+		private void OnRoomConfigsChanged(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			if (RoomConfigs == null || RoomConfigs.Count == 0)
+			{
+				Debug.Console(AutomateVxDebug.Verbose, this, "OnRoomConfigsChanged: RoomConfigs is null or has not entries.");
+				return;
+			}
+
+			foreach (var rc in RoomConfigs)
+			{
+				var join = (uint)(joinMap.RoomConfigNames.JoinNumber + rc.Id) - 1;
+				var name = rc.Name ?? "";
+
+				trilist.SetString(join, name);
+			}
+		}
+
+		private void OnScenariosChanged(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
+		{
+			if (Scenarios == null || Scenarios.Count == 0)
+			{
+				Debug.Console(AutomateVxDebug.Verbose, this, "OnScenariosChanged: Scenarios is null or has not entries.");
+				return;
+			}
+
+			foreach (var scenario in Scenarios)
+			{
+				var join = (uint)(joinMap.ScenarioNames.JoinNumber + scenario.Id) - 1;
+				var name = scenario.Name ?? "";
+
+				trilist.SetString(join, name);
 			}
 		}
 
@@ -1047,10 +1038,10 @@ namespace OneBeyondAutomateVxEpi
 		/// <param name="state">bool</param>
 		public void SetAutoSwitch(bool state)
 		{
-			var url = state 
-				? string.Format("{0}/StartAutoSwitch", ApiPath) 
+			var url = state
+				? string.Format("{0}/StartAutoSwitch", ApiPath)
 				: string.Format("{0}/StopAutoSwitch", ApiPath);
-			
+
 			_client.SendRequest("POST", url, string.Empty);
 		}
 
@@ -1112,7 +1103,7 @@ namespace OneBeyondAutomateVxEpi
 		/// <param name="state"></param>
 		public void SetIsoRecord(bool state)
 		{
-			var url = (state) 
+			var url = (state)
 				? string.Format("{0}/StartISORecord", ApiPath)
 				: string.Format("{0}/StopISORecord", ApiPath);
 
@@ -1169,7 +1160,7 @@ namespace OneBeyondAutomateVxEpi
 		public void GetLayouts()
 		{
 			var url = string.Format("{0}/GetLayouts", ApiPath);
-			_client.SendRequest("POST", url, string.Empty);		
+			_client.SendRequest("POST", url, string.Empty);
 		}
 
 		/// <summary>
@@ -1191,7 +1182,7 @@ namespace OneBeyondAutomateVxEpi
 			if (layout < 1 || layout > 26)
 				return;
 
-			var c = ConvertLayoutIdToString(layout);
+			var c = ConvertIdToString(layout);
 
 			var url = string.Format("{0}/ChangeLayout", ApiPath);
 			var jo = new
@@ -1202,15 +1193,15 @@ namespace OneBeyondAutomateVxEpi
 			_client.SendRequest("POST", url, content);
 		}
 
-		private char ConvertLayoutIdToString(int id)
+		private char ConvertIdToString(int id)
 		{
 			return (char)(id + 64);
 		}
 
-		private int ConvertLayoutIdToInt()
+		private int ConvertIdToInt(string id)
 		{
-			var id = CurrentLayout.Id.ToCharArray();
-			return Convert.ToInt16(id[0]) - 64;
+			var i = id.ToCharArray();
+			return Convert.ToInt16(i[0]) - 64;
 		}
 
 		/// <summary>

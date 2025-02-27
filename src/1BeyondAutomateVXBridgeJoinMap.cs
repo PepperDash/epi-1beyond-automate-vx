@@ -721,8 +721,8 @@ namespace OneBeyondAutomateVxEpi
 				JoinType = eJoinType.Serial
 			});
 
-		[JoinName("CameraNames")]
-		public JoinDataComplete CameraNames = new JoinDataComplete(
+		[JoinName("CameraModels")]
+		public JoinDataComplete CameraModels = new JoinDataComplete(
 			new JoinData
 			{
 				JoinNumber = 31,
@@ -745,6 +745,20 @@ namespace OneBeyondAutomateVxEpi
 			new JoinMetadata
 			{
 				Description = "Name of each layout [A-Z]",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		[JoinName("ScenarioNames")]
+		public JoinDataComplete ScenarioNames = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 81,
+				JoinSpan = 20
+			},
+			new JoinMetadata
+			{
+				Description = "Name of each scenario, up-to 20",
 				JoinCapabilities = eJoinCapabilities.ToSIMPL,
 				JoinType = eJoinType.Serial
 			});

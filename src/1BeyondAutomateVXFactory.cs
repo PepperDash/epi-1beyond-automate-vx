@@ -17,7 +17,7 @@ namespace OneBeyondAutomateVxEpi
         {
             MinimumEssentialsFrameworkVersion = "1.12.8";
 
-            TypeNames = new List<string>() { "oneBeyondAutomateVx" };
+            TypeNames = new List<string> { "oneBeyondAutomateVx" };
         }
         
 		/// <summary>
