@@ -869,6 +869,11 @@ namespace OneBeyondAutomateVxEpi
 							{
 								CurrentScenario = response.Scenario;
 								ResponseSuccessMessage = response.Message;
+
+								GetAutoSwitchStatus();
+								GetOutputStatus();
+								GetStreamStatus();
+
 								return;
 							}
 
