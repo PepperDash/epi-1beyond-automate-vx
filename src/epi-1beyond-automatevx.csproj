@@ -103,7 +103,6 @@
     <Compile Include="1BeyondAutomateVXConfigObject.cs" />
     <Compile Include="1BeyondAutomateVxDebug.cs" />
     <Compile Include="1BeyondAutomateVXFactory.cs" />
-    <Compile Include="1BeyondAutomateVXDeviceProperties.cs" />
     <Compile Include="ApiObjects\ApiResponseParser.cs" />
     <Content Include="CommandResponseReferences.txt" />
     <Compile Include="GenericClients\GenericClientHelpers.cs" />
