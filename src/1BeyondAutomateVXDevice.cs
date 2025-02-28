@@ -365,7 +365,7 @@ namespace OneBeyondAutomateVxEpi
 			{
 				if (!a.DeviceOnLine) return;
 
-				UpdateFeedbacks();
+				Poll();
 			};
 		}
 
@@ -487,56 +487,56 @@ namespace OneBeyondAutomateVxEpi
 
 		private void UpdateFeedbacks()
 		{
-			if (LoginSuccessfulFeedback != null)
-				LoginSuccessfulFeedback.FireUpdate();
+			//if (LoginSuccessfulFeedback != null)
+			//    LoginSuccessfulFeedback.FireUpdate();
 
-			if (AutoSwitchIsOnFeedback != null)
-				AutoSwitchIsOnFeedback.FireUpdate();
+			//if (AutoSwitchIsOnFeedback != null)
+			//    AutoSwitchIsOnFeedback.FireUpdate();
 
-			if (RecordIsOnFeedback != null)
-				RecordIsOnFeedback.FireUpdate();
+			//if (RecordIsOnFeedback != null)
+			//    RecordIsOnFeedback.FireUpdate();
 
-			if (IsoRecordIsOnFeedback != null)
-				IsoRecordIsOnFeedback.FireUpdate();
+			//if (IsoRecordIsOnFeedback != null)
+			//    IsoRecordIsOnFeedback.FireUpdate();
 
-			if (OutputIsOnFeedback != null)
-				OutputIsOnFeedback.FireUpdate();
+			//if (OutputIsOnFeedback != null)
+			//    OutputIsOnFeedback.FireUpdate();
 
-			if (StreamIsOnFeedback != null)
-				StreamIsOnFeedback.FireUpdate();
+			//if (StreamIsOnFeedback != null)
+			//    StreamIsOnFeedback.FireUpdate();
 
-			if (CamerasCountFeedback != null)
-				CamerasCountFeedback.FireUpdate();
+			//if (CamerasCountFeedback != null)
+			//    CamerasCountFeedback.FireUpdate();
 
-			if (CameraAddressFeedback != null)
-				CameraAddressFeedback.FireUpdate();
+			//if (CameraAddressFeedback != null)
+			//    CameraAddressFeedback.FireUpdate();
 
-			if (LayoutsCountFeedback != null)
-				LayoutsCountFeedback.FireUpdate();
+			//if (LayoutsCountFeedback != null)
+			//    LayoutsCountFeedback.FireUpdate();
 
-			if (CurrentLayoutIdFeedback != null)
-				CurrentLayoutIdFeedback.FireUpdate();
+			//if (CurrentLayoutIdFeedback != null)
+			//    CurrentLayoutIdFeedback.FireUpdate();
 
-			if (CurrentLayoutNameFeedback != null)
-				CurrentLayoutNameFeedback.FireUpdate();
+			//if (CurrentLayoutNameFeedback != null)
+			//    CurrentLayoutNameFeedback.FireUpdate();
 
-			if (RoomConfigsCountFeedback != null)
-				RoomConfigsCountFeedback.FireUpdate();
+			//if (RoomConfigsCountFeedback != null)
+			//    RoomConfigsCountFeedback.FireUpdate();
 
-			if (CurrentRoomConfigIdFeedback != null)
-				CurrentRoomConfigIdFeedback.FireUpdate();
+			//if (CurrentRoomConfigIdFeedback != null)
+			//    CurrentRoomConfigIdFeedback.FireUpdate();
 
-			if (CurrentRoomConfigNameFeedback != null)
-				CurrentRoomConfigNameFeedback.FireUpdate();
+			//if (CurrentRoomConfigNameFeedback != null)
+			//    CurrentRoomConfigNameFeedback.FireUpdate();
 
-			if (ScenariosCountFeedback != null)
-				ScenariosCountFeedback.FireUpdate();
+			//if (ScenariosCountFeedback != null)
+			//    ScenariosCountFeedback.FireUpdate();
 
-			if (CurrentScenarioIdFeedback != null)
-				CurrentScenarioIdFeedback.FireUpdate();
+			//if (CurrentScenarioIdFeedback != null)
+			//    CurrentScenarioIdFeedback.FireUpdate();
 
-			if (CurrentScenarioNameFeedback != null)
-				CurrentScenarioNameFeedback.FireUpdate();
+			//if (CurrentScenarioNameFeedback != null)
+			//    CurrentScenarioNameFeedback.FireUpdate();
 		}
 
 		#endregion
