@@ -236,7 +236,7 @@ namespace OneBeyondAutomateVxEpi
 		/// <param name="name"></param>
 		/// <param name="config"></param>
 		/// <param name="client"></param>
-		public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVXConfigObject config, IRestfulComms client)
+		public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVxConfig config, IRestfulComms client)
 			: base(key, name)
 		{
 			Debug.Console(AutomateVxDebug.Trace, this, "Constructing new {0} instance", name);

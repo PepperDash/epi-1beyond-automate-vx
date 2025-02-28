@@ -6,14 +6,10 @@ namespace OneBeyondAutomateVxEpi
 	/// <summary>
 	/// Plugin device configuration object
 	/// </summary>
-	public class OneBeyondAutomateVXConfigObject
+	public class OneBeyondAutomateVxConfig
 	{
 		[JsonProperty("control")]
 		public EssentialsControlPropertiesConfig Control { get; set; }
-
-		public OneBeyondAutomateVXConfigObject()
-		{
-		}
 	}
 
 }

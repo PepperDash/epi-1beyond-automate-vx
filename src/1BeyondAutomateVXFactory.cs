@@ -15,7 +15,7 @@ namespace OneBeyondAutomateVxEpi
 		/// </summary>
         public OneBeyoneAutomateVxFactory()
         {
-            MinimumEssentialsFrameworkVersion = "1.12.8";
+            MinimumEssentialsFrameworkVersion = "1.16.1";
 
             TypeNames = new List<string> { "oneBeyondAutomateVx" };
         }
@@ -28,7 +28,7 @@ namespace OneBeyondAutomateVxEpi
             Debug.Console(AutomateVxDebug.Notice, "[{0}] Factory Attempting to create new device from type: {1}", dc.Key, dc.Type);
 
             // get the plugin device properties configuration object & check for null 
-            var propertiesConfig = dc.Properties.ToObject<OneBeyondAutomateVXConfigObject>();
+            var propertiesConfig = dc.Properties.ToObject<OneBeyondAutomateVxConfig>();
             if (propertiesConfig == null)
             {
                 Debug.Console(AutomateVxDebug.Trace, "[{0}] Factory: failed to read properties config for {1}", dc.Key, dc.Name);
