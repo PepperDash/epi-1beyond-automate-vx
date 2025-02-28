@@ -32,7 +32,8 @@ namespace OneBeyondAutomateVxEpi
 			{
 				_responseCode = value;
 				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseCode: {0}", _responseCode);
-				//ResponseCodeFeedback.FireUpdate();
+				if(ResponseCodeFeedback != null)
+					ResponseCodeFeedback.FireUpdate();
 			}
 		}
 
@@ -43,7 +44,8 @@ namespace OneBeyondAutomateVxEpi
 			{
 				_responseContent = value;
 				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseContent: {0}", _responseContent);
-				//ResponseContentFeedback.FireUpdate();
+				if(ResponseContentFeedback != null)
+					ResponseContentFeedback.FireUpdate();
 			}
 		}
 
@@ -334,8 +336,11 @@ namespace OneBeyondAutomateVxEpi
 			Debug.Console(AutomateVxDebug.Trace, "Linking to Bridge Type {0}", GetType().Name);
 
 			// Linked Feedbacks
-			//ResponseCodeFeedback.LinkInputSig(trilist.UShortInput[0]);
-			//ResponseContentFeedback.LinkInputSig(trilist.StringInput[0]);
+			if(ResponseCodeFeedback != null)
+				ResponseCodeFeedback.LinkInputSig(trilist.UShortInput[0]);
+			if(ResponseContentFeedback != null)
+				ResponseContentFeedback.LinkInputSig(trilist.StringInput[0]);
+
 			ResponseSuccessMessageFeedback.LinkInputSig(trilist.StringInput[joinMap.SuccessMessage.JoinNumber]);
 			ResponseErrorMessageFeedback.LinkInputSig(trilist.StringInput[joinMap.ErrorMessage.JoinNumber]);
 
@@ -360,56 +365,7 @@ namespace OneBeyondAutomateVxEpi
 			{
 				if (!a.DeviceOnLine) return;
 
-				if (LoginSuccessfulFeedback != null)
-					LoginSuccessfulFeedback.FireUpdate();
-
-				if (AutoSwitchIsOnFeedback != null)
-					AutoSwitchIsOnFeedback.FireUpdate();
-
-				if (RecordIsOnFeedback != null)
-					RecordIsOnFeedback.FireUpdate();
-
-				if (IsoRecordIsOnFeedback != null)
-					IsoRecordIsOnFeedback.FireUpdate();
-
-				if (OutputIsOnFeedback != null)
-					OutputIsOnFeedback.FireUpdate();
-
-				if (StreamIsOnFeedback != null)
-					StreamIsOnFeedback.FireUpdate();
-
-				if (CamerasCountFeedback != null)
-					CamerasCountFeedback.FireUpdate();
-
-				if (CameraAddressFeedback != null)
-					CameraAddressFeedback.FireUpdate();
-
-				if (LayoutsCountFeedback != null)
-					LayoutsCountFeedback.FireUpdate();
-
-				if (CurrentLayoutIdFeedback != null)
-					CurrentLayoutIdFeedback.FireUpdate();
-
-				if (CurrentLayoutNameFeedback != null)
-					CurrentLayoutNameFeedback.FireUpdate();
-
-				if (RoomConfigsCountFeedback != null)
-					RoomConfigsCountFeedback.FireUpdate();
-
-				if (CurrentRoomConfigIdFeedback != null)
-					CurrentRoomConfigIdFeedback.FireUpdate();
-
-				if (CurrentRoomConfigNameFeedback != null)
-					CurrentRoomConfigNameFeedback.FireUpdate();
-
-				if (ScenariosCountFeedback != null)
-					ScenariosCountFeedback.FireUpdate();
-
-				if (CurrentScenarioIdFeedback != null)
-					CurrentScenarioIdFeedback.FireUpdate();
-
-				if (CurrentScenarioNameFeedback != null)
-					CurrentScenarioNameFeedback.FireUpdate();
+				UpdateFeedbacks();
 			};
 		}
 
@@ -527,6 +483,60 @@ namespace OneBeyondAutomateVxEpi
 			CurrentScenarioNameFeedback.LinkInputSig(trilist.StringInput[joinMap.CurrentScenarioName.JoinNumber]);
 
 			ScenariosChanged += (o, a) => OnScenariosChanged(trilist, joinMap);
+		}
+
+		private void UpdateFeedbacks()
+		{
+			if (LoginSuccessfulFeedback != null)
+				LoginSuccessfulFeedback.FireUpdate();
+
+			if (AutoSwitchIsOnFeedback != null)
+				AutoSwitchIsOnFeedback.FireUpdate();
+
+			if (RecordIsOnFeedback != null)
+				RecordIsOnFeedback.FireUpdate();
+
+			if (IsoRecordIsOnFeedback != null)
+				IsoRecordIsOnFeedback.FireUpdate();
+
+			if (OutputIsOnFeedback != null)
+				OutputIsOnFeedback.FireUpdate();
+
+			if (StreamIsOnFeedback != null)
+				StreamIsOnFeedback.FireUpdate();
+
+			if (CamerasCountFeedback != null)
+				CamerasCountFeedback.FireUpdate();
+
+			if (CameraAddressFeedback != null)
+				CameraAddressFeedback.FireUpdate();
+
+			if (LayoutsCountFeedback != null)
+				LayoutsCountFeedback.FireUpdate();
+
+			if (CurrentLayoutIdFeedback != null)
+				CurrentLayoutIdFeedback.FireUpdate();
+
+			if (CurrentLayoutNameFeedback != null)
+				CurrentLayoutNameFeedback.FireUpdate();
+
+			if (RoomConfigsCountFeedback != null)
+				RoomConfigsCountFeedback.FireUpdate();
+
+			if (CurrentRoomConfigIdFeedback != null)
+				CurrentRoomConfigIdFeedback.FireUpdate();
+
+			if (CurrentRoomConfigNameFeedback != null)
+				CurrentRoomConfigNameFeedback.FireUpdate();
+
+			if (ScenariosCountFeedback != null)
+				ScenariosCountFeedback.FireUpdate();
+
+			if (CurrentScenarioIdFeedback != null)
+				CurrentScenarioIdFeedback.FireUpdate();
+
+			if (CurrentScenarioNameFeedback != null)
+				CurrentScenarioNameFeedback.FireUpdate();
 		}
 
 		#endregion
