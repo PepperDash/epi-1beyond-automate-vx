@@ -1,0 +1,171 @@
+﻿{
+  "info": {},
+  "devices": [
+    {
+      "key": "processor",
+      "type": "cp4n",
+      "name": "Processor",
+      "group": "processor",
+      "supportedConfigModes": [
+        "compliance",
+        "essentials"
+      ],
+      "supportedSystemTypes": [
+        "hudType",
+        "presType",
+        "vtcType",
+        "custom"
+      ],
+      "supportsCompliance": true,
+      "properties": {
+        "numberOfComPorts": 6,
+        "numberOfIrPorts": 8,
+        "numberOfRelays": 8,
+        "numberOfDIOPorts": 8
+      }
+    },
+    {
+      "key": "camera-vx1",
+      "name": "AutomateVX Server",
+      "type": "oneBeyondAutomateVx",
+      "group": "pluginDevices",
+      "properties": {
+        "control": {
+          "method": "http",
+          "tcpSshProperties": {
+            "address": "172.22.46.58",
+            "port": 3579,
+            "username": "Admin",
+            "password": "AutomateVXAdmin",
+            "autoReconnect": false,
+            "autoReconnectIntervalMs": 5000
+          }
+        }
+      }
+    },
+    {
+      "key": "cameras-bridge",
+      "group": "api",
+      "type": "eiscApiAdvanced",
+      "properties": {
+        "control": {
+          "ipid": "a4",
+          "method": "ipidTcp",
+          "tcpSshProperties": {
+            "address": "127.0.0.2",
+            "port": 0
+          }
+        },
+        "devices": [
+          {
+            "deviceKey": "camera-vx1",
+            "joinStart": 501
+          }
+        ]
+      }
+    }
+  ],
+  "rooms": [],
+  "sourceLists": null,
+  "destinationLists": null,
+  "tieLines": [],
+  "joinMaps": {},
+  "global": null
+}
+
+
+[13:58:25.991]App 1:Creating device 'camera-vx1', type 'oneBeyondAutomateVx'
+[13:58:25.995]App 1:Loading 'oneBeyondAutomateVx' from Essentials Core
+[13:58:26.005]App 1:typeName = onebeyondautomatevx
+[13:58:26.009]App 1:[camera-vx1] Factory Attempting to create new device from type: oneBeyondAutomateVx
+[13:58:26.057]App 1:[camera-vx1] building Http client
+[13:58:26.075]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> GenericClientHttps:
+Key = camera-vx1-http-client
+Host = http://172.22.46.58:3579
+Port = 3579
+Username = Admin
+Password = AutomateVXAdmin
+AuthBase64 = QWRtaW46QXV0b21hdGVWWEFkbWlu
+Token =
+--------------------------------------------------
+[13:58:26.096]App 1:[camera-vx1] Constructing new AutomateVX Server instance
+[13:58:26.099]App 1:Creating device 'cameras-bridge', type 'eiscApiAdvanced'
+[13:58:26.100]App 1:Loading 'eiscApiAdvanced' from Essentials Core
+[13:58:26.100]App 1:typeName = eiscapiadvanced
+
+
+[13:58:31.598]App 1:[camera-vx1-http-client]
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/Get-Token
+content:
+requestType: Post
+authHeaderValue: QWRtaW46QXV0b21hdGVWWEFkbWlu
+OnResponseReceived: Request = Get-Token > Code = 200 | ContentString = {"status":"OK","token":"POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie"}
+--------------------------------------------------
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/AutoSwitchStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+OnResponseReceived: Request = AutoSwitchStatus > Code = 200 | ContentString = {"message":"AutoSwitching in Progress","results":true,"status":"OK"}
+--------------------------------------------------
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/OutputStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+OnResponseReceived: Request = OutputStatus > Code = 200 | ContentString = {"status":"OK","results":true,"message":"Outputting in progress"}
+--------------------------------------------------
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/GetRoomConfigs
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+OnResponseReceived: Request = GetRoomConfigs > Code = 200 | ContentString = {"status":"OK","message":"Room configs loaded successfully","roomConfigs":[{"id":1,"name":"Cheever B313"}]}
+--------------------------------------------------
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/GetLayouts
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+OnResponseReceived: Request = GetLayouts > Code = 200 | ContentString = {"status":"OK","message":"Layouts loaded successfully","layouts":[{"id":"A","name":"Full Screen"},{"id":"B","name":"Dynamic Q&A"},{"id":"C","name":"PiP"}]}
+--------------------------------------------------
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/RoomConfigStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+OnResponseReceived: Request = RoomConfigStatus > Code = 200 | ContentString = {"status":"OK","message":"Current room configuration queried successfully","roomConfig":{"id":1,"name":"Cheever B313"}}
+--------------------------------------------------
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/LayoutStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+OnResponseReceived: Request = LayoutStatus > Code = 200 | ContentString = {"status":"OK","message":"Current layout queried successfully","layout":{"id":"A","name":"Full Screen"}}
+--------------------------------------------------
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/GetCameras
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+OnResponseReceived: Request = GetCameras > Code = 200 | ContentString = {"status":"OK","message":"cameras loaded successfully","cameras":[{"id":1,"model":"i20","ip":"172.22.114.11","asPTZ":"False"},{"id":2,"model":"p12","ip":"172.22.114.12","asPTZ":"False"},{"id":3,"model":"p12","ip":"172.22.114.13","asPTZ":"False"},{"id":4,"model":"p20","ip":"172.22.114.16","asPTZ":"False"},{"id":5,"model":"p20","ip":"172.22.114.15","asPTZ":"False"},{"id":6,"model":"p12","ip":"172.22.114.17","asPTZ":"False"},{"id":7,"model":"p12","ip":"172.22.114.14","asPTZ":"False"}]}
+--------------------------------------------------
+--------------------------------------------------
+>>>>> SendRequest
+url: http://172.22.46.58:3579/api/CameraStatus
+content:
+requestType: Post
+authHeaderValue: POSxCd5KkA8JUT2DFP0yLgvsT7iU53F0Em0YpL325NLXNxYbxu2PTSWOoX0FmCie
+OnResponseReceived: Request = CameraStatus > Code = 200 | ContentString = {"status":"OK","message":"Live camera address queried successfully.","address":"6","addresses":["6"]}
+--------------------------------------------------

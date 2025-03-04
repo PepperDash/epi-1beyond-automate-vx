@@ -1,25 +1,16 @@
 ﻿using PepperDash.Essentials.Core;
 
-namespace PDT.OneBeyondAutomateVx.EPI
+namespace OneBeyondAutomateVxEpi
 {
 	/// <summary>
 	/// Plugin device Bridge Join Map
 	/// </summary>
-	/// <remarks>
-	/// Rename the class to match the device plugin being developed.  Reference Essentials JoinMaps, if one exists for the device plugin being developed
-	/// </remarks>
-	/// <see cref="PepperDash.Essentials.Core.Bridges"/>
-	/// <example>
-	/// "EssentialsPluginBridgeJoinMapTemplate" renamed to "SamsungMdcBridgeJoinMap"
-	/// </example>
 	public class OneBeyondAutomateVxBridgeJoinMap : JoinMapBaseAdvanced
 	{
 		#region Digital
 
-		// TODO [ ] Add digital joins below plugin being developed
-
-		[JoinName("AuthenticatedFB")]
-        public JoinDataComplete AuthenticatedFB = new JoinDataComplete(
+		[JoinName("Authenticate")]
+        public JoinDataComplete Authenticate = new JoinDataComplete(
 			new JoinData
 			{
 				JoinNumber = 1,
@@ -27,8 +18,8 @@ namespace PDT.OneBeyondAutomateVx.EPI
 			},
 			new JoinMetadata
 			{
-				Description = "Successfully authenticated to Automate VX server",
-				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				Description = "Authenticates with Automate VX server and reports when authenticated",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
 				JoinType = eJoinType.Digital
 			});
 
@@ -368,56 +359,69 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 JoinType = eJoinType.Digital
             });
 
-        [JoinName("CopyFiles")]
-        public JoinDataComplete CopyFiles = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 26,
-                JoinSpan = 1
-            },
-            new JoinMetadata
-            {
-                Description = "Trigger copying of files.",
-                JoinCapabilities = eJoinCapabilities.FromSIMPL,
-                JoinType = eJoinType.Digital
-            });
+		// currently not implemented, commented out to hide from JoinMap
+		//[JoinName("CopyFiles")]
+		//public JoinDataComplete CopyFiles = new JoinDataComplete(
+		//    new JoinData
+		//    {
+		//        JoinNumber = 26,
+		//        JoinSpan = 1
+		//    },
+		//    new JoinMetadata
+		//    {
+		//        Description = "Trigger copying of files.",
+		//        JoinCapabilities = eJoinCapabilities.FromSIMPL,
+		//        JoinType = eJoinType.Digital
+		//    });
 
-        [JoinName("CopyFilesSuccesfulFB")]
-        public JoinDataComplete CopyFilesSuccesfulFB = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 27,
-                JoinSpan = 1
-            },
-            new JoinMetadata
-            {
-                Description = "Pulses when copy is successful.",
-                JoinCapabilities = eJoinCapabilities.ToSIMPL,
-                JoinType = eJoinType.Digital
-            });
+		//[JoinName("CopyFilesSuccesfulFB")]
+		//public JoinDataComplete CopyFilesSuccesfulFb = new JoinDataComplete(
+		//    new JoinData
+		//    {
+		//        JoinNumber = 27,
+		//        JoinSpan = 1
+		//    },
+		//    new JoinMetadata
+		//    {
+		//        Description = "Pulses when copy is successful.",
+		//        JoinCapabilities = eJoinCapabilities.ToSIMPL,
+		//        JoinType = eJoinType.Digital
+		//    });
 
-        [JoinName("DeleteFiles")]
-        public JoinDataComplete DeleteFiles = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 27,
-                JoinSpan = 1
-            },
-            new JoinMetadata
-            {
-                Description = "Set High to have files deleted after copy files operation",
-                JoinCapabilities = eJoinCapabilities.FromSIMPL,
-                JoinType = eJoinType.Digital
-            });
+		//[JoinName("DeleteFiles")]
+		//public JoinDataComplete DeleteFiles = new JoinDataComplete(
+		//    new JoinData
+		//    {
+		//        JoinNumber = 27,
+		//        JoinSpan = 1
+		//    },
+		//    new JoinMetadata
+		//    {
+		//        Description = "Set High to have files deleted after copy files operation",
+		//        JoinCapabilities = eJoinCapabilities.FromSIMPL,
+		//        JoinType = eJoinType.Digital
+		//    });
+
+		[JoinName("GetRoomConfigs")]
+		public JoinDataComplete GetRoomConfigs = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 28,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Query for available room configs",
+				JoinCapabilities = eJoinCapabilities.FromSIMPL,
+				JoinType = eJoinType.Digital
+			});
 
         #endregion
 
 
 		#region Analog
 
-		// TODO [ ] Add analog joins below plugin being developed
-
-        [JoinName("ChangeLayout")]
+		[JoinName("ChangeLayout")]
         public JoinDataComplete ChangeLayout = new JoinDataComplete(
             new JoinData
             {
@@ -558,38 +562,69 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 JoinType = eJoinType.Analog
             });
 
-        [JoinName("StorageSpaceAvailableGB")]
-        public JoinDataComplete StorageSpaceAvailableGB = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 11,
-                JoinSpan = 1
-            },
-            new JoinMetadata
-            {
-                Description = "Reports the remaining storage space in GB",
-                JoinCapabilities = eJoinCapabilities.ToSIMPL,
-                JoinType = eJoinType.Analog
-            });
+		// currently not implemented, commented out to hide from JoinMap
+		//[JoinName("StorageSpaceAvailableGB")]
+		//public JoinDataComplete StorageSpaceAvailableGb = new JoinDataComplete(
+		//    new JoinData
+		//    {
+		//        JoinNumber = 11,
+		//        JoinSpan = 1
+		//    },
+		//    new JoinMetadata
+		//    {
+		//        Description = "Reports the remaining storage space in GB",
+		//        JoinCapabilities = eJoinCapabilities.ToSIMPL,
+		//        JoinType = eJoinType.Analog
+		//    });
 
-        [JoinName("StorageSpaceTotalGB")]
-        public JoinDataComplete StorageSpaceTotalGB = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 12,
-                JoinSpan = 1
-            },
-            new JoinMetadata
-            {
-                Description = "Reports the total storage space in GB",
-                JoinCapabilities = eJoinCapabilities.ToSIMPL,
-                JoinType = eJoinType.Analog
-            });
+		//[JoinName("StorageSpaceTotalGB")]
+		//public JoinDataComplete StorageSpaceTotalGb = new JoinDataComplete(
+		//    new JoinData
+		//    {
+		//        JoinNumber = 12,
+		//        JoinSpan = 1
+		//    },
+		//    new JoinMetadata
+		//    {
+		//        Description = "Reports the total storage space in GB",
+		//        JoinCapabilities = eJoinCapabilities.ToSIMPL,
+		//        JoinType = eJoinType.Analog
+		//    });
+
+		[JoinName("ChangeScenario")]
+		public JoinDataComplete ChangeScenario = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 13,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Specifies the desired scenario and provides feedback for current scenario.",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.Analog
+			});
+
+		[JoinName("NumberOfScenarios")]
+		public JoinDataComplete NumberOfScenarios = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 14,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Reports the number of scenarios stored on the Automate server",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Analog
+			});
 
 		#endregion
 
 
 		#region Serial
+
+
         [JoinName("ErrorMessage")]
         public JoinDataComplete ErrorMessage = new JoinDataComplete(
 			new JoinData
@@ -618,50 +653,122 @@ namespace PDT.OneBeyondAutomateVx.EPI
                 JoinType = eJoinType.Serial
             });
 
-        [JoinName("CopyFilesDestination")]
-        public JoinDataComplete CopyFilesDestination = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 3,
-                JoinSpan = 1
-            },
-            new JoinMetadata
-            {
-                Description = "The location to copy files to",
-                JoinCapabilities = eJoinCapabilities.FromSIMPL,
-                JoinType = eJoinType.Serial
-            });
+		// currently not implemented, commented out to hide from JoinMap
+		//[JoinName("CopyFilesDestination")]
+		//public JoinDataComplete CopyFilesDestination = new JoinDataComplete(
+		//    new JoinData
+		//    {
+		//        JoinNumber = 3,
+		//        JoinSpan = 1
+		//    },
+		//    new JoinMetadata
+		//    {
+		//        Description = "The location to copy files to",
+		//        JoinCapabilities = eJoinCapabilities.FromSIMPL,
+		//        JoinType = eJoinType.Serial
+		//    });
 
-        [JoinName("CopyLogDestination")]
-        public JoinDataComplete CopyLogDestination = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 3,
-                JoinSpan = 1
-            },
-            new JoinMetadata
-            {
-                Description = "The location for the log file for the copy files operation",
-                JoinCapabilities = eJoinCapabilities.FromSIMPL,
-                JoinType = eJoinType.Serial
-            });
+		//[JoinName("CopyLogDestination")]
+		//public JoinDataComplete CopyLogDestination = new JoinDataComplete(
+		//    new JoinData
+		//    {
+		//        JoinNumber = 4,
+		//        JoinSpan = 1
+		//    },
+		//    new JoinMetadata
+		//    {
+		//        Description = "The location for the log file for the copy files operation",
+		//        JoinCapabilities = eJoinCapabilities.FromSIMPL,
+		//        JoinType = eJoinType.Serial
+		//    });
 
-        [JoinName("LayoutName")]
-        public JoinDataComplete LayoutName = new JoinDataComplete(
-            new JoinData
-            {
-                JoinNumber = 5,
-                JoinSpan =  26,
-            },
-            new JoinMetadata
-            {
-                Description = "Name of each layout [A-Z]",
-                JoinCapabilities = eJoinCapabilities.ToSIMPL,
-                JoinType = eJoinType.Serial
-            });
+		[JoinName("CurrentLayoutName")]
+		public JoinDataComplete CurrentLayoutName = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 11,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Current layout name.",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.Serial
+			});
 
-        [JoinName("RoomConfigName")]
-        public JoinDataComplete RoomConfigName = new JoinDataComplete(
+		[JoinName("CurrentRoomConfigName")]
+		public JoinDataComplete CurrentRoomConfigName = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 12,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Current room config name.",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		[JoinName("CurrentScenarioName")]
+		public JoinDataComplete CurrentScenarioName = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 13,
+				JoinSpan = 1
+			},
+			new JoinMetadata
+			{
+				Description = "Current scenario name.",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		[JoinName("CameraModels")]
+		public JoinDataComplete CameraModels = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 31,
+				JoinSpan = 12
+			}, 
+			new JoinMetadata
+			{
+				Description = "Name of each camera 1-12",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		[JoinName("LayoutNames")]
+		public JoinDataComplete LayoutNames = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 51,
+				JoinSpan = 26
+			},
+			new JoinMetadata
+			{
+				Description = "Name of each layout [A-Z]",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		[JoinName("ScenarioNames")]
+		public JoinDataComplete ScenarioNames = new JoinDataComplete(
+			new JoinData
+			{
+				JoinNumber = 81,
+				JoinSpan = 20
+			},
+			new JoinMetadata
+			{
+				Description = "Name of each scenario, up-to 20",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+
+        [JoinName("RoomConfigNames")]
+        public JoinDataComplete RoomConfigNames = new JoinDataComplete(
             new JoinData
             {
                 JoinNumber = 101,
@@ -680,7 +787,6 @@ namespace PDT.OneBeyondAutomateVx.EPI
 		/// <summary>
 		/// Plugin device BridgeJoinMap constructor
 		/// </summary>
-		/// <param name="joinStart">This will be the join it starts on the EISC bridge</param>
         public OneBeyondAutomateVxBridgeJoinMap(uint joinStart)
             : base(joinStart, typeof(OneBeyondAutomateVxBridgeJoinMap))
 		{
