@@ -59,7 +59,7 @@ __If you do not make these changes to the nuspec file, the project will not gene
 <!-- START Minimum Essentials Framework Versions -->
 ### Minimum Essentials Framework Versions
 
-- 1.12.8
+- 1.16.1
 <!-- END Minimum Essentials Framework Versions -->
 <!-- START Config Example -->
 ### Config Example
@@ -69,7 +69,7 @@ __If you do not make these changes to the nuspec file, the project will not gene
     "key": "GeneratedKey",
     "uid": 1,
     "name": "GeneratedName",
-    "type": "oneBeyondAutomateVx",
+    "type": "OneBeyondAutomateVx",
     "group": "Group",
     "properties": {
         "control": "SampleValue"
@@ -78,9 +78,7 @@ __If you do not make these changes to the nuspec file, the project will not gene
 ```
 <!-- END Config Example -->
 <!-- START Supported Types -->
-### Supported Types
 
-- oneBeyondAutomateVx
 <!-- END Supported Types -->
 <!-- START Join Maps -->
 
@@ -88,24 +86,26 @@ __If you do not make these changes to the nuspec file, the project will not gene
 <!-- START Interfaces Implemented -->
 ### Interfaces Implemented
 
-- ID
+- IRestfulComms
 <!-- END Interfaces Implemented -->
 <!-- START Base Classes -->
 ### Base Classes
 
-- JoinMapBaseAdvanced
-- EventArgs
 - EssentialsBridgeableDevice
+- JoinMapBaseAdvanced
+- RootResponse
+- EventArgs
 <!-- END Base Classes -->
 <!-- START Public Methods -->
 ### Public Methods
 
-- public void GetToken()
 - public void ClearToken()
+- public void GetToken()
+- public void Poll()
 - public void GetAutoSwitchStatus()
 - public void SetAutoSwitch(bool state)
 - public void GetRecordStatus()
-- public void SetRecord(eRecordOperation operation)
+- public void SetRecord(ERecordOperation operation)
 - public void GetIsoRecordStatus()
 - public void SetIsoRecord(bool state)
 - public void GetStreamStatus()
@@ -114,21 +114,21 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - public void SetOutput(bool state)
 - public void GetLayouts()
 - public void GetLayoutStatus()
-- public void SetLayout(string layout)
+- public void SetLayout(ushort layout)
 - public void GetRoomConfigStatus()
 - public void GetRoomConfigs()
-- public void SetRoomConfig(uint id)
-- public void ForceSetRoomConfig(uint id)
+- public void SetRoomConfig(uint configId)
+- public void ForceSetRoomConfig(uint configId)
 - public void GoHome()
 - public void GetCameras()
 - public void GetCameraStatus()
-- public void SetCamera(uint address)
+- public void SetCamera(uint cameraAddress)
 - public void SetCameraPreset(uint camId, uint presetId)
 - public void SaveCameraPreset(uint camId, uint presetId)
 - public void ImportCameraPresets()
 - public void ExportCameraPresets()
 - public void CopyFiles(string dest, string logDest, bool delete)
-- public void GetStorageSpaceAvailable()
+- public void GetStorageSpaceAvailable(string driveLetters)
 - public void GetRecordingSpaceAvailable()
 - public void SetSleep()
 - public void SetWake()
@@ -136,6 +136,43 @@ __If you do not make these changes to the nuspec file, the project will not gene
 - public void SetCloseWirecast()
 - public void GetScenarios()
 - public void GetScenarioStatus()
-- public void SetScenario(uint id)
+- public void SetScenario(uint scenarioId)
+- public void SendRequest(string requestType, string path, string content)
+- public void SendRequest(RequestType requestType, string path, string content)
+- public void SendRequest(string requestType, string path, string content)
+- public void SendRequest(RequestType requestType, string path, string content)
 <!-- END Public Methods -->
 
+<!-- START Bool Feedbacks -->
+### Bool Feedbacks
+
+- LoginSuccessfulFeedback
+- AutoSwitchIsOnFeedback
+- RecordIsOnFeedback
+- IsoRecordIsOnFeedback
+- StreamIsOnFeedback
+- OutputIsOnFeedback
+<!-- END Bool Feedbacks -->
+<!-- START Int Feedbacks -->
+### Int Feedbacks
+
+- ResponseCodeFeedback
+- CameraAddressFeedback
+- CamerasCountFeedback
+- LayoutsCountFeedback
+- CurrentLayoutIdFeedback
+- RoomConfigsCountFeedback
+- CurrentRoomConfigIdFeedback
+- ScenariosCountFeedback
+- CurrentScenarioIdFeedback
+<!-- END Int Feedbacks -->
+<!-- START String Feedbacks -->
+### String Feedbacks
+
+- ResponseContentFeedback
+- ResponseSuccessMessageFeedback
+- ResponseErrorMessageFeedback
+- CurrentLayoutNameFeedback
+- CurrentRoomConfigNameFeedback
+- CurrentScenarioNameFeedback
+<!-- END String Feedbacks -->
