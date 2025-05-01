@@ -31,7 +31,7 @@ namespace OneBeyondAutomateVxEpi
 			set
 			{
 				_responseCode = value;
-				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseCode: {0}", _responseCode);
+				Debug.LogVerbose(this, "ResponseCode: {0}", _responseCode);
 				if(ResponseCodeFeedback != null)
 					ResponseCodeFeedback.FireUpdate();
 			}
@@ -43,7 +43,7 @@ namespace OneBeyondAutomateVxEpi
 			set
 			{
 				_responseContent = value;
-				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseContent: {0}", _responseContent);
+				Debug.LogVerbose(this, "ResponseContent: {0}", _responseContent);
 				if(ResponseContentFeedback != null)
 					ResponseContentFeedback.FireUpdate();
 			}
@@ -55,7 +55,7 @@ namespace OneBeyondAutomateVxEpi
 			set
 			{
 				_responseSuccessMessage = value;
-				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseSuccessMessage: {0}", _responseSuccessMessage);
+				Debug.LogVerbose(this, "ResponseSuccessMessage: {0}", _responseSuccessMessage);
 				ResponseSuccessMessageFeedback.FireUpdate();
 			}
 		}
@@ -66,7 +66,7 @@ namespace OneBeyondAutomateVxEpi
 			set
 			{
 				_responseErrorMessage = value;
-				Debug.Console(AutomateVxDebug.Verbose, this, "ResponseErrorMessage: {0}", _responseErrorMessage);
+				Debug.LogVerbose(this, "ResponseErrorMessage: {0}", _responseErrorMessage);
 				ResponseErrorMessageFeedback.FireUpdate();
 			}
 		}
@@ -241,17 +241,14 @@ namespace OneBeyondAutomateVxEpi
 		public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVxConfig config, IRestfulComms client)
 			: base(key, name)
 		{
-			Debug.Console(AutomateVxDebug.Trace, this, "Constructing new {0} instance", name);
+			Debug.LogInformation(this, "Constructing new {0} instance", name);
 
 			try
-			{
-				AutomateVxDebug.ResetDebugLevels();
-
+			{		
 				_client = client;
 				if (_client == null)
 				{
-					Debug.Console(AutomateVxDebug.Trace, this, Debug.ErrorLogLevel.Error,
-						"Failed to construct '{1}' using method {0}",
+					Debug.LogError(this, "Failed to construct '{1}' using method {0}",
 						config.Control.Method, name);
 					return;
 				}
@@ -292,9 +289,9 @@ namespace OneBeyondAutomateVxEpi
 			}
 			catch (Exception ex)
 			{
-				Debug.Console(AutomateVxDebug.Notice, this, Debug.ErrorLogLevel.Error, "OneBeyondAutomateVx Exception Message: {0}", ex.Message);
-				Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "OneBeyondAutomateVx Stack Trace: {0}", ex.StackTrace);
-				if (ex.InnerException != null) Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "OneBeyondAutomateVx Inner Exception {0}", ex.InnerException);
+				Debug.LogError(this, "OneBeyondAutomateVx Exception Message: {0}", ex.Message);
+				Debug.LogError(this, "OneBeyondAutomateVx Stack Trace: {0}", ex.StackTrace);
+				if (ex.InnerException != null) Debug.LogError(this, "OneBeyondAutomateVx Inner Exception {0}", ex.InnerException);
 			}
 		}
 
@@ -332,8 +329,8 @@ namespace OneBeyondAutomateVxEpi
 				joinMap.SetCustomJoinData(customJoins);
 			}
 
-			Debug.Console(AutomateVxDebug.Notice, "Linking to Trilist '{0}'", trilist.ID.ToString("X"));
-			Debug.Console(AutomateVxDebug.Trace, "Linking to Bridge Type {0}", GetType().Name);
+			Debug.LogDebug("Linking to Trilist '{0}'", trilist.ID.ToString("X"));
+			Debug.LogInformation("Linking to Bridge Type {0}", GetType().Name);
 
 			// Linked Feedbacks
 			if(ResponseCodeFeedback != null)
@@ -434,7 +431,7 @@ namespace OneBeyondAutomateVxEpi
 
 					if (camId == 0 || presetId == 0)
 					{
-						Debug.Console(AutomateVxDebug.Trace, this,
+                        Debug.LogInformation(this,
 							"Unable to recall preset.  Please specify values for both CameraToRecallPresetOn and CameraPresetToRecall analog joins");
 						return;
 					}
@@ -545,7 +542,7 @@ namespace OneBeyondAutomateVxEpi
 		{
 			try
 			{
-				Debug.Console(AutomateVxDebug.Verbose, this,
+                Debug.LogVerbose(this, 
 					"OnResponseReceived: Request = {0} > Code = {1} | ContentString = {2}",
 					args.Request, args.Code, args.ContentString);
 
@@ -575,7 +572,7 @@ namespace OneBeyondAutomateVxEpi
 							var response = ApiResponseParser.ParseResultResponse(content);
 							if (response.Status == "OK")
 							{
-								Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseRecieved: 'autoswitchstatus' results {0}", response.Results.ToString());
+								Debug.LogVerbose(this, "OnResponseRecieved: 'autoswitchstatus' results {0}", response.Results.ToString());
 								AutoSwitchIsOn = (response.Results == true);
 								ResponseSuccessMessage = response.Message;
 								return;
@@ -877,7 +874,7 @@ namespace OneBeyondAutomateVxEpi
 						{
 							ResponseCode = args.Code;
 							ResponseContent = content;
-							Debug.Console(AutomateVxDebug.Verbose, this, "OnResponseReceived: Code = {0}, Content = {1}", ResponseCode, ResponseContent);
+							Debug.LogVerbose(this, "OnResponseReceived: Code = {0}, Content = {1}", ResponseCode, ResponseContent);
 
 							break;
 						}
@@ -885,10 +882,10 @@ namespace OneBeyondAutomateVxEpi
 			}
 			catch (Exception ex)
 			{
-				Debug.Console(AutomateVxDebug.Notice, this, Debug.ErrorLogLevel.Error, "OnResponseReceived Exception Message for request: {0}", args.Request);
-				Debug.Console(AutomateVxDebug.Notice, this, Debug.ErrorLogLevel.Error, "OnResponseReceived Exception Message: {0}", ex.Message);
-				Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "OnResponseReceived Stack Trace: {0}", ex.StackTrace);
-				if (ex.InnerException != null) Debug.Console(AutomateVxDebug.Verbose, this, Debug.ErrorLogLevel.Error, "OnResponseReceived Inner Exception {0}", ex.InnerException);
+				Debug.LogError(this, "OnResponseReceived Exception Message for request: {0}", args.Request);
+				Debug.LogError(this, "OnResponseReceived Exception Message: {0}", ex.Message);
+				Debug.LogError(this, "OnResponseReceived Stack Trace: {0}", ex.StackTrace);
+				if (ex.InnerException != null) Debug.LogError(this, "OnResponseReceived Inner Exception {0}", ex.InnerException);
 			}
 		}
 
@@ -896,7 +893,7 @@ namespace OneBeyondAutomateVxEpi
 		{
 			if (Cameras == null || Cameras.Count == 0)
 			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "OnCamerasChanged: Cameras is null or has not entries");
+				Debug.LogVerbose(this, "OnCamerasChanged: Cameras is null or has not entries");
 				return;
 			}
 
@@ -915,7 +912,7 @@ namespace OneBeyondAutomateVxEpi
 		{
 			if (Layouts == null || Layouts.Count == 0)
 			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "OnLayoutsChanged: Layouts is null or has not entries.");
+				Debug.LogVerbose(this, "OnLayoutsChanged: Layouts is null or has not entries.");
 				return;
 			}
 
@@ -933,7 +930,7 @@ namespace OneBeyondAutomateVxEpi
 		{
 			if (RoomConfigs == null || RoomConfigs.Count == 0)
 			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "OnRoomConfigsChanged: RoomConfigs is null or has not entries.");
+				Debug.LogVerbose(this, "OnRoomConfigsChanged: RoomConfigs is null or has not entries.");
 				return;
 			}
 
@@ -950,7 +947,7 @@ namespace OneBeyondAutomateVxEpi
 		{
 			if (Scenarios == null || Scenarios.Count == 0)
 			{
-				Debug.Console(AutomateVxDebug.Verbose, this, "OnScenariosChanged: Scenarios is null or has not entries.");
+				Debug.LogVerbose(this, "OnScenariosChanged: Scenarios is null or has not entries.");
 				return;
 			}
 
