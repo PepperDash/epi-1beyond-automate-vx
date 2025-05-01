@@ -15,7 +15,7 @@ namespace OneBeyondAutomateVxEpi
 		/// </summary>
         public OneBeyoneAutomateVxFactory()
         {
-            MinimumEssentialsFrameworkVersion = "2.0.0";
+            MinimumEssentialsFrameworkVersion = "2.4.7";
 
             TypeNames = new List<string> { "oneBeyondAutomateVx" };
         }
