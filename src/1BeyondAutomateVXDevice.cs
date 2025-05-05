@@ -11,26 +11,31 @@ using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
 using System.Linq;
 using PepperDash.Essentials.Devices.Common.Cameras;
+using PepperDash.Essentials.AppServer.Messengers;
+using ApiCamera = OneBeyondAutomateVxEpi.ApiObjects.Camera;
+
+
 
 
 
 namespace OneBeyondAutomateVxEpi
     {
-    public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCameraAutoMode, ISelectableItems<string>
+    public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCameraAutoMode, ISelectableItems<ushort>
         {
-        private Dictionary<string, ISelectableItem> _autoSwitchItems = new Dictionary<string, ISelectableItem>();
-        public Dictionary<string, ISelectableItem> Items
+
+        private Dictionary<ushort, ISelectableItem> _cameraItems = new Dictionary<ushort, ISelectableItem>();
+        public Dictionary<ushort, ISelectableItem> Items
             {
-            get => _autoSwitchItems;
+            get => _cameraItems;
             set
                 {
-                _autoSwitchItems = value;
+                _cameraItems = value;
                 ItemsUpdated?.Invoke(this, EventArgs.Empty);
                 }
             }
 
-        private string _currentItem;
-        public string CurrentItem
+        private ushort _currentItem;
+        public ushort CurrentItem
             {
             get => _currentItem;
             set
@@ -43,39 +48,6 @@ namespace OneBeyondAutomateVxEpi
 
         public event EventHandler ItemsUpdated;
         public event EventHandler CurrentItemChanged;
-
-        private class AutoSwitchSelectableItem : ISelectableItem
-            {
-            private readonly OneBeyondAutomateVx _parent;
-            private readonly bool _targetState;
-
-            public string Key { get; }
-            public string Name { get; }
-            private bool _isSelected;
-
-            public bool IsSelected
-                {
-                get => _isSelected;
-                set
-                    {
-                    if (_isSelected == value) return;
-                    _isSelected = value;
-                    ItemUpdated?.Invoke(this, EventArgs.Empty);
-                    }
-                }
-
-            public event EventHandler ItemUpdated;
-
-            public AutoSwitchSelectableItem(OneBeyondAutomateVx parent, string key, string name, bool targetState)
-                {
-                _parent = parent;
-                Key = key;
-                Name = name;
-                _targetState = targetState;
-                }
-
-            public void Select() => _parent.SetAutoSwitch(_targetState);
-            }
 
         private const string ApiPath = "/api";
 
@@ -286,7 +258,7 @@ namespace OneBeyondAutomateVxEpi
         public StringFeedback CurrentScenarioNameFeedback;
         public IntFeedback CurrentScenarioIdFeedback;
 
-        public List<Camera> Cameras { get; set; }
+        public List<ApiCamera> Cameras { get; set; }
         public List<NameWithIdString> Layouts { get; set; }
         public List<NameWithIdInt> RoomConfigs { get; set; }
         public List<NameWithIdInt> Scenarios { get; set; }
@@ -346,13 +318,32 @@ namespace OneBeyondAutomateVxEpi
 
 
                 if (Cameras == null)
-                    Cameras = new List<Camera>();
+                    Cameras = new List<ApiCamera>();
                 if (Layouts == null)
                     Layouts = new List<NameWithIdString>();
                 if (RoomConfigs == null)
                     RoomConfigs = new List<NameWithIdInt>();
                 if (Scenarios == null)
                     Scenarios = new List<NameWithIdInt>();
+
+                // Build the camera-selection dictionary
+                Items = Cameras.ToDictionary(
+                    cam => (ushort)cam.Id,
+                    cam => (ISelectableItem)new CameraSelectableItem(this, (ushort)cam.Id, $"Camera {cam.Id}")
+                );
+
+                // Seed the current selection based on feedback
+                CurrentItem = (ushort)CameraAddress;
+                foreach (var kv in Items)
+                    kv.Value.IsSelected = kv.Key == CurrentItem;
+
+                // Keep selection in sync when the camera address feedback fires
+                CameraAddressFeedback.OutputChange += (s, e) =>
+                {
+                    CurrentItem = (ushort)CameraAddress;
+                    foreach (var kv in Items)
+                        kv.Value.IsSelected = kv.Key == CurrentItem;
+                };
 
                 _client.ResponseReceived += OnResponseReceived;
                 }
@@ -374,8 +365,12 @@ namespace OneBeyondAutomateVxEpi
                 return base.CustomActivate();
                 }
 
-            var iHasCameraAutoModeMessenger = new IHasCameraAutoModeMessenger($"{Key}-{mc.Key}-cameraAutoMode", $"/device/{Key}", this);
+            var iHasCameraAutoModeMessenger = new CameraAutoModeMessenger($"{Key}-{mc.Key}-cameraAutoMode", $"/device/{Key}", this);
             mc.AddDeviceMessenger(iHasCameraAutoModeMessenger);
+
+            _ = new ISelectableItemsMessenger<ushort>($"{Key}-{mc.Key}-cameraSelect", $"/device/{Key}", this, "selectedCamera");
+
+
 
             return base.CustomActivate();
             }
