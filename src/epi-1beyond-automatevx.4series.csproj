@@ -11,7 +11,7 @@
 		<AssemblyTitle>PepperDash.Essentials.Plugin.1BeyondAutomateVx</AssemblyTitle>
 		<Company>PepperDash Technologies</Company>
 		<Description>This software is a plugin designed to work as a part of PepperDash Essentials for Crestron control processors. This plugin allows for control of 1Beyond AutomateVX Camera server.</Description>
-		<Copyright>Copyright 2024</Copyright>
+		<Copyright>Copyright 2025</Copyright>
 		<Version>1.0.0-local</Version>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<InformationalVersion>$(Version)</InformationalVersion>
