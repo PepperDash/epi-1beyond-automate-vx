@@ -25,7 +25,7 @@ Provided under MIT license
 							"address": "172.22.46.58",
 							"port": 3579,
 							"username": "crestronproc",	
-							"password": "E-team9800",
+							"password": "<YOUR_PASSWORD>",
 							"autoReconnect": false,
 							"autoReconnectIntervalMs": 5000
 						}
