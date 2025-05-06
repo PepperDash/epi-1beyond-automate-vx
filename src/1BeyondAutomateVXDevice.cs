@@ -92,6 +92,8 @@ namespace OneBeyondAutomateVxEpi
         public StringFeedback ResponseErrorMessageFeedback { get; private set; }
 
         private Dictionary<uint, CameraSelectableItems> _cameraItems = new Dictionary<uint, CameraSelectableItems>();
+        private Dictionary<uint, ScenariosSelectableItems> _scenarioItems = new Dictionary<uint, ScenariosSelectableItems>();
+        private Dictionary<uint, ConfigurationsSelectableItems> _configItems = new Dictionary<uint, ConfigurationsSelectableItems>();
 
 
         #endregion
@@ -369,9 +371,37 @@ namespace OneBeyondAutomateVxEpi
                 }
 
             var cameraItems = new CameraSelectableItems($"{Key}-cameraItems", "Camera Items", selectableItems);
-
             var cameraSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-{mc.Key}-cameraManualSelect", $"/device/{Key}", cameraItems, "selectedCamera");
             mc.AddDeviceMessenger(cameraSelectMessenger);
+
+            if (Scenarios != null)
+                {
+                var selectableScenarios = new Dictionary<string, ISelectableItem>();
+                foreach (var scenario in Scenarios)
+                    {
+                    selectableScenarios[scenario.Id.ToString()] = new ScenariosSelectableItems.ScenariosSelectableItem(
+                        scenario.Id.ToString(), scenario.Name, scenario.Id, this);
+                    }
+
+                var scenarioItems = new ScenariosSelectableItems($"{Key}-scenarioItems", "Scenario Items", selectableScenarios);
+                var scenarioSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-{mc.Key}-scenarioSelect", $"/device/{Key}", scenarioItems, "selectedScenario");
+                mc.AddDeviceMessenger(scenarioSelectMessenger);
+                }
+
+            if (RoomConfigs != null)
+                {
+                var selectableConfigs = new Dictionary<string, ISelectableItem>();
+                foreach (var config in RoomConfigs)
+                    {
+                    selectableConfigs[config.Id.ToString()] = new ConfigurationsSelectableItems.ConfigurationsSelectableItem(
+                        config.Id.ToString(), config.Name, config.Id, this);
+                    }
+
+                var configItems = new ConfigurationsSelectableItems($"{Key}-configItems", "Configuration Items", selectableConfigs);
+                var configSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-{mc.Key}-configSelect", $"/device/{Key}", configItems, "selectedConfig");
+                mc.AddDeviceMessenger(configSelectMessenger);
+                }
+
             }
 
 
