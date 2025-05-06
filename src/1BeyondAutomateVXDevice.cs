@@ -13,6 +13,9 @@ using System.Linq;
 using PepperDash.Essentials.Devices.Common.Cameras;
 using PepperDash.Essentials.AppServer.Messengers;
 using ApiCamera = OneBeyondAutomateVxEpi.ApiObjects.Camera;
+using PepperDash.Core.Logging;
+using Independentsoft.Exchange;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 
 
@@ -20,34 +23,11 @@ using ApiCamera = OneBeyondAutomateVxEpi.ApiObjects.Camera;
 
 namespace OneBeyondAutomateVxEpi
     {
-    public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCameraAutoMode, ISelectableItems<ushort>
+    public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCameraAutoMode
         {
 
-        private Dictionary<ushort, ISelectableItem> _cameraItems = new Dictionary<ushort, ISelectableItem>();
-        public Dictionary<ushort, ISelectableItem> Items
-            {
-            get => _cameraItems;
-            set
-                {
-                _cameraItems = value;
-                ItemsUpdated?.Invoke(this, EventArgs.Empty);
-                }
-            }
+        
 
-        private ushort _currentItem;
-        public ushort CurrentItem
-            {
-            get => _currentItem;
-            set
-                {
-                if (_currentItem == value) return;
-                _currentItem = value;
-                CurrentItemChanged?.Invoke(this, EventArgs.Empty);
-                }
-            }
-
-        public event EventHandler ItemsUpdated;
-        public event EventHandler CurrentItemChanged;
 
         private const string ApiPath = "/api";
 
@@ -110,6 +90,9 @@ namespace OneBeyondAutomateVxEpi
         public StringFeedback ResponseContentFeedback { get; private set; }
         public StringFeedback ResponseSuccessMessageFeedback { get; private set; }
         public StringFeedback ResponseErrorMessageFeedback { get; private set; }
+
+        private Dictionary<uint, CameraSelectableItems> _cameraItems = new Dictionary<uint, CameraSelectableItems>();
+
 
         #endregion
 
@@ -277,6 +260,10 @@ namespace OneBeyondAutomateVxEpi
         /// <param name="name"></param>
         /// <param name="config"></param>
         /// <param name="client"></param>
+        /// 
+        private readonly OneBeyondAutomateVxConfig _config;
+
+
         public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVxConfig config, IRestfulComms client)
             : base(key, name)
             {
@@ -285,6 +272,8 @@ namespace OneBeyondAutomateVxEpi
             try
                 {
                 _client = client;
+                _config = config;
+
                 if (_client == null)
                     {
                     Debug.LogError(this, "Failed to construct '{1}' using method {0}",
@@ -326,41 +315,7 @@ namespace OneBeyondAutomateVxEpi
                 if (Scenarios == null)
                     Scenarios = new List<NameWithIdInt>();
 
-                // Build the camera-selection dictionary
-                var cameraConfigDict = (config.Cameras ?? new Dictionary<int, CameraConfig>())
-                    .Values.ToDictionary(cam => cam.DeviceKey, cam => cam);
-
-                Debug.Console(1, this, "Configured Cameras from JSON:");
-                foreach (var cam in cameraConfigDict.Values)
-                    {
-                    Debug.Console(1, this, $" - ID: {cam.Id}, Name: {cam.Name}, DeviceKey: {cam.DeviceKey}");
-                    }
-
-                // Auto-fix duplicate or zero IDs
-                var idSet = new HashSet<ushort>();
-                ushort autoId = 1;
-                foreach (var cam in cameraConfigDict.Values)
-                    {
-                    if (cam.Id <= 0 || !idSet.Add((ushort)cam.Id))
-                        {
-                        while (!idSet.Add(autoId)) autoId++;
-                        Debug.Console(0, this, $"WARNING: Camera '{cam.Name}' had duplicate or zero ID. Assigned new ID: {autoId}");
-                        cam.Id = autoId;
-                        }
-                    }
-
-                // Build Items dictionary with cleaned-up IDs
-                Items = cameraConfigDict.ToDictionary(
-                    kvp => (ushort)kvp.Value.Id,
-                    kvp => (ISelectableItem)new CameraSelectableItem(this, (ushort)kvp.Value.Id, kvp.Value.Name)
-                );
-                CameraAddressFeedback.OutputChange += (s, e) =>
-                {
-                    CurrentItem = (ushort)CameraAddress;
-                    foreach (var kv in Items)
-                        kv.Value.IsSelected = kv.Key == CurrentItem;
-                };
-
+                
                 _client.ResponseReceived += OnResponseReceived;
                 }
             catch (Exception ex)
@@ -372,23 +327,51 @@ namespace OneBeyondAutomateVxEpi
             }
 
 
-        public override bool CustomActivate()
+        protected override void CreateMobileControlMessengers()
             {
+            this.LogInformation("Adding Mobile Control Messengers for 1Beyond");
             var mc = DeviceManager.AllDevices.OfType<IMobileControl>().FirstOrDefault();
-
             if (mc == null)
                 {
-                return base.CustomActivate();
+                this.LogError("Unable to find Mobile Control device");
+                return;
                 }
 
+            Debug.LogInformation(this, "Creating IHasCameraAutoModeMessenger: {0}", $"{Key}-{mc.Key}-cameraAutoMode");
             var iHasCameraAutoModeMessenger = new IHasCameraAutoModeMessenger($"{Key}-{mc.Key}-cameraAutoMode", $"/device/{Key}", this);
             mc.AddDeviceMessenger(iHasCameraAutoModeMessenger);
 
-            _ = new ISelectableItemsMessenger<ushort>($"{Key}-{mc.Key}-cameraSelect", $"/device/{Key}", this, "selectedCamera");
 
+            var selectableItems = new Dictionary<string, ISelectableItem>();
 
+            if (_config?.Cameras != null)
+                {
+                Debug.LogInformation(this, "SerializeObject camera config:\n{0}", JsonConvert.SerializeObject(_config.Cameras));
 
-            return base.CustomActivate();
+                foreach (var camera in _config.Cameras.Values)
+                    {
+                    Debug.LogInformation(this, "Camera ID: {0}, Name: {1}, DeviceKey: {2}",
+                        camera.Id, camera.Name, camera.DeviceKey);
+
+                    // Add each camera to the selectableItems dictionary
+                    selectableItems[camera.Id.ToString()] = new CameraSelectableItems.CameraSelectableItem(
+                        camera.Id.ToString(), camera.Name, camera.Id, this);
+                    }
+                // Debugging: Log the contents of the cameraItems dictionary
+                foreach (var item in selectableItems)
+                    {
+                    Debug.LogInformation(this, "SelectableItem Key: {0}, Name: {1}", item.Key, item.Value);
+                    }
+                }
+            else
+                {
+                Debug.LogWarning(this, "No cameras found in config to register CameraSelectableItems.");
+                }
+
+            var cameraItems = new CameraSelectableItems($"{Key}-cameraItems", "Camera Items", selectableItems);
+
+            var cameraSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-{mc.Key}-cameraManualSelect", $"/device/{Key}", cameraItems, "selectedCamera");
+            mc.AddDeviceMessenger(cameraSelectMessenger);
             }
 
 
