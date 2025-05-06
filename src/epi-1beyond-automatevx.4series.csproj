@@ -33,6 +33,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="SleepWakeMessenger.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="epi-1beyond-automatevx.projectinfo" />
   </ItemGroup>
 

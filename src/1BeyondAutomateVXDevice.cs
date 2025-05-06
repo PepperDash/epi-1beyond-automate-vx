@@ -17,18 +17,10 @@ using PepperDash.Core.Logging;
 using Independentsoft.Exchange;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
-
-
-
-
 namespace OneBeyondAutomateVxEpi
     {
-    public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCameraAutoMode
+    public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCameraAutoMode, IHasPowerControl
         {
-
-        
-
-
         private const string ApiPath = "/api";
 
         #region IRestfulComms
@@ -339,37 +331,20 @@ namespace OneBeyondAutomateVxEpi
                 return;
                 }
 
-            Debug.LogInformation(this, "Creating IHasCameraAutoModeMessenger: {0}", $"{Key}-{mc.Key}-cameraAutoMode");
             var iHasCameraAutoModeMessenger = new IHasCameraAutoModeMessenger($"{Key}-{mc.Key}-cameraAutoMode", $"/device/{Key}", this);
             mc.AddDeviceMessenger(iHasCameraAutoModeMessenger);
 
-
             var selectableItems = new Dictionary<string, ISelectableItem>();
-
             if (_config?.Cameras != null)
                 {
-                Debug.LogInformation(this, "SerializeObject camera config:\n{0}", JsonConvert.SerializeObject(_config.Cameras));
 
                 foreach (var camera in _config.Cameras.Values)
                     {
-                    Debug.LogInformation(this, "Camera ID: {0}, Name: {1}, DeviceKey: {2}",
-                        camera.Id, camera.Name, camera.DeviceKey);
-
                     // Add each camera to the selectableItems dictionary
                     selectableItems[camera.Id.ToString()] = new CameraSelectableItems.CameraSelectableItem(
                         camera.Id.ToString(), camera.Name, camera.Id, this);
                     }
-                // Debugging: Log the contents of the cameraItems dictionary
-                foreach (var item in selectableItems)
-                    {
-                    Debug.LogInformation(this, "SelectableItem Key: {0}, Name: {1}", item.Key, item.Value);
-                    }
                 }
-            else
-                {
-                Debug.LogWarning(this, "No cameras found in config to register CameraSelectableItems.");
-                }
-
             var cameraItems = new CameraSelectableItems($"{Key}-cameraItems", "Camera Items", selectableItems);
             var cameraSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-{mc.Key}-cameraManualSelect", $"/device/{Key}", cameraItems, "selectedCamera");
             mc.AddDeviceMessenger(cameraSelectMessenger);
@@ -382,7 +357,6 @@ namespace OneBeyondAutomateVxEpi
                     selectableScenarios[scenario.Id.ToString()] = new ScenariosSelectableItems.ScenariosSelectableItem(
                         scenario.Id.ToString(), scenario.Name, scenario.Id, this);
                     }
-
                 var scenarioItems = new ScenariosSelectableItems($"{Key}-scenarioItems", "Scenario Items", selectableScenarios);
                 var scenarioSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-{mc.Key}-scenarioSelect", $"/device/{Key}", scenarioItems, "selectedScenario");
                 mc.AddDeviceMessenger(scenarioSelectMessenger);
@@ -401,7 +375,6 @@ namespace OneBeyondAutomateVxEpi
                 var configSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-{mc.Key}-configSelect", $"/device/{Key}", configItems, "selectedConfig");
                 mc.AddDeviceMessenger(configSelectMessenger);
                 }
-
             }
 
 
@@ -1576,6 +1549,15 @@ namespace OneBeyondAutomateVxEpi
         public void CameraAutoModeToggle()
             {
             SetAutoSwitch(!_autoSwitchIsOn);
+            }
+
+        public void PowerOn() => SetWake();
+
+        public void PowerOff() => SetSleep();
+
+        public void PowerToggle()
+            {
+            throw new NotImplementedException();
             }
         }
     }
