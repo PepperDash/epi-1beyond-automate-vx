@@ -314,7 +314,7 @@ namespace OneBeyondAutomateVxEpi
                 ScenariosCountFeedback = new IntFeedback(() => Scenarios.Count);
                 CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
                 CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
-                CameraAutoModeIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn); 
+                CameraAutoModeIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
 
 
                 if (Cameras == null)
@@ -327,17 +327,33 @@ namespace OneBeyondAutomateVxEpi
                     Scenarios = new List<NameWithIdInt>();
 
                 // Build the camera-selection dictionary
-                Items = Cameras.ToDictionary(
-                    cam => (ushort)cam.Id,
-                    cam => (ISelectableItem)new CameraSelectableItem(this, (ushort)cam.Id, $"Camera {cam.Id}")
+                var cameraConfigDict = (config.Cameras ?? new Dictionary<int, CameraConfig>())
+                    .Values.ToDictionary(cam => cam.DeviceKey, cam => cam);
+
+                Debug.Console(1, this, "Configured Cameras from JSON:");
+                foreach (var cam in cameraConfigDict.Values)
+                    {
+                    Debug.Console(1, this, $" - ID: {cam.Id}, Name: {cam.Name}, DeviceKey: {cam.DeviceKey}");
+                    }
+
+                // Auto-fix duplicate or zero IDs
+                var idSet = new HashSet<ushort>();
+                ushort autoId = 1;
+                foreach (var cam in cameraConfigDict.Values)
+                    {
+                    if (cam.Id <= 0 || !idSet.Add((ushort)cam.Id))
+                        {
+                        while (!idSet.Add(autoId)) autoId++;
+                        Debug.Console(0, this, $"WARNING: Camera '{cam.Name}' had duplicate or zero ID. Assigned new ID: {autoId}");
+                        cam.Id = autoId;
+                        }
+                    }
+
+                // Build Items dictionary with cleaned-up IDs
+                Items = cameraConfigDict.ToDictionary(
+                    kvp => (ushort)kvp.Value.Id,
+                    kvp => (ISelectableItem)new CameraSelectableItem(this, (ushort)kvp.Value.Id, kvp.Value.Name)
                 );
-
-                // Seed the current selection based on feedback
-                CurrentItem = (ushort)CameraAddress;
-                foreach (var kv in Items)
-                    kv.Value.IsSelected = kv.Key == CurrentItem;
-
-                // Keep selection in sync when the camera address feedback fires
                 CameraAddressFeedback.OutputChange += (s, e) =>
                 {
                     CurrentItem = (ushort)CameraAddress;
@@ -365,7 +381,7 @@ namespace OneBeyondAutomateVxEpi
                 return base.CustomActivate();
                 }
 
-            var iHasCameraAutoModeMessenger = new CameraAutoModeMessenger($"{Key}-{mc.Key}-cameraAutoMode", $"/device/{Key}", this);
+            var iHasCameraAutoModeMessenger = new IHasCameraAutoModeMessenger($"{Key}-{mc.Key}-cameraAutoMode", $"/device/{Key}", this);
             mc.AddDeviceMessenger(iHasCameraAutoModeMessenger);
 
             _ = new ISelectableItemsMessenger<ushort>($"{Key}-{mc.Key}-cameraSelect", $"/device/{Key}", this, "selectedCamera");
@@ -1550,4 +1566,3 @@ namespace OneBeyondAutomateVxEpi
             }
         }
     }
-
