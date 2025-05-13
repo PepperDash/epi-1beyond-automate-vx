@@ -46,9 +46,13 @@ namespace OneBeyondAutomateVxEpi
 
             public void Select()
                 {
-                // Logic for selecting the scenario
-                _parent.CurrentScenario = new NameWithIdInt { Id = Id, Name = Name };
-                IsSelected = true;
+                _parent.SetScenario((uint)Id);
+                }
+
+            public void UpdateSelectedFromFeedback(int selectedId)
+                {
+                IsSelected = Id == selectedId;
+                ItemUpdated?.Invoke(this, EventArgs.Empty);
                 }
 
             public override string ToString()

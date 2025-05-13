@@ -46,9 +46,13 @@ namespace OneBeyondAutomateVxEpi
 
             public void Select()
                 {
-                // Logic for selecting the configuration
-                _parent.CurrentRoomConfig = new NameWithIdInt { Id = Id, Name = Name };
-                IsSelected = true;
+                _parent.SetRoomConfig((uint)Id);
+                }
+
+            public void UpdateSelectedFromFeedback(int selectedId)
+                {
+                IsSelected = Id == selectedId;
+                ItemUpdated?.Invoke(this, EventArgs.Empty);
                 }
 
             public override string ToString()
