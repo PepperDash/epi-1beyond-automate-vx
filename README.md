@@ -17,7 +17,7 @@ Provided under MIT license
     "key": "GeneratedKey",
     "uid": 1,
     "name": "GeneratedName",
-    "type": "OneBeyondAutomateVx",
+    "type": "oneBeyondAutomateVx",
     "group": "Group",
     "properties": {
         "control": "SampleValue"
