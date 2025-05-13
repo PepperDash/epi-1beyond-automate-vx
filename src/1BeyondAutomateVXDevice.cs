@@ -655,7 +655,7 @@ namespace OneBeyondAutomateVxEpi
                             var response = ApiResponseParser.ParseResultResponse(content);
                             if (response.Status == "OK")
                                 {
-                                Debug.LogVerbose(this, "OnResponseRecieved: 'autoswitchstatus' results {0}", response.Results.ToString());
+                                Debug.LogVerbose(this, "OnResponseReceived: 'autoswitchstatus' results {0}", response.Results.ToString());
                                 AutoSwitchIsOn = (response.Results == true);
                                 ResponseSuccessMessage = response.Message;
                                 return;
