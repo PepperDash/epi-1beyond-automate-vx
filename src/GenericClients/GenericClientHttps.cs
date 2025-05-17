@@ -36,8 +36,7 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 		{
 			if (string.IsNullOrEmpty(key) || controlConfig == null)
 			{
-				Debug.Console(AutomateVxDebug.Verbose, Debug.ErrorLogLevel.Error,
-					"GenericClient key or host is null or empty, failed to create client for {0}", key);
+				Debug.LogError("GenericClient key or host is null or empty, failed to create client for {0}", key);
 				return;
 			}
 
@@ -55,7 +54,7 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 			Password = controlConfig.TcpSshProperties.Password ?? "";
 			AuthorizationBase64 = GenericClientHelpers.EncodeBase64(key, Username, Password);
 
-			Debug.Console(AutomateVxDebug.Verbose, this, @"
+			Debug.LogVerbose(this, @"
 {0}
 >>>>> GenericClientHttps: 
 Key = {1}
@@ -122,7 +121,7 @@ Token = {7}
 
 			request.Header.SetHeaderValue("Authorization", authorizationHeaderValue);
 
-			Debug.Console(AutomateVxDebug.Verbose, this, @"
+			Debug.LogVerbose(this, @"
 {0}
 >>>>> SendRequest
 url: {1}
@@ -144,7 +143,7 @@ authHeaderValue: {4}
 			{
 				if (response == null)
 				{
-					Debug.Console(AutomateVxDebug.Verbose, this, @"
+					Debug.LogVerbose(this, @"
 {0}
 >>>>> RequestDispatch
 request: {1}
@@ -231,9 +230,9 @@ error: {2}
 		// Checks request queue and issues next request
 		private void CheckRequestQueue()
 		{
-			Debug.Console(AutomateVxDebug.Verbose, this, "CheckRequestQueue: _requestQueue.Count = {0}", _requestQueue.Count);
+			Debug.LogVerbose(this, "CheckRequestQueue: _requestQueue.Count = {0}", _requestQueue.Count);
 			var nextRequest = _requestQueue.TryToDequeue();
-			Debug.Console(AutomateVxDebug.Verbose, this, "CheckRequestQueue: _requestQueue.TryToDequeue was {0}",
+			Debug.LogVerbose(this, "CheckRequestQueue: _requestQueue.TryToDequeue was {0}",
 				(nextRequest == null) ? "unsuccessful" : "successful");
 			if (nextRequest != null)
 			{

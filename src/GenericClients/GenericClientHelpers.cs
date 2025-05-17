@@ -26,10 +26,7 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 			}
 			catch (Exception err)
 			{
-				Debug.Console(AutomateVxDebug.Trace, 
-					Debug.ErrorLogLevel.Error, 
-					"[{0}] EncodeBase64 Exception:\r{1}", 
-					key, err);
+                Debug.LogError("[{0}] EncodeBase64 Exception:\r{1}", key, err);
 				return "";
 			}
 		}
@@ -45,23 +42,23 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 			try
 			{
 				var jToken = JToken.Parse(contentString);
-				Debug.Console(AutomateVxDebug.Notice, "[{0}] IsValidJson: obj {1}", key, jToken == null ? "is null" : "is not null");
+				Debug.LogDebug("[{0}] IsValidJson: obj {1}", key, jToken == null ? "is null" : "is not null");
 
 				return jToken;
 			}
 			catch (JsonReaderException jex)
 			{
-				Debug.Console(AutomateVxDebug.Notice, "[{0}] IsValidJson JsonReaderException.Message: {1}", key, jex.Message);
-				Debug.Console(AutomateVxDebug.Verbose, "[{0}] IsValidJson JsonReaderException.StackTrace: {1}", key, jex.StackTrace);
-				if (jex.InnerException != null) Debug.Console(AutomateVxDebug.Verbose, "[{0}] IsValidJson JsonReaderException.InnerException: {1}", key, jex.InnerException);
+				Debug.LogDebug("[{0}] IsValidJson JsonReaderException.Message: {1}", key, jex.Message);
+				Debug.LogVerbose("[{0}] IsValidJson JsonReaderException.StackTrace: {1}", key, jex.StackTrace);
+				if (jex.InnerException != null) Debug.LogVerbose("[{0}] IsValidJson JsonReaderException.InnerException: {1}", key, jex.InnerException);
 
 				return null;
 			}
 			catch (Exception ex)
 			{
-				Debug.Console(AutomateVxDebug.Notice, "[{0}] IsValidJson Exception.Message: {1}", key, ex.Message);
-				Debug.Console(AutomateVxDebug.Verbose, "[{0}] IsValidJson Exception.StackTrace: {1}", key, ex.StackTrace);
-				if (ex.InnerException != null) Debug.Console(AutomateVxDebug.Verbose, "[{0}] IsValidJson Exception.InnerException: {1}", key, ex.InnerException);
+				Debug.LogDebug("[{0}] IsValidJson Exception.Message: {1}", key, ex.Message);
+				Debug.LogVerbose("[{0}] IsValidJson Exception.StackTrace: {1}", key, ex.StackTrace);
+				if (ex.InnerException != null) Debug.LogVerbose("[{0}] IsValidJson Exception.InnerException: {1}", key, ex.InnerException);
 
 				return null;
 			}
