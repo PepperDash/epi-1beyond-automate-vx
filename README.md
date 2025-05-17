@@ -14,15 +14,29 @@ Provided under MIT license
 
 ```json
 {
-    "key": "GeneratedKey",
-    "uid": 1,
-    "name": "GeneratedName",
-    "type": "OneBeyondAutomateVx",
-    "group": "Group",
-    "properties": {
-        "control": "SampleValue"
-    }
-}
+				"key": "camera-vx1",
+				"name": "AutomateVX Server",
+				"type": "oneBeyondAutomateVx",
+				"group": "pluginDevices",
+				"properties": {
+					"control": {
+						"method": "http",
+						"tcpSshProperties": {
+							"address": "172.22.46.58",
+							"port": 3579,
+							"username": "crestronproc",	
+							"password": "<YOUR_PASSWORD>",
+							"autoReconnect": false,
+							"autoReconnectIntervalMs": 5000
+						}
+					},
+          "cameras":{
+            "1": {"id": 1, "name": "Camera 1", "deviceKey": "camera-1-viscaoverIpDevice"},
+            "2": {"id": 2, "name": "Camera 2", "deviceKey": "camera-2-viscaoverIpDevice"}, 
+            "3": {"id": 3, "name": "Camera 3", "deviceKey": "camera-3-viscaoverIpDevice"}
+          }
+				}
+			},
 ```
 <!-- END Config Example -->
 <!-- START Supported Types -->
