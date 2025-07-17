@@ -45,7 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PepperDashEssentials" Version="2.4.7" />
+    <PackageReference Include="PepperDashEssentials" Version="2.8.0-feature-add-IHasCamerasMessenger.1" />
   </ItemGroup>
 
 </Project>
