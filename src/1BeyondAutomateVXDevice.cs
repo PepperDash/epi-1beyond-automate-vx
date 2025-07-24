@@ -1067,6 +1067,9 @@ namespace OneBeyondAutomateVxEpi
         /// </summary>
         public void Poll()
         {
+
+            // Run this in a separate thread to avoid blocking the main thread
+            // when the sleep commands are executed.
             CrestronInvoke.BeginInvoke((o) =>
             {
                 GetAutoSwitchStatus();
