@@ -336,7 +336,7 @@ namespace OneBeyondAutomateVxEpi
                 CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
                 CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
                 CameraAutoModeIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
-                SelectedCameraFeedback = new StringFeedback(() => _selectedCamera.Key);
+                SelectedCameraFeedback = new StringFeedback(() => _selectedCamera?.Key ?? string.Empty);
 
                 if (ApiCameras == null)
                     ApiCameras = new List<ApiCamera>();
@@ -1245,10 +1245,10 @@ namespace OneBeyondAutomateVxEpi
             _client.SendRequest("POST", url, string.Empty);
         }
 
-        /// <summary>#####
-        /// Set the layout
+        /// <summary>
+        /// Sets the layout of the device to the specified layout ID.
         /// </summary>
-        /// <param name="layout"></param>
+        /// <param name="layout">The layout ID (1-26) to set.</param>
         public void SetLayout(ushort layout)
         {
             // Check for valid input (1-26)
