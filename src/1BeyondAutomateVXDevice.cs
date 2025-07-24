@@ -336,7 +336,7 @@ namespace OneBeyondAutomateVxEpi
                 CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
                 CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
                 CameraAutoModeIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
-                SelectedCameraFeedback = new StringFeedback(() => _selectedCamera.Key);
+                SelectedCameraFeedback = new StringFeedback(() => _selectedCamera?.Key ?? string.Empty);
 
                 if (ApiCameras == null)
                     ApiCameras = new List<ApiCamera>();
