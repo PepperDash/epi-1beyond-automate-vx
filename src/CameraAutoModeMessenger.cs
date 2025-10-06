@@ -33,7 +33,7 @@ namespace OneBeyondAutomateVxEpi
             {
             var state = new IHasCameraAutoModeMessage
                 {
-                CameraAutoModeStatus = _cameramodedevice.CameraAutoModeIsOnFeedback.BoolValue
+                CameraAutoModeIsOn = _cameramodedevice.CameraAutoModeIsOnFeedback.BoolValue
                 };
             PostStatusMessage(state, id);
             }
@@ -41,8 +41,8 @@ namespace OneBeyondAutomateVxEpi
 
     public class IHasCameraAutoModeMessage : DeviceStateMessageBase
         {
-        [JsonProperty("cameraAutoModeStatus", NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool? CameraAutoModeStatus { get; set; }
+            [JsonProperty("cameraAutoModeIsOn", NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+            public bool? CameraAutoModeIsOn { get; set; }
 
         }
 

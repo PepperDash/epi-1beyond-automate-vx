@@ -83,10 +83,7 @@ namespace OneBeyondAutomateVxEpi
         public StringFeedback ResponseSuccessMessageFeedback { get; private set; }
         public StringFeedback ResponseErrorMessageFeedback { get; private set; }
 
-        private Dictionary<uint, CameraSelectableItems> _cameraItems = new Dictionary<uint, CameraSelectableItems>();
-        private Dictionary<uint, ScenariosSelectableItems> _scenarioItems = new Dictionary<uint, ScenariosSelectableItems>();
-        private Dictionary<uint, ConfigurationsSelectableItems> _configItems = new Dictionary<uint, ConfigurationsSelectableItems>();
-
+        private ScenariosSelectableItems ScenariosSelectableItems;
 
         #endregion
 
@@ -394,27 +391,46 @@ namespace OneBeyondAutomateVxEpi
                 var selectableScenarios = new Dictionary<string, ISelectableItem>();
                 foreach (var scenario in Scenarios)
                 {
-                    selectableScenarios[scenario.Id.ToString()] = new ScenariosSelectableItems.ScenariosSelectableItem(
+                    selectableScenarios[scenario.Id.ToString()] = new ScenariosSelectableItem(
                         scenario.Id.ToString(), scenario.Name, scenario.Id, this);
                 }
-                var scenarioItems = new ScenariosSelectableItems($"{Key}-scenarioItems", "Scenario Items", selectableScenarios);
-                var scenarioSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-scenarioSelect", $"/device/{Key}", scenarioItems, "selectedScenario");
+
+                ScenariosSelectableItems = new ScenariosSelectableItems($"{Key}-scenarioItems", "Scenario Items", selectableScenarios);
+
+                ScenariosChanged += (o, a) =>
+                {
+                    var scenarios = new Dictionary<string, ISelectableItem>();
+                    foreach (var scenario in Scenarios)
+                    {
+                        scenarios[scenario.Id.ToString()] = new ScenariosSelectableItem(
+                            scenario.Id.ToString(), scenario.Name, scenario.Id, this);
+                    }
+
+                    ScenariosSelectableItems.Items = scenarios;
+                };
+
+                var scenarioSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-scenarioSelect", $"/device/{Key}", ScenariosSelectableItems, "selectedScenario");
                 mc.AddDeviceMessenger(scenarioSelectMessenger);
             }
 
-            if (RoomConfigs != null)
-            {
-                var selectableConfigs = new Dictionary<string, ISelectableItem>();
-                foreach (var config in RoomConfigs)
-                {
-                    selectableConfigs[config.Id.ToString()] = new ConfigurationsSelectableItems.ConfigurationsSelectableItem(
-                        config.Id.ToString(), config.Name, config.Id, this);
-                }
+            //if (RoomConfigs != null)
+            //{
+            //    var selectableConfigs = new Dictionary<string, ISelectableItem>();
+            //    foreach (var config in RoomConfigs)
+            //    {
+            //        selectableConfigs[config.Id.ToString()] = new ConfigurationsSelectableItems.ConfigurationsSelectableItem(
+            //            config.Id.ToString(), config.Name, config.Id, this);
+            //    }
 
-                var configItems = new ConfigurationsSelectableItems($"{Key}-configItems", "Configuration Items", selectableConfigs);
-                var configSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-configSelect", $"/device/{Key}", configItems, "selectedConfig");
-                mc.AddDeviceMessenger(configSelectMessenger);
-            }
+            //    var configItems = new ConfigurationsSelectableItems($"{Key}-configItems", "Configuration Items", selectableConfigs);
+            //    var configSelectMessenger = new ISelectableItemsMessenger<string>($"{Key}-configSelect", $"/device/{Key}", configItems, "selectedConfig");
+            //    mc.AddDeviceMessenger(configSelectMessenger);
+            //}
+        }
+
+        private void OneBeyondAutomateVx_ScenariosChanged(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
 
