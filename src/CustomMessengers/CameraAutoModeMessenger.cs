@@ -41,7 +41,7 @@ namespace OneBeyondAutomateVxEpi
 
     public class IHasCameraAutoModeMessage : DeviceStateMessageBase
         {
-            [JsonProperty("cameraAutoModeIsOn", NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+            [JsonProperty("cameraAutoModeIsOn", NullValueHandling = NullValueHandling.Ignore)]
             public bool? CameraAutoModeIsOn { get; set; }
 
         }

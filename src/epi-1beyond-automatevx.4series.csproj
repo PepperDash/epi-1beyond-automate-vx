@@ -45,7 +45,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PepperDashEssentials" Version="2.8.0-feature-add-IHasCamerasMessenger.1" />
+    <PackageReference Include="PepperDashEssentials" Version="2.18.0-feature-add-IKeyed-to-interfaces.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>

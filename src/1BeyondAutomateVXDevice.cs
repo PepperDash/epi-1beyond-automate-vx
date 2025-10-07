@@ -1,25 +1,23 @@
-﻿using PepperDash.Essentials.Core.DeviceTypeInterfaces;
-using System;
-using System.Collections.Generic;
-using Crestron.SimplSharp;
+﻿using Crestron.SimplSharp;
 using Crestron.SimplSharpPro.DeviceSupport;
 using Newtonsoft.Json;
 using OneBeyondAutomateVxEpi.ApiObjects;
 using OneBeyondAutomateVxEpi.GenericClients;
 using PepperDash.Core;
+using PepperDash.Core.Logging;
+using PepperDash.Essentials.AppServer.Messengers;
 using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
-using System.Linq;
+using PepperDash.Essentials.Core.DeviceTypeInterfaces;
 using PepperDash.Essentials.Devices.Common.Cameras;
-using PepperDash.Essentials.AppServer.Messengers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using ApiCamera = OneBeyondAutomateVxEpi.ApiObjects.Camera;
-using PepperDash.Core.Logging;
-using Independentsoft.Exchange;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace OneBeyondAutomateVxEpi
 {
-    public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCameras, IHasCameraAutoMode, IHasPowerControl
+    public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCamerasWithControls, IHasCameraAutoMode, IHasPowerControl
     {
         private const string ApiPath = "/api";
 
@@ -252,13 +250,13 @@ namespace OneBeyondAutomateVxEpi
         /// <summary>
         /// Collection of cameras indexed by their address.
         /// </summary>
-        private Dictionary<uint, CameraBase> _cameras = new Dictionary<uint, CameraBase>();
+        private Dictionary<uint, IHasCameraControls> _cameras = new Dictionary<uint, IHasCameraControls>();
 
-        public List<CameraBase> Cameras => _cameras.Values.ToList();
+        public List<IHasCameraControls> Cameras => _cameras.Values.ToList();
 
-        private CameraBase _selectedCamera;
+        private IHasCameraControls _selectedCamera;
 
-        public CameraBase SelectedCamera
+        public IHasCameraControls SelectedCamera
         {
             get
             {
@@ -270,7 +268,7 @@ namespace OneBeyondAutomateVxEpi
 
                 _selectedCamera = value;
                 SelectedCameraFeedback.FireUpdate();
-                CameraSelected?.Invoke(this, new CameraSelectedEventArgs(_selectedCamera));
+                CameraSelected?.Invoke(this, new CameraSelectedEventArgs<IHasCameraControls>(_selectedCamera));
             }
         }
 
@@ -280,7 +278,7 @@ namespace OneBeyondAutomateVxEpi
         public event EventHandler LayoutsChanged;
         public event EventHandler RoomConfigsChanged;
         public event EventHandler ScenariosChanged;
-        public event EventHandler<CameraSelectedEventArgs> CameraSelected;
+        public event EventHandler<CameraSelectedEventArgs<IHasCameraControls>> CameraSelected;
 
         /// <summary>
         /// Plugin device constructor for devices that need IBasicCommunication
@@ -447,7 +445,7 @@ namespace OneBeyondAutomateVxEpi
         {
             foreach (var camera in _config.Cameras)
             {
-                var cam = DeviceManager.GetDeviceForKey(camera.DeviceKey) as CameraBase;
+                var cam = DeviceManager.GetDeviceForKey<IHasCameraControls>(camera.DeviceKey);
 
                 if (cam == null)
                 {
