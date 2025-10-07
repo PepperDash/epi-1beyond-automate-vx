@@ -344,8 +344,6 @@ namespace OneBeyondAutomateVxEpi
                 if (Scenarios == null)
                     Scenarios = new List<NameWithIdInt>();
 
-                SetupCameras();
-
 
                 _client.ResponseReceived += OnResponseReceived;
             }
@@ -440,6 +438,9 @@ namespace OneBeyondAutomateVxEpi
         public override void Initialize()
         {
             GetToken();
+
+            SetupCameras();
+
         }
 
         private void SetupCameras()
