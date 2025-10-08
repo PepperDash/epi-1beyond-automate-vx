@@ -1586,10 +1586,14 @@ namespace OneBeyondAutomateVxEpi
 
         public void SelectCamera(string key)
         {
-            if (UInt32.TryParse(key, out uint result))
-            {
-                SetCamera(result);
-            }
+            var camera = _config.Cameras.FirstOrDefault((c) => c.DeviceKey == key);
+
+            if (camera == null)
+                this.LogError("SelectCamera: Unable to find camera with key {key}", key);
+
+            this.LogDebug("SelectCamera: Setting camera to {camera}", camera?.Id);
+            SetCamera(camera.Id);
+            
         }
     }
 }
