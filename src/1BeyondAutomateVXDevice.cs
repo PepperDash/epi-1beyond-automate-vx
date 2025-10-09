@@ -218,6 +218,16 @@ namespace OneBeyondAutomateVxEpi
                 _currentScenario = value;
                 CurrentScenarioNameFeedback.FireUpdate();
                 CurrentScenarioIdFeedback.FireUpdate();
+
+                var scenario = ScenariosSelectableItems.Items.Values.FirstOrDefault(s => s.Key == _currentScenario.Id.ToString());
+
+                ScenariosSelectableItems.CurrentItem = scenario.Key;
+
+                foreach (var item in ScenariosSelectableItems.Items) 
+                {
+                    var scenarioItem = item.Value as ScenariosSelectableItem;
+                    scenarioItem.UpdateSelectedFromFeedback(_currentScenario.Id);
+                }
             }
         }
 
