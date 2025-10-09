@@ -4,6 +4,7 @@ using Crestron.SimplSharp;
 using Crestron.SimplSharp.Net.Http;
 using OneBeyondAutomateVxEpi.ApiObjects;
 using PepperDash.Core;
+using PepperDash.Core.Logging;
 using PepperDash.Essentials.Core;
 using RequestType = Crestron.SimplSharp.Net.Http.RequestType;
 
@@ -136,24 +137,31 @@ authHeaderValue: {4}
 		// dispatches the recieved request
 		private void RequestDispatch(HttpClientRequest request)
 		{
-			_client.DispatchAsync(request, (response, error) =>
+			try
 			{
-				if (response == null)
+				_client.DispatchAsync(request, (response, error) =>
 				{
-                    Debug.LogVerbose(this, @"
+					if (response == null)
+					{
+						Debug.LogVerbose(this, @"
 {0}
 >>>>> RequestDispatch
 request: {1}
 error: {2}
 {0}", Separator, request, error);
-					return;
-				}
+						return;
+					}
 
-				var parts = request.Url.ToString().Split('/');
-				var requestPath = parts[parts.Length - 1];
+					var parts = request.Url.ToString().Split('/');
+					var requestPath = parts[parts.Length - 1];
 
-				OnResponseRecieved(new GenericClientResponseEventArgs(requestPath, response.Code, response.ContentString));
-			});
+					OnResponseRecieved(new GenericClientResponseEventArgs(requestPath, response.Code, response.ContentString));
+				});
+			}
+			catch (Exception e)
+			{
+				this.LogError(e, "RequestDispatch Exception: {message}", e.Message);
+			}
 		}
 
 		/// <summary>

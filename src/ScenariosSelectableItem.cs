@@ -48,12 +48,12 @@ namespace OneBeyondAutomateVxEpi
             public bool IsSelected { get; set; }
 
             public ScenariosSelectableItem(string key, string name, int id, OneBeyondAutomateVx parent)
-                {
+            {
                 Key = key;
                 Name = name;
                 Id = id;
                 _parent = parent;
-                }
+            }
 
             public void Select()
                 {
