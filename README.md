@@ -17,10 +17,20 @@ Provided under MIT license
     "key": "GeneratedKey",
     "uid": 1,
     "name": "GeneratedName",
-    "type": "oneBeyondAutomateVx",
+    "type": "OneBeyondAutomateVx",
     "group": "Group",
     "properties": {
-        "control": "SampleValue"
+        "control": "SampleValue",
+        "cameras": [
+            {
+                "id": "SampleValue",
+                "name": "SampleString",
+                "deviceKey": "SampleString"
+            }
+        ],
+        "enableCameraReboot": true,
+        "cameraRebootHour": 0,
+        "cameraRebootMinute": 0
     }
 }
 ```
@@ -34,6 +44,11 @@ Provided under MIT license
 <!-- START Interfaces Implemented -->
 ### Interfaces Implemented
 
+- IHasCamerasWithControls
+- IHasCameraAutoMode
+- IHasPowerControl
+- ISelectableItems<string>
+- IKeyName
 - IRestfulComms
 <!-- END Interfaces Implemented -->
 <!-- START Base Classes -->
@@ -43,10 +58,12 @@ Provided under MIT license
 - JoinMapBaseAdvanced
 - RootResponse
 - EventArgs
+- MessengerBase
 <!-- END Base Classes -->
 <!-- START Public Methods -->
 ### Public Methods
 
+- public void RebootCameras()
 - public void ClearToken()
 - public void GetToken()
 - public void Poll()
@@ -85,6 +102,18 @@ Provided under MIT license
 - public void GetScenarios()
 - public void GetScenarioStatus()
 - public void SetScenario(uint scenarioId)
+- public void CameraAutoModeOn()
+- public void CameraAutoModeOff()
+- public void CameraAutoModeToggle()
+- public void PowerOn()
+- public void PowerOff()
+- public void PowerToggle()
+- public void SelectCamera(string key)
+- public void Select()
+- public void UpdateSelectedFromFeedback(int selectedId)
+- public void Select()
+- public void Select()
+- public void UpdateSelectedFromFeedback(int selectedId)
 - public void SendRequest(string requestType, string path, string content)
 - public void SendRequest(RequestType requestType, string path, string content)
 - public void SendRequest(string requestType, string path, string content)
@@ -100,6 +129,7 @@ Provided under MIT license
 - IsoRecordIsOnFeedback
 - StreamIsOnFeedback
 - OutputIsOnFeedback
+- CameraAutoModeIsOnFeedback
 <!-- END Bool Feedbacks -->
 <!-- START Int Feedbacks -->
 ### Int Feedbacks
@@ -123,4 +153,5 @@ Provided under MIT license
 - CurrentLayoutNameFeedback
 - CurrentRoomConfigNameFeedback
 - CurrentScenarioNameFeedback
+- SelectedCameraFeedback
 <!-- END String Feedbacks -->
