@@ -30,6 +30,8 @@ namespace OneBeyondAutomateVxEpi
         private string _responseSuccessMessage;
         private string _responseErrorMessage;
 
+        public bool CameraRebootEnabled => _config.EnableCameraReboot;
+
         public int ResponseCode
         {
             get { return _responseCode; }
@@ -299,6 +301,7 @@ namespace OneBeyondAutomateVxEpi
         /// <param name="client"></param>
         /// 
         private readonly OneBeyondAutomateVxConfig _config;
+        private CTimer _cameraRebootTimer;
 
 
         public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVxConfig config, IRestfulComms client)
@@ -354,6 +357,8 @@ namespace OneBeyondAutomateVxEpi
 
 
                 _client.ResponseReceived += OnResponseReceived;
+
+                SetupCameraRebootSchedule();
             }
             catch (Exception ex)
             {
@@ -376,6 +381,9 @@ namespace OneBeyondAutomateVxEpi
 
             var iHasCameraAutoModeMessenger = new IHasCameraAutoModeMessenger($"{Key}-cameraAutoMode", $"/device/{Key}", this);
             mc.AddDeviceMessenger(iHasCameraAutoModeMessenger);
+
+            var cameraRebootMessenger = new CameraRebootMessenger($"{Key}-cameraReboot", $"/device/{Key}", this);
+            mc.AddDeviceMessenger(cameraRebootMessenger);
 
             //var selectableItems = new Dictionary<string, ISelectableItem>();
             //if (_config?.Cameras != null)
@@ -468,6 +476,85 @@ namespace OneBeyondAutomateVxEpi
 
         }
 
+        public void RebootCameras()
+        {
+            if (!_config.EnableCameraReboot) return;
+
+            foreach (ApiCamera camera in ApiCameras)
+            {
+                Debug.LogInformation(this, "Rebooting camera '{0}'", camera.Id);
+                SetCameraPreset((uint)camera.Id, 99); // preset 99 is reboot
+            }
+        }
+
+        private void SetupCameraRebootSchedule()
+        {
+            if (!_config.EnableCameraReboot)
+            {
+                Debug.LogInformation(this, "Camera reboot scheduling disabled");
+                return;
+            }
+
+            if (_config.CameraRebootHour < 0 || _config.CameraRebootHour > 23 ||
+                _config.CameraRebootMinute < 0 || _config.CameraRebootMinute > 59)
+            {
+                _config.CameraRebootHour = 4;
+                _config.CameraRebootMinute = 30;
+                Debug.LogInformation(this, "Camera reboot time not set or invalid, using default time: {0}:{1:D2}", 
+                    _config.CameraRebootHour, _config.CameraRebootMinute);
+            }
+            else
+            {
+                Debug.LogInformation(this, "Setting up camera reboot schedule for {0}:{1:D2}", 
+                    _config.CameraRebootHour, _config.CameraRebootMinute);
+            }
+            
+            CalculateAndStartRebootTimer();
+        }
+
+        private void CalculateAndStartRebootTimer()
+        {
+            if (_cameraRebootTimer != null)
+            {
+                _cameraRebootTimer.Stop();
+                _cameraRebootTimer.Dispose();
+                _cameraRebootTimer = null;
+            }
+
+            var now = DateTime.Now;
+            var scheduledTime = new DateTime(now.Year, now.Month, now.Day, _config.CameraRebootHour, _config.CameraRebootMinute, 0);
+            
+            if (scheduledTime <= now)
+            {
+                scheduledTime = scheduledTime.AddDays(1);
+            }
+
+            var timeUntilReboot = (long)(scheduledTime - now).TotalMilliseconds;
+            
+            Debug.LogInformation(this, "Next camera reboot scheduled for: {0} (in {1} ms)", 
+                scheduledTime.ToString("yyyy-MM-dd HH:mm:ss"), timeUntilReboot);
+
+            _cameraRebootTimer = new CTimer(OnCameraRebootTimerCallback, timeUntilReboot);
+            _cameraRebootTimer.Reset();
+        }
+
+        private void OnCameraRebootTimerCallback(object obj)
+        {
+            try
+            {
+                Debug.LogInformation(this, "Executing scheduled camera reboot");
+                RebootCameras();
+                
+                CalculateAndStartRebootTimer();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(this, "Error during scheduled camera reboot: {0}", ex.Message);
+                Debug.LogError(this, "Stack trace: {0}", ex.StackTrace);
+                
+                CalculateAndStartRebootTimer();
+            }
+        }
 
         #region Overrides of EssentialsBridgeableDevice
 

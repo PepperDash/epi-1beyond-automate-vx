@@ -14,6 +14,15 @@ namespace OneBeyondAutomateVxEpi
 
             [JsonProperty("cameras")]
             public List<CameraConfig> Cameras { get; set; }
+
+            [JsonProperty("enableCameraReboot")]            
+            public bool EnableCameraReboot { get; set; }
+
+            [JsonProperty("cameraRebootHour")]
+            public int CameraRebootHour { get; set; }
+
+            [JsonProperty("cameraRebootMinute")]
+            public int CameraRebootMinute { get; set; }
         }
 
     /// <summary>
