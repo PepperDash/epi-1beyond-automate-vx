@@ -46,6 +46,8 @@
 
   <ItemGroup>
     <PackageReference Include="PepperDashEssentials" Version="2.18.0-feature-add-IKeyed-to-interfaces.1" />
+	<Reference Include="System.Net" />
+	<Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>

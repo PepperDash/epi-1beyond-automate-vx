@@ -35,40 +35,10 @@ namespace OneBeyondAutomateVxEpi
                 return null;
             }
 
-			IRestfulComms client;
-
-			switch (propertiesConfig.Control.Method)
+			if(propertiesConfig.Control != null)
 			{
-				case eControlMethod.Http:
-				{
-					Debug.LogDebug("[{0}] building {1} client",
-						dc.Key, propertiesConfig.Control.Method);
-
-					client = new GenericClientHttp(string.Format("{0}-http", dc.Key), propertiesConfig.Control);
-
-					break;
-				}
-				case eControlMethod.Https:
-				{
-					Debug.LogDebug("[{0}] building {1} client",
-						dc.Key, propertiesConfig.Control.Method);
-
-					client = new GenericClientHttps(string.Format("{0}-https", dc.Key), propertiesConfig.Control);
-
-					break;
-				}
-				default:
-				{
-					Debug.LogInformation("[{0}] control method {1} not supported, check configuration and upate to 'http' (port 3579) or 'https' (port 4443)",
-						dc.Key, propertiesConfig.Control.Method);
-
-					client = null;
-
-					break;
-				}
+				return new OneBeyondAutomateVx(dc.Key, dc.Name, propertiesConfig);
 			}
-
-			if(client != null ) return new OneBeyondAutomateVx(dc.Key, dc.Name, propertiesConfig, client);
 
 			Debug.LogInformation("[{0}] Factory notice: No control object present for device {1}", dc.Key, dc.Name);
 			return null;

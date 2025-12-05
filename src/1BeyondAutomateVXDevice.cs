@@ -2,6 +2,7 @@
 using Crestron.SimplSharpPro.DeviceSupport;
 using Newtonsoft.Json;
 using OneBeyondAutomateVxEpi.ApiObjects;
+using OneBeyondAutomateVxEpi.Communications;
 using OneBeyondAutomateVxEpi.GenericClients;
 using PepperDash.Core;
 using PepperDash.Core.Logging;
@@ -10,9 +11,11 @@ using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
 using PepperDash.Essentials.Core.DeviceTypeInterfaces;
 using PepperDash.Essentials.Devices.Common.Cameras;
+using Renci.SshNet.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using ApiCamera = OneBeyondAutomateVxEpi.ApiObjects.Camera;
 
 namespace OneBeyondAutomateVxEpi
@@ -23,7 +26,9 @@ namespace OneBeyondAutomateVxEpi
 
         #region IRestfulComms
 
-        private readonly IRestfulComms _client;
+        // private readonly IRestfulComms _client;
+
+        private readonly OneBeyondClient _oneBeyondClient;
 
         private int _responseCode;
         private string _responseContent;
@@ -225,7 +230,7 @@ namespace OneBeyondAutomateVxEpi
 
                 ScenariosSelectableItems.CurrentItem = scenario.Key;
 
-                foreach (var item in ScenariosSelectableItems.Items) 
+                foreach (var item in ScenariosSelectableItems.Items)
                 {
                     var scenarioItem = item.Value as ScenariosSelectableItem;
                     scenarioItem.UpdateSelectedFromFeedback(_currentScenario.Id);
@@ -276,7 +281,7 @@ namespace OneBeyondAutomateVxEpi
             }
             private set
             {
-                if(value == _selectedCamera) return;
+                if (value == _selectedCamera) return;
 
                 _selectedCamera = value;
                 SelectedCameraFeedback.FireUpdate();
@@ -304,47 +309,41 @@ namespace OneBeyondAutomateVxEpi
         private CTimer _cameraRebootTimer;
 
 
-        public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVxConfig config, IRestfulComms client)
+        public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVxConfig config)
             : base(key, name)
         {
             Debug.LogInformation(this, "Constructing new {0} instance", name);
 
             try
             {
-                _client = client;
                 _config = config;
 
-                if (_client == null)
-                {
-                    Debug.LogError(this, "Failed to construct '{1}' using method {0}",
-                        config.Control.Method, name);
-                    return;
-                }
+                _oneBeyondClient = new OneBeyondClient(Key + "-httpClient", config.Control);
 
                 //ResponseCodeFeedback = new IntFeedback(() => ResponseCode);
                 //ResponseContentFeedback = new StringFeedback(() => ResponseContent);
-                ResponseSuccessMessageFeedback = new StringFeedback(() => ResponseSuccessMessage);
-                ResponseErrorMessageFeedback = new StringFeedback(() => ResponseErrorMessage);
+                ResponseSuccessMessageFeedback = new StringFeedback("ResponseSuccessMessageFeedback", () => ResponseSuccessMessage);
+                ResponseErrorMessageFeedback = new StringFeedback("ResponseErrorMessageFeedback", () => ResponseErrorMessage);
 
-                LoginSuccessfulFeedback = new BoolFeedback(() => !string.IsNullOrEmpty(Token));
-                AutoSwitchIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
-                RecordIsOnFeedback = new BoolFeedback(() => RecordIsOn);
-                IsoRecordIsOnFeedback = new BoolFeedback(() => IsoRecordIsOn);
-                StreamIsOnFeedback = new BoolFeedback(() => StreamIsOn);
-                OutputIsOnFeedback = new BoolFeedback(() => OutputIsOn);
-                CameraAddressFeedback = new IntFeedback(() => CameraAddress);
-                CamerasCountFeedback = new IntFeedback(() => ApiCameras.Count);
-                LayoutsCountFeedback = new IntFeedback(() => Layouts.Count);
-                CurrentLayoutNameFeedback = new StringFeedback(() => CurrentLayout.Name);
-                CurrentLayoutIdFeedback = new IntFeedback(() => ConvertIdToInt(CurrentLayout.Id));
-                RoomConfigsCountFeedback = new IntFeedback(() => RoomConfigs.Count);
-                CurrentRoomConfigNameFeedback = new StringFeedback(() => CurrentRoomConfig.Name);
-                CurrentRoomConfigIdFeedback = new IntFeedback(() => CurrentRoomConfig.Id);
-                ScenariosCountFeedback = new IntFeedback(() => Scenarios.Count);
-                CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
-                CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
-                CameraAutoModeIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
-                SelectedCameraFeedback = new StringFeedback(() => _selectedCamera?.Key ?? string.Empty);
+                LoginSuccessfulFeedback = new BoolFeedback("LoginSuccessfulFeedback", () => !string.IsNullOrEmpty(Token));
+                AutoSwitchIsOnFeedback = new BoolFeedback("AutoSwitchIsOnFeedback", () => AutoSwitchIsOn);
+                RecordIsOnFeedback = new BoolFeedback("RecordIsOnFeedback", () => RecordIsOn);
+                IsoRecordIsOnFeedback = new BoolFeedback("IsoRecordIsOnFeedback", () => IsoRecordIsOn);
+                StreamIsOnFeedback = new BoolFeedback("StreamIsOnFeedback", () => StreamIsOn);
+                OutputIsOnFeedback = new BoolFeedback("OutputIsOnFeedback", () => OutputIsOn);
+                CameraAddressFeedback = new IntFeedback("CameraAddressFeedback", () => CameraAddress);
+                CamerasCountFeedback = new IntFeedback("CamerasCountFeedback", () => ApiCameras.Count);
+                LayoutsCountFeedback = new IntFeedback("LaoutsCountFeedback", () => Layouts.Count);
+                CurrentLayoutNameFeedback = new StringFeedback("CurrentLayoutNameFeedback", () => CurrentLayout.Name);
+                CurrentLayoutIdFeedback = new IntFeedback("CurrentLayoutIdFeedback", () => ConvertIdToInt(CurrentLayout.Id));
+                RoomConfigsCountFeedback = new IntFeedback("RoomConfigsCountFeedback", () => RoomConfigs.Count);
+                CurrentRoomConfigNameFeedback = new StringFeedback("CurrentRoomConfigNameFeedback", () => CurrentRoomConfig.Name);
+                CurrentRoomConfigIdFeedback = new IntFeedback("CurrentRoomConfigIdFeedback", () => CurrentRoomConfig.Id);
+                ScenariosCountFeedback = new IntFeedback("ScenariosCountFeedback", () => Scenarios.Count);
+                CurrentScenarioNameFeedback = new StringFeedback("CurrentScenarioNameFeedback", () => CurrentScenario.Name);
+                CurrentScenarioIdFeedback = new IntFeedback("CurrentScenarioIdFeedback", () => CurrentScenario.Id);
+                CameraAutoModeIsOnFeedback = new BoolFeedback("CameraAutoModeIsOnFeedback", () => AutoSwitchIsOn);
+                SelectedCameraFeedback = new StringFeedback("SelectedCameraFeedback", () => _selectedCamera?.Key ?? string.Empty);
 
                 if (ApiCameras == null)
                     ApiCameras = new List<ApiCamera>();
@@ -356,15 +355,15 @@ namespace OneBeyondAutomateVxEpi
                     Scenarios = new List<NameWithIdInt>();
 
 
-                _client.ResponseReceived += OnResponseReceived;
+                // _client.ResponseReceived += OnResponseReceived;
 
                 SetupCameraRebootSchedule();
             }
             catch (Exception ex)
             {
-                Debug.LogError(this, "OneBeyondAutomateVx Exception Message: {0}", ex.Message);
-                Debug.LogError(this, "OneBeyondAutomateVx Stack Trace: {0}", ex.StackTrace);
-                if (ex.InnerException != null) Debug.LogError(this, "OneBeyondAutomateVx Inner Exception {0}", ex.InnerException);
+                this.LogError("OneBeyondAutomateVx Exception Message: {0}", ex.Message);
+                this.LogError("OneBeyondAutomateVx Stack Trace: {0}", ex.StackTrace);
+                if (ex.InnerException != null) this.LogError("OneBeyondAutomateVx Inner Exception {0}", ex.InnerException);
             }
         }
 
@@ -500,15 +499,15 @@ namespace OneBeyondAutomateVxEpi
             {
                 _config.CameraRebootHour = 4;
                 _config.CameraRebootMinute = 30;
-                Debug.LogInformation(this, "Camera reboot time not set or invalid, using default time: {0}:{1:D2}", 
+                Debug.LogInformation(this, "Camera reboot time not set or invalid, using default time: {0}:{1:D2}",
                     _config.CameraRebootHour, _config.CameraRebootMinute);
             }
             else
             {
-                Debug.LogInformation(this, "Setting up camera reboot schedule for {0}:{1:D2}", 
+                Debug.LogInformation(this, "Setting up camera reboot schedule for {0}:{1:D2}",
                     _config.CameraRebootHour, _config.CameraRebootMinute);
             }
-            
+
             CalculateAndStartRebootTimer();
         }
 
@@ -523,15 +522,15 @@ namespace OneBeyondAutomateVxEpi
 
             var now = DateTime.Now;
             var scheduledTime = new DateTime(now.Year, now.Month, now.Day, _config.CameraRebootHour, _config.CameraRebootMinute, 0);
-            
+
             if (scheduledTime <= now)
             {
                 scheduledTime = scheduledTime.AddDays(1);
             }
 
             var timeUntilReboot = (long)(scheduledTime - now).TotalMilliseconds;
-            
-            Debug.LogInformation(this, "Next camera reboot scheduled for: {0} (in {1} ms)", 
+
+            Debug.LogInformation(this, "Next camera reboot scheduled for: {0} (in {1} ms)",
                 scheduledTime.ToString("yyyy-MM-dd HH:mm:ss"), timeUntilReboot);
 
             _cameraRebootTimer = new CTimer(OnCameraRebootTimerCallback, timeUntilReboot);
@@ -544,14 +543,14 @@ namespace OneBeyondAutomateVxEpi
             {
                 Debug.LogInformation(this, "Executing scheduled camera reboot");
                 RebootCameras();
-                
+
                 CalculateAndStartRebootTimer();
             }
             catch (Exception ex)
             {
                 Debug.LogError(this, "Error during scheduled camera reboot: {0}", ex.Message);
                 Debug.LogError(this, "Stack trace: {0}", ex.StackTrace);
-                
+
                 CalculateAndStartRebootTimer();
             }
         }
@@ -736,357 +735,6 @@ namespace OneBeyondAutomateVxEpi
 
         #endregion
 
-        private void OnResponseReceived(object sender, GenericClientResponseEventArgs args)
-        {
-            try
-            {
-                Debug.LogVerbose(this,
-                    "OnResponseReceived: Request = {0} > Code = {1} | ContentString = {2}",
-                    args.Request, args.Code, args.ContentString);
-
-                var request = args.Request.ToLower();
-                var content = args.ContentString;
-
-                switch (request)
-                {
-                    case "get-token":
-                        {
-                            var response = ApiResponseParser.ParseTokenResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                Token = response.Token;
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            // if not OK, clear the token
-                            ResponseErrorMessage = response.Error;
-                            ClearToken();
-
-                            break;
-                        }
-                    case "autoswitchstatus":
-                        {
-                            var response = ApiResponseParser.ParseResultResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                Debug.LogVerbose(this, "OnResponseReceived: 'autoswitchstatus' results {0}", response.Results.ToString());
-                                AutoSwitchIsOn = (response.Results == true);
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "startautoswitch":
-                    case "stopautoswitch":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                GetAutoSwitchStatus();
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "outputstatus":
-                        {
-                            var response = ApiResponseParser.ParseResultResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                OutputIsOn = response.Results;
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "startouput":
-                    case "stopoutput":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                GetOutputStatus();
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "streamstatus":
-                        {
-                            var response = ApiResponseParser.ParseResultResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                StreamIsOn = response.Results;
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "startstream":
-                    case "stopstream":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                GetStreamStatus();
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "recordstatus":
-                        {
-                            var response = ApiResponseParser.ParseRecordStatusResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                RecordIsOn = (response.RecordState != 1);
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "isorecordstatus":
-                        {
-                            var response = ApiResponseParser.ParseResultResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                IsoRecordIsOn = response.Results;
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "getcameras":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                ApiCameras = response.Cameras;
-                                CamerasCountFeedback.FireUpdate();
-
-                                var handler = CamerasChanged;
-                                if (handler != null)
-                                {
-                                    handler(this, null);
-                                }
-
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-                            break;
-                        }
-                    case "camerastatus":
-                        {
-                            var response = ApiResponseParser.ParseCameraAddressResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                CameraAddress = Convert.ToInt16(response.Address);
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "manualswitchcamera":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                GetCameraStatus();
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "getlayouts":
-                        {
-                            var response = ApiResponseParser.ParseLayoutsResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                Layouts = response.Layouts;
-                                LayoutsCountFeedback.FireUpdate();
-
-                                var handler = LayoutsChanged;
-                                if (handler != null)
-                                {
-                                    handler(this, null);
-                                }
-
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "layoutstatus":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                CurrentLayout = response.Layout;
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "changelayout":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                GetLayoutStatus();
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "getroomconfigs":
-                        {
-                            var response = ApiResponseParser.ParseRoomConfigsResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                RoomConfigs = response.RoomConfigs;
-                                RoomConfigsCountFeedback.FireUpdate();
-
-                                var handler = RoomConfigsChanged;
-                                if (handler != null)
-                                {
-                                    handler(this, null);
-                                }
-
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "roomconfigstatus":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                CurrentRoomConfig = response.RoomConfig;
-                                ResponseSuccessMessage = response.Message;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "getscenarios":
-                        {
-                            var response = ApiResponseParser.ParseScenariosResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                Scenarios = response.Scenarios;
-                                ScenariosCountFeedback.FireUpdate();
-
-                                var handler = ScenariosChanged;
-                                if (handler != null)
-                                {
-                                    handler(this, null);
-                                }
-
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "scenariostatus":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                CurrentScenario = response.Scenario;
-                                ResponseSuccessMessage = response.Message;
-
-                                GetAutoSwitchStatus();
-                                GetOutputStatus();
-                                GetStreamStatus();
-
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Error;
-
-                            break;
-                        }
-                    case "gotoscenario":
-                        {
-                            var response = ApiResponseParser.ParseRootResponse(content);
-                            if (response.Status == "OK")
-                            {
-                                GetScenarioStatus();
-                                ResponseSuccessMessage = response.Message;
-                                return;
-                            }
-
-                            ResponseErrorMessage = response.Message;
-                            break;
-                        }
-                    default:
-                        {
-                            ResponseCode = args.Code;
-                            ResponseContent = content;
-                            Debug.LogVerbose(this, "OnResponseReceived: Code = {0}, Content = {1}", ResponseCode, ResponseContent);
-
-                            break;
-                        }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(this, "OnResponseReceived Exception Message for request: {0}", args.Request);
-                Debug.LogError(this, "OnResponseReceived Exception Message: {0}", ex.Message);
-                Debug.LogError(this, "OnResponseReceived Stack Trace: {0}", ex.StackTrace);
-                if (ex.InnerException != null) Debug.LogError(this, "OnResponseReceived Inner Exception {0}", ex.InnerException);
-            }
-        }
-
         private void OnCamerasChanged(BasicTriList trilist, OneBeyondAutomateVxBridgeJoinMap joinMap)
         {
             if (ApiCameras == null || ApiCameras.Count == 0)
@@ -1171,7 +819,16 @@ namespace OneBeyondAutomateVxEpi
         /// </summary>
         public void GetToken()
         {
-            _client.SendRequest("POST", "Get-Token", string.Empty);
+            // _client.SendRequest("POST", "Get-Token", string.Empty);
+            var response = _oneBeyondClient.SendRequest<TokenResponse>(HttpMethod.Post, "Get-Token");
+
+            Token = response.Token;
+            ResponseSuccessMessage = response.Message;
+
+            if (response.Status != "OK")
+            {
+                ClearToken();
+            }
         }
 
         /// <summary>
@@ -1214,7 +871,17 @@ namespace OneBeyondAutomateVxEpi
         public void GetAutoSwitchStatus()
         {
             var url = string.Format("{0}/AutoSwitchStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                Debug.LogVerbose(this, "OnResponseReceived: 'autoswitchstatus' results {0}", response.Results.ToString());
+                AutoSwitchIsOn = (response.Results == true);
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1227,7 +894,18 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartAutoSwitch", ApiPath)
                 : string.Format("{0}/StopAutoSwitch", ApiPath);
 
-            _client.SendRequest("POST", url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
+            if (response.Status == "OK")
+            {
+                GetAutoSwitchStatus();
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
         }
 
         /// <summary>
@@ -1236,7 +914,17 @@ namespace OneBeyondAutomateVxEpi
         public void GetRecordStatus()
         {
             var url = string.Format("{0}/RecordStatusResponse", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<RecordStatusResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                OutputIsOn = response.Results;
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1270,7 +958,8 @@ namespace OneBeyondAutomateVxEpi
                     break;
             }
 
-            _client.SendRequest("POST", url, string.Empty);
+
+            _oneBeyondClient.SendRequest<object>(HttpMethod.Post, url);
         }
 
         /// <summary>
@@ -1279,7 +968,17 @@ namespace OneBeyondAutomateVxEpi
         public void GetIsoRecordStatus()
         {
             var url = string.Format("{0}/ISORecordStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                IsoRecordIsOn = response.Results;
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1292,7 +991,13 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartISORecord", ApiPath)
                 : string.Format("{0}/StopISORecord", ApiPath);
 
-            _client.SendRequest("POST", url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1301,7 +1006,17 @@ namespace OneBeyondAutomateVxEpi
         public void GetStreamStatus()
         {
             var url = string.Format("{0}/StreamStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                StreamIsOn = response.Results;
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1314,7 +1029,16 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartStream", ApiPath)
                 : string.Format("{0}/StopStream", ApiPath);
 
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+
+            if (response.Status == "OK")
+            {
+                GetStreamStatus();
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1323,7 +1047,17 @@ namespace OneBeyondAutomateVxEpi
         public void GetOutputStatus()
         {
             var url = string.Format("{0}/OutputStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                OutputIsOn = response.Results;
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1336,7 +1070,16 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartOutput", ApiPath)
                 : string.Format("{0}/StopOutput", ApiPath);
 
-            _client.SendRequest("POST", url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+
+            if (response.Status == "OK")
+            {
+                GetOutputStatus();
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1345,7 +1088,26 @@ namespace OneBeyondAutomateVxEpi
         public void GetLayouts()
         {
             var url = string.Format("{0}/GetLayouts", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<LayoutsResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                Layouts = response.Layouts;
+                LayoutsCountFeedback.FireUpdate();
+
+                var handler = LayoutsChanged;
+                if (handler != null)
+                {
+                    handler(this, null);
+                }
+
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
+
         }
 
         /// <summary>
@@ -1354,7 +1116,17 @@ namespace OneBeyondAutomateVxEpi
         public void GetLayoutStatus()
         {
             var url = string.Format("{0}/LayoutStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                CurrentLayout = response.Layout;
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1375,7 +1147,17 @@ namespace OneBeyondAutomateVxEpi
                 id = c
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status == "OK")
+            {
+                GetLayoutStatus();
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         private char ConvertIdToString(int id)
@@ -1395,7 +1177,16 @@ namespace OneBeyondAutomateVxEpi
         public void GetRoomConfigStatus()
         {
             var url = string.Format("{0}/RoomConfigStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                CurrentRoomConfig = response.RoomConfig;
+                ResponseSuccessMessage = response.Message;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1404,7 +1195,25 @@ namespace OneBeyondAutomateVxEpi
         public void GetRoomConfigs()
         {
             var url = string.Format("{0}/GetRoomConfigs", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<RoomConfigsResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                RoomConfigs = response.RoomConfigs;
+                RoomConfigsCountFeedback.FireUpdate();
+
+                var handler = RoomConfigsChanged;
+                if (handler != null)
+                {
+                    handler(this, null);
+                }
+
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1419,7 +1228,14 @@ namespace OneBeyondAutomateVxEpi
                 id = configId
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
+            // TODO: Not sure if we need to deal with the response here?
         }
 
         /// <summary>
@@ -1434,7 +1250,15 @@ namespace OneBeyondAutomateVxEpi
                 id = configId
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
+            // TODO: Not sure if we need to deal with the response here?
         }
 
         /// <summary>
@@ -1443,7 +1267,13 @@ namespace OneBeyondAutomateVxEpi
         public void GoHome()
         {
             var url = string.Format("{0}/GoHome", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1452,7 +1282,25 @@ namespace OneBeyondAutomateVxEpi
         public void GetCameras()
         {
             var url = string.Format("{0}/GetCameras", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                ApiCameras = response.Cameras;
+                CamerasCountFeedback.FireUpdate();
+
+                var handler = CamerasChanged;
+                if (handler != null)
+                {
+                    handler(this, null);
+                }
+
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1461,7 +1309,17 @@ namespace OneBeyondAutomateVxEpi
         public void GetCameraStatus()
         {
             var url = string.Format("{0}/CameraStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+
+            var response = _oneBeyondClient.SendRequest<CameraAddressResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response.Status == "OK")
+            {
+                CameraAddress = Convert.ToInt16(response.Address);
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1476,7 +1334,17 @@ namespace OneBeyondAutomateVxEpi
                 address = cameraAddress.ToString()
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status == "OK")
+            {
+                GetCameraStatus();
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1493,7 +1361,14 @@ namespace OneBeyondAutomateVxEpi
                 pre = presetId.ToString()
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1510,7 +1385,14 @@ namespace OneBeyondAutomateVxEpi
                 pre = presetId.ToString()
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1520,7 +1402,14 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ImportCameraPresets", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
+
         }
 
         /// <summary>
@@ -1530,7 +1419,13 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ExportCameraPresets", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1549,7 +1444,13 @@ namespace OneBeyondAutomateVxEpi
                 deleteSource = delete
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1569,7 +1470,13 @@ namespace OneBeyondAutomateVxEpi
                 drives = driveLetters
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1579,7 +1486,13 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/RecodingSpaceAvail", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1589,7 +1502,13 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Sleep", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1599,7 +1518,13 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Wake", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1609,7 +1534,13 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Restart", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1619,7 +1550,13 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/CloseWirecast", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status != "OK")
+            {
+                ResponseErrorMessage = response.Error;
+                return;
+            }
         }
 
         /// <summary>
@@ -1629,7 +1566,25 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/GetScenarios", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<ScenariosResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status == "OK")
+            {
+                Scenarios = response.Scenarios;
+                ScenariosCountFeedback.FireUpdate();
+
+                var handler = ScenariosChanged;
+                if (handler != null)
+                {
+                    handler(this, null);
+                }
+
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
+
         }
 
         /// <summary>
@@ -1639,7 +1594,21 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ScenarioStatus", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status == "OK")
+            {
+                CurrentScenario = response.Scenario;
+                ResponseSuccessMessage = response.Message;
+
+                GetAutoSwitchStatus();
+                GetOutputStatus();
+                GetStreamStatus();
+
+                return;
+            }
+
+            ResponseErrorMessage = response.Error;
         }
 
         /// <summary>
@@ -1654,7 +1623,16 @@ namespace OneBeyondAutomateVxEpi
                 id = scenarioId
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response.Status == "OK")
+            {
+                GetScenarioStatus();
+                ResponseSuccessMessage = response.Message;
+                return;
+            }
+
+            ResponseErrorMessage = response.Message;
         }
 
         public void CameraAutoModeOn()
@@ -1690,7 +1668,7 @@ namespace OneBeyondAutomateVxEpi
 
             this.LogDebug("SelectCamera: Setting camera to {camera}", camera?.Id);
             SetCamera(camera.Id);
-            
+
         }
     }
 }

@@ -6,7 +6,7 @@ using PepperDash.Core;
 
 namespace OneBeyondAutomateVxEpi.GenericClients
 {
-	public static class GenericClientHelpers
+	public static class AuthenticationHelpers
 	{
 		// encodes username and password, returning a Base64 encoded string
 		public static string EncodeBase64(string key, string username, string password)
