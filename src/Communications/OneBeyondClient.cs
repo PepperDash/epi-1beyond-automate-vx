@@ -34,7 +34,7 @@ namespace OneBeyondAutomateVxEpi.Communications
                     port);
 
             _httpClient.BaseAddress = new Uri(baseAddress);
-            _httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
+            _httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
             var username = controlConfig.TcpSshProperties.Username ?? "";
             var password = controlConfig.TcpSshProperties.Password ?? "";
