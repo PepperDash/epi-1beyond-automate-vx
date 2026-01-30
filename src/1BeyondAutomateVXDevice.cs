@@ -43,9 +43,8 @@ namespace OneBeyondAutomateVxEpi
             set
             {
                 _responseCode = value;
-                Debug.LogVerbose(this, "ResponseCode: {0}", _responseCode);
-                if (ResponseCodeFeedback != null)
-                    ResponseCodeFeedback.FireUpdate();
+                this.LogVerbose("ResponseCode: {responseCode}", _responseCode);
+                ResponseCodeFeedback?.FireUpdate();
             }
         }
 
@@ -55,9 +54,8 @@ namespace OneBeyondAutomateVxEpi
             set
             {
                 _responseContent = value;
-                Debug.LogVerbose(this, "ResponseContent: {0}", _responseContent);
-                if (ResponseContentFeedback != null)
-                    ResponseContentFeedback.FireUpdate();
+                this.LogVerbose("ResponseContent: {responseContent}", _responseContent);
+                ResponseContentFeedback?.FireUpdate();
             }
         }
 
@@ -67,8 +65,8 @@ namespace OneBeyondAutomateVxEpi
             set
             {
                 _responseSuccessMessage = value;
-                Debug.LogVerbose(this, "ResponseSuccessMessage: {0}", _responseSuccessMessage);
-                ResponseSuccessMessageFeedback.FireUpdate();
+                this.LogVerbose("ResponseSuccessMessage: {responseSuccessMessage}", _responseSuccessMessage);
+                ResponseSuccessMessageFeedback?.FireUpdate();
             }
         }
 
@@ -78,7 +76,7 @@ namespace OneBeyondAutomateVxEpi
             set
             {
                 _responseErrorMessage = value;
-                Debug.LogVerbose(this, "ResponseErrorMessage: {0}", _responseErrorMessage);
+                this.LogVerbose("ResponseErrorMessage: {responseErrorMessage}", _responseErrorMessage);
                 ResponseErrorMessageFeedback.FireUpdate();
             }
         }
@@ -312,7 +310,7 @@ namespace OneBeyondAutomateVxEpi
         public OneBeyondAutomateVx(string key, string name, OneBeyondAutomateVxConfig config)
             : base(key, name)
         {
-            Debug.LogInformation(this, "Constructing new {0} instance", name);
+            this.LogInformation("Constructing new {name} instance", name);
 
             try
             {
@@ -361,9 +359,8 @@ namespace OneBeyondAutomateVxEpi
             }
             catch (Exception ex)
             {
-                this.LogError("OneBeyondAutomateVx Exception Message: {0}", ex.Message);
-                this.LogError("OneBeyondAutomateVx Stack Trace: {0}", ex.StackTrace);
-                if (ex.InnerException != null) this.LogError("OneBeyondAutomateVx Inner Exception {0}", ex.InnerException);
+                this.LogError("OneBeyondAutomateVx Exception: {message}", ex.Message);
+                this.LogError(ex, "OneBeyondAutomateVx Stack Trace: ");
             }
         }
 
@@ -466,7 +463,7 @@ namespace OneBeyondAutomateVxEpi
 
                 if (cam == null)
                 {
-                    Debug.LogError(this, "Camera with key '{0}' not found in DeviceManager", camera.DeviceKey);
+                    this.LogError("Camera with key '{deviceKey}' not found in DeviceManager", camera.DeviceKey);
                     continue;
                 }
 
@@ -481,7 +478,7 @@ namespace OneBeyondAutomateVxEpi
 
             foreach (ApiCamera camera in ApiCameras)
             {
-                Debug.LogInformation(this, "Rebooting camera '{0}'", camera.Id);
+                this.LogInformation("Rebooting camera '{cameraId}'", camera.Id);
                 SetCameraPreset((uint)camera.Id, 99); // preset 99 is reboot
             }
         }
@@ -490,7 +487,7 @@ namespace OneBeyondAutomateVxEpi
         {
             if (!_config.EnableCameraReboot)
             {
-                Debug.LogInformation(this, "Camera reboot scheduling disabled");
+                this.LogInformation("Camera reboot scheduling disabled");
                 return;
             }
 
@@ -499,12 +496,12 @@ namespace OneBeyondAutomateVxEpi
             {
                 _config.CameraRebootHour = 4;
                 _config.CameraRebootMinute = 30;
-                Debug.LogInformation(this, "Camera reboot time not set or invalid, using default time: {0}:{1:D2}",
+                this.LogInformation("Camera reboot time not set or invalid, using default time: {hour}:{minute:D2}",
                     _config.CameraRebootHour, _config.CameraRebootMinute);
             }
             else
             {
-                Debug.LogInformation(this, "Setting up camera reboot schedule for {0}:{1:D2}",
+                this.LogInformation("Setting up camera reboot schedule for {hour}:{minute:D2}",
                     _config.CameraRebootHour, _config.CameraRebootMinute);
             }
 
@@ -530,7 +527,7 @@ namespace OneBeyondAutomateVxEpi
 
             var timeUntilReboot = (long)(scheduledTime - now).TotalMilliseconds;
 
-            Debug.LogInformation(this, "Next camera reboot scheduled for: {0} (in {1} ms)",
+            this.LogInformation("Next camera reboot scheduled for: {scheduledTime} (in {timeUntilReboot} ms)",
                 scheduledTime.ToString("yyyy-MM-dd HH:mm:ss"), timeUntilReboot);
 
             _cameraRebootTimer = new CTimer(OnCameraRebootTimerCallback, timeUntilReboot);
@@ -541,15 +538,15 @@ namespace OneBeyondAutomateVxEpi
         {
             try
             {
-                Debug.LogInformation(this, "Executing scheduled camera reboot");
+                this.LogInformation("Executing scheduled camera reboot");
                 RebootCameras();
 
                 CalculateAndStartRebootTimer();
             }
             catch (Exception ex)
             {
-                Debug.LogError(this, "Error during scheduled camera reboot: {0}", ex.Message);
-                Debug.LogError(this, "Stack trace: {0}", ex.StackTrace);
+                this.LogError("Exception: Error during scheduled camera reboot {message}", ex.Message);
+                this.LogError(ex, "Stack trace: ");
 
                 CalculateAndStartRebootTimer();
             }
@@ -580,8 +577,8 @@ namespace OneBeyondAutomateVxEpi
                 joinMap.SetCustomJoinData(customJoins);
             }
 
-            Debug.LogDebug("Linking to Trilist '{0}'", trilist.ID.ToString("X"));
-            Debug.LogInformation("Linking to Bridge Type {0}", GetType().Name);
+            this.LogDebug("Linking to Trilist '{trilistId}'", trilist.ID.ToString("X"));
+            this.LogInformation("Linking to Bridge Type {bridgeType}", GetType().Name);
 
             // Linked Feedbacks
             if (ResponseCodeFeedback != null)
@@ -682,8 +679,7 @@ namespace OneBeyondAutomateVxEpi
 
                 if (camId == 0 || presetId == 0)
                 {
-                    Debug.LogInformation(this,
-                        "Unable to recall preset.  Please specify values for both CameraToRecallPresetOn and CameraPresetToRecall analog joins");
+                    this.LogInformation("Unable to recall preset.  Please specify values for both CameraToRecallPresetOn and CameraPresetToRecall analog joins");
                     return;
                 }
 
@@ -739,7 +735,7 @@ namespace OneBeyondAutomateVxEpi
         {
             if (ApiCameras == null || ApiCameras.Count == 0)
             {
-                Debug.LogVerbose(this, "OnCamerasChanged: Cameras is null or has not entries");
+                this.LogVerbose("OnCamerasChanged: Cameras is null or has not entries");
                 return;
             }
 
@@ -758,7 +754,7 @@ namespace OneBeyondAutomateVxEpi
         {
             if (Layouts == null || Layouts.Count == 0)
             {
-                Debug.LogVerbose(this, "OnLayoutsChanged: Layouts is null or has not entries.");
+                this.LogVerbose("OnLayoutsChanged: Layouts is null or has not entries.");
                 return;
             }
 
@@ -776,7 +772,7 @@ namespace OneBeyondAutomateVxEpi
         {
             if (RoomConfigs == null || RoomConfigs.Count == 0)
             {
-                Debug.LogVerbose(this, "OnRoomConfigsChanged: RoomConfigs is null or has not entries.");
+                this.LogVerbose("OnRoomConfigsChanged: RoomConfigs is null or has not entries.");
                 return;
             }
 
@@ -793,7 +789,7 @@ namespace OneBeyondAutomateVxEpi
         {
             if (Scenarios == null || Scenarios.Count == 0)
             {
-                Debug.LogVerbose(this, "OnScenariosChanged: Scenarios is null or has not entries.");
+                this.LogVerbose("OnScenariosChanged: Scenarios is null or has not entries.");
                 return;
             }
 
@@ -821,6 +817,13 @@ namespace OneBeyondAutomateVxEpi
         {
             // _client.SendRequest("POST", "Get-Token", string.Empty);
             var response = _oneBeyondClient.SendRequest<TokenResponse>(HttpMethod.Post, "Get-Token");
+
+            if (response == null)
+            {
+                this.LogError("GetToken: No response from device, clearing token");
+                ClearToken();
+                return;
+            }
 
             Token = response.Token;
             ResponseSuccessMessage = response.Message;
@@ -873,9 +876,15 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/AutoSwitchStatus", ApiPath);
             var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
 
+            if (response == null)
+            {
+                this.LogError("GetAutoSwitchStatus: No response from device");
+                return;
+            }
+
             if (response.Status == "OK")
             {
-                Debug.LogVerbose(this, "OnResponseReceived: 'autoswitchstatus' results {0}", response.Results.ToString());
+                this.LogVerbose("OnResponseReceived: 'autoswitchstatus' results {responseResults}", response.Results.ToString());
                 AutoSwitchIsOn = (response.Results == true);
                 ResponseSuccessMessage = response.Message;
                 return;
@@ -895,6 +904,12 @@ namespace OneBeyondAutomateVxEpi
                 : string.Format("{0}/StopAutoSwitch", ApiPath);
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+            if (response == null)
+            {
+                this.LogError("SetAutoSwitch: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -916,6 +931,11 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/RecordStatusResponse", ApiPath);
 
             var response = _oneBeyondClient.SendRequest<RecordStatusResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response == null)
+            {
+                this.LogError("GetRecordStatus: No response from device");
+            }
 
             if (response.Status == "OK")
             {
@@ -971,6 +991,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
 
+            if (response == null)
+            {
+                this.LogError("GetIsoRecordStatus: No response from device");
+                return;
+            }
+
             if (response.Status == "OK")
             {
                 IsoRecordIsOn = response.Results;
@@ -993,6 +1019,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
 
+            if (response == null)
+            {
+                this.LogError("SetIsoRecord: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1008,6 +1040,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/StreamStatus", ApiPath);
 
             var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response == null)
+            {
+                this.LogError("GetStreamStatus: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1032,6 +1070,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
 
+            if (response == null)
+            {
+                this.LogError("SetStream: No response from device");
+                return;
+            }
+
             if (response.Status == "OK")
             {
                 GetStreamStatus();
@@ -1049,6 +1093,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/OutputStatus", ApiPath);
 
             var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response == null)
+            {
+                this.LogError("GetOutputStatus: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1072,6 +1122,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
 
+            if (response == null)
+            {
+                this.LogError("SetOutput: No response from device");
+                return;
+            }
+
             if (response.Status == "OK")
             {
                 GetOutputStatus();
@@ -1090,6 +1146,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/GetLayouts", ApiPath);
 
             var response = _oneBeyondClient.SendRequest<LayoutsResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response == null)
+            {
+                this.LogError("GetLayouts: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1118,6 +1180,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/LayoutStatus", ApiPath);
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response == null)
+            {
+                this.LogError("GetLayoutStatus: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1150,6 +1218,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("SetLayout: No response from device");
+                return;
+            }
+
             if (response.Status == "OK")
             {
                 GetLayoutStatus();
@@ -1180,6 +1254,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
 
+            if (response == null)
+            {
+                this.LogError("GetRoomConfigStatus: No response from device");
+                return; 
+            }
+
             if (response.Status == "OK")
             {
                 CurrentRoomConfig = response.RoomConfig;
@@ -1197,6 +1277,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/GetRoomConfigs", ApiPath);
 
             var response = _oneBeyondClient.SendRequest<RoomConfigsResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response == null)
+            {
+                this.LogError("GetRoomConfigs: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1230,6 +1316,12 @@ namespace OneBeyondAutomateVxEpi
             var content = JsonConvert.SerializeObject(jo);
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("SetRoomConfig: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1253,6 +1345,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("ForceSetRoomConfig: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1269,6 +1367,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/GoHome", ApiPath);
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
 
+            if (response == null)
+            {
+                this.LogError("GoHome: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1284,6 +1388,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/GetCameras", ApiPath);
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+
+            if (response == null)
+            {
+                this.LogError("GetCameras: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1312,6 +1422,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<CameraAddressResponse>(HttpMethod.Post, url, string.Empty);
 
+            if (response == null)
+            {
+                this.LogError("GetCameraStatus: No response from device");
+                return;
+            }
+
             if (response.Status == "OK")
             {
                 CameraAddress = Convert.ToInt16(response.Address);
@@ -1336,6 +1452,12 @@ namespace OneBeyondAutomateVxEpi
             var content = JsonConvert.SerializeObject(jo);
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response == null)
+            {
+                this.LogError("SetCamera: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1364,6 +1486,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("SetCameraPreset: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1388,6 +1516,12 @@ namespace OneBeyondAutomateVxEpi
 
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("SaveCameraPreset: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1403,6 +1537,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/ImportCameraPresets", ApiPath);
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response == null)
+            {
+                this.LogError("ImportCameraPresets: No response from device");
+                return;
+            }
 
             if (response.Status != "OK")
             {
@@ -1420,6 +1560,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/ExportCameraPresets", ApiPath);
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response == null)
+            {
+                this.LogError("ExportCameraPresets: No response from device");
+                return;
+            }
 
             if (response.Status != "OK")
             {
@@ -1445,6 +1591,12 @@ namespace OneBeyondAutomateVxEpi
             };
             var content = JsonConvert.SerializeObject(jo);
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response == null)
+            {
+                this.LogError("CopyFiles: No response from device");
+                return;
+            }
 
             if (response.Status != "OK")
             {
@@ -1472,6 +1624,12 @@ namespace OneBeyondAutomateVxEpi
             var content = JsonConvert.SerializeObject(jo);
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("GetStorageSpaceAvailable: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1487,6 +1645,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/RecodingSpaceAvail", ApiPath);
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response == null)
+            {
+                this.LogError("GetRecordingSpaceAvailable: No response from device");
+                return;
+            }
 
             if (response.Status != "OK")
             {
@@ -1504,6 +1668,12 @@ namespace OneBeyondAutomateVxEpi
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("SetSleep: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1519,6 +1689,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/Wake", ApiPath);
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response == null)
+            {
+                this.LogError("SetWake: No response from device");
+                return;
+            }
 
             if (response.Status != "OK")
             {
@@ -1536,6 +1712,12 @@ namespace OneBeyondAutomateVxEpi
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("Restart: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1552,6 +1734,12 @@ namespace OneBeyondAutomateVxEpi
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("SetCloseWirecast: No response from device");
+                return;
+            }
+
             if (response.Status != "OK")
             {
                 ResponseErrorMessage = response.Error;
@@ -1567,6 +1755,12 @@ namespace OneBeyondAutomateVxEpi
             var url = string.Format("{0}/GetScenarios", ApiPath);
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<ScenariosResponse>(HttpMethod.Post, url, content);
+
+            if (response == null)
+            {
+                this.LogError("GetScenarios: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1596,6 +1790,12 @@ namespace OneBeyondAutomateVxEpi
             var content = string.Empty;
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
 
+            if (response == null)
+            {
+                this.LogError("GetScenarioStatus: No response from device");
+                return;
+            }
+
             if (response.Status == "OK")
             {
                 CurrentScenario = response.Scenario;
@@ -1624,6 +1824,12 @@ namespace OneBeyondAutomateVxEpi
             };
             var content = JsonConvert.SerializeObject(jo);
             var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+
+            if (response == null)
+            {
+                this.LogError("SetScenario: No response from device");
+                return;
+            }
 
             if (response.Status == "OK")
             {
@@ -1668,7 +1874,6 @@ namespace OneBeyondAutomateVxEpi
 
             this.LogDebug("SelectCamera: Setting camera to {camera}", camera?.Id);
             SetCamera(camera.Id);
-
         }
     }
 }
