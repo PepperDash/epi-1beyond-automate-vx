@@ -874,7 +874,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetAutoSwitchStatus()
         {
             var url = string.Format("{0}/AutoSwitchStatus", ApiPath);
-            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -903,7 +903,7 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartAutoSwitch", ApiPath)
                 : string.Format("{0}/StopAutoSwitch", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty, Token);
             if (response == null)
             {
                 this.LogError("SetAutoSwitch: No response from device");
@@ -930,7 +930,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/RecordStatusResponse", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<RecordStatusResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RecordStatusResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -979,7 +979,7 @@ namespace OneBeyondAutomateVxEpi
             }
 
 
-            _oneBeyondClient.SendRequest<object>(HttpMethod.Post, url);
+            _oneBeyondClient.SendRequest<object>(HttpMethod.Post, url, string.Empty, Token);
         }
 
         /// <summary>
@@ -989,7 +989,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ISORecordStatus", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1017,7 +1017,7 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartISORecord", ApiPath)
                 : string.Format("{0}/StopISORecord", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1039,7 +1039,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/StreamStatus", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1068,7 +1068,7 @@ namespace OneBeyondAutomateVxEpi
                 : string.Format("{0}/StopStream", ApiPath);
 
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1092,7 +1092,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/OutputStatus", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<ResultResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1120,7 +1120,7 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartOutput", ApiPath)
                 : string.Format("{0}/StopOutput", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1145,7 +1145,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/GetLayouts", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<LayoutsResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<LayoutsResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1179,7 +1179,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/LayoutStatus", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1216,7 +1216,7 @@ namespace OneBeyondAutomateVxEpi
             };
             var content = JsonConvert.SerializeObject(jo);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1252,7 +1252,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/RoomConfigStatus", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1276,7 +1276,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/GetRoomConfigs", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<RoomConfigsResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RoomConfigsResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1314,7 +1314,7 @@ namespace OneBeyondAutomateVxEpi
                 id = configId
             };
             var content = JsonConvert.SerializeObject(jo);
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1343,7 +1343,7 @@ namespace OneBeyondAutomateVxEpi
             };
             var content = JsonConvert.SerializeObject(jo);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1365,7 +1365,7 @@ namespace OneBeyondAutomateVxEpi
         public void GoHome()
         {
             var url = string.Format("{0}/GoHome", ApiPath);
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1387,7 +1387,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/GetCameras", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1420,7 +1420,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/CameraStatus", ApiPath);
 
-            var response = _oneBeyondClient.SendRequest<CameraAddressResponse>(HttpMethod.Post, url, string.Empty);
+            var response = _oneBeyondClient.SendRequest<CameraAddressResponse>(HttpMethod.Post, url, string.Empty, Token);
 
             if (response == null)
             {
@@ -1451,7 +1451,7 @@ namespace OneBeyondAutomateVxEpi
             };
             var content = JsonConvert.SerializeObject(jo);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1484,7 +1484,7 @@ namespace OneBeyondAutomateVxEpi
             };
             var content = JsonConvert.SerializeObject(jo);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1514,7 +1514,7 @@ namespace OneBeyondAutomateVxEpi
             };
             var content = JsonConvert.SerializeObject(jo);
 
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1536,7 +1536,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ImportCameraPresets", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1559,7 +1559,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ExportCameraPresets", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1590,7 +1590,7 @@ namespace OneBeyondAutomateVxEpi
                 deleteSource = delete
             };
             var content = JsonConvert.SerializeObject(jo);
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1622,7 +1622,7 @@ namespace OneBeyondAutomateVxEpi
                 drives = driveLetters
             };
             var content = JsonConvert.SerializeObject(jo);
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1644,7 +1644,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/RecodingSpaceAvail", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1666,7 +1666,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Sleep", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1688,7 +1688,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Wake", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1710,7 +1710,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Restart", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1732,7 +1732,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/CloseWirecast", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1754,7 +1754,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/GetScenarios", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<ScenariosResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<ScenariosResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1788,7 +1788,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ScenarioStatus", ApiPath);
             var content = string.Empty;
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {
@@ -1823,7 +1823,7 @@ namespace OneBeyondAutomateVxEpi
                 id = scenarioId
             };
             var content = JsonConvert.SerializeObject(jo);
-            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content);
+            var response = _oneBeyondClient.SendRequest<RootResponse>(HttpMethod.Post, url, content, Token);
 
             if (response == null)
             {

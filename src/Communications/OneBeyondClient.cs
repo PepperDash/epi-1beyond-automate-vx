@@ -7,6 +7,8 @@ using PepperDash.Core.Logging;
 
 namespace OneBeyondAutomateVxEpi.Communications
 {
+
+
     public class OneBeyondClient : IKeyed
     {
         private static readonly string _separator = new String('-', 50);
@@ -15,6 +17,7 @@ namespace OneBeyondAutomateVxEpi.Communications
 
         public string Key { get; private set; }
 
+        private string userPassAuth;
 
         public OneBeyondClient(string key, ControlPropertiesConfig controlConfig)
         {
@@ -39,10 +42,7 @@ namespace OneBeyondAutomateVxEpi.Communications
             var username = controlConfig.TcpSshProperties.Username ?? "";
             var password = controlConfig.TcpSshProperties.Password ?? "";
 
-            var authorizationBase64 = AuthenticationHelpers.EncodeBase64(key, username, password);
-
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authorizationBase64);
+            userPassAuth = AuthenticationHelpers.EncodeBase64(key, username, password);
 
             this.LogVerbose(@"
 {0}
@@ -53,7 +53,7 @@ Port = {3}
 Username = {4}
 Password = {5}
 AuthBase64 = {6}
-{0}", _separator, Key, baseAddress, port, username, password, authorizationBase64);
+{0}", _separator, Key, baseAddress, port, username, password, userPassAuth);
         }
 
         /// <summary>
@@ -64,10 +64,22 @@ AuthBase64 = {6}
         /// <param name="uri">The URI for the request</param>
         /// <param name="data">serialized data to send</param>
         /// <returns></returns>
-        public T SendRequest<T>(HttpMethod method, string uri, string data = "")
+        public T SendRequest<T>(HttpMethod method, string uri, string data = "", string authorization = null)
         {
             try
             {
+
+                if (!string.IsNullOrEmpty(authorization))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authorization);
+                }
+                else
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", userPassAuth);
+                }
+
                 // Use the string directly - HttpClient will combine it with BaseAddress
                 // Don't create a Uri object as it may be interpreted as file:// for relative paths
                 using (var request = new HttpRequestMessage(method, uri))
