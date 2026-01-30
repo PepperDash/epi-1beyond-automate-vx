@@ -44,7 +44,7 @@ namespace OneBeyondAutomateVxEpi.Communications
             _httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authorizationBase64);
 
-            Debug.LogVerbose(this, @"
+            this.LogVerbose(@"
 {0}
 >>>>> GenericClientHttps: 
 Key = {1}
@@ -77,7 +77,7 @@ AuthBase64 = {6}
                         request.Content = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                     }
 
-                    Debug.LogVerbose(this, @"
+                    this.LogVerbose(@"
 {0}
 >>>>> SendRequest
 url: {1}
@@ -90,9 +90,10 @@ authHeaderValue: {4}
                     {
                         if (!response.IsSuccessStatusCode)
                         {
-                            this.LogDebug("Unable to get sources for {Host}: {response.StatusCode} - {response.ReasonPhrase}");
+                            this.LogDebug("Unable to get sources for {Host}: {responseStatusCode} - {responseReasonPhrase}",
+                                _httpClient.BaseAddress, response.StatusCode, response.ReasonPhrase);
 
-                            Debug.LogVerbose(this, @"
+                            this.LogVerbose(@"
 {0}
 >>>>> RequestDispatch
 request: {1}
