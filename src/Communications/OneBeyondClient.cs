@@ -66,11 +66,11 @@ AuthBase64 = {6}
         /// <returns></returns>
         public T SendRequest<T>(HttpMethod method, string uri, string data = "")
         {
-            var url = new Uri(uri);
-
             try
             {
-                using (var request = new HttpRequestMessage(method, url))
+                // Use the string directly - HttpClient will combine it with BaseAddress
+                // Don't create a Uri object as it may be interpreted as file:// for relative paths
+                using (var request = new HttpRequestMessage(method, uri))
                 {
                     if (method == HttpMethod.Post || method == HttpMethod.Put)
                     {
