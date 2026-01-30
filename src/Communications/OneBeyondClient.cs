@@ -80,11 +80,11 @@ AuthBase64 = {6}
                     this.LogVerbose(@"
 {0}
 >>>>> SendRequest
-url: {1}
-content: {2}
-requestType: {3}
-authHeaderValue: {4}
-{0}", _separator, request.RequestUri, request.Content?.ReadAsStringAsync().Result, request.Method, _httpClient.DefaultRequestHeaders.Authorization);
+url: {1}{2}
+content: {3}
+requestType: {4}
+authHeaderValue: {5}
+{0}", _separator, _httpClient.BaseAddress, uri, request.Content?.ReadAsStringAsync().Result, request.Method, _httpClient.DefaultRequestHeaders.Authorization);
 
                     using (var response = _httpClient.SendAsync(request).Result)
                     {
