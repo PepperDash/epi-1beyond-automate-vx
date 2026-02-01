@@ -18,6 +18,7 @@ namespace OneBeyondAutomateVxEpi.Communications
         public string Key { get; private set; }
 
         private string userPassAuth;
+        public string Token { get; private set; }
 
         public OneBeyondClient(string key, ControlPropertiesConfig controlConfig)
         {
@@ -43,6 +44,7 @@ namespace OneBeyondAutomateVxEpi.Communications
             var password = controlConfig.TcpSshProperties.Password ?? "";
 
             userPassAuth = AuthenticationHelpers.EncodeBase64(key, username, password);
+            Token = string.Empty;
 
             this.LogVerbose(@"
 {0}
@@ -53,7 +55,8 @@ Port = {3}
 Username = {4}
 Password = {5}
 AuthBase64 = {6}
-{0}", _separator, Key, baseAddress, port, username, password, userPassAuth);
+AuthToken = {7}
+{0}", _separator, Key, baseAddress, port, username, password, userPassAuth, Token);
         }
 
         /// <summary>
@@ -68,21 +71,16 @@ AuthBase64 = {6}
         {
             try
             {
+                // Remove existing Authorization header if present
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                
+                // Set Authorization header without scheme (API expects raw encoded value)
+                var authValue = !string.IsNullOrEmpty(authorization) ? authorization : userPassAuth;
+                _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authValue);
 
-                if (!string.IsNullOrEmpty(authorization))
-                {
-                    _httpClient.DefaultRequestHeaders.Authorization =
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authorization);
-                }
-                else
-                {
-                    _httpClient.DefaultRequestHeaders.Authorization =
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", userPassAuth);
-                }
-
-                // Use the string directly - HttpClient will combine it with BaseAddress
-                // Don't create a Uri object as it may be interpreted as file:// for relative paths
-                using (var request = new HttpRequestMessage(method, uri))
+                // Build the full URL string - HttpRequestMessage accepts a string URI
+                var fullUrl = string.Format("{0}/{1}", _httpClient.BaseAddress, uri.TrimStart('/'));
+                using (var request = new HttpRequestMessage(method, fullUrl))
                 {
                     if (method == HttpMethod.Post || method == HttpMethod.Put)
                     {
@@ -124,6 +122,13 @@ error: {2}
                         }
 
                         var responseData = ApiResponseParser.ParseResponse<T>(contentString);
+                        // if(T == typeof(TokenResponse) && responseData != null)
+                        // {
+                        //     if (responseData is TokenResponse tokenResponse)
+                        //     {
+                        //         Token = tokenResponse.Token;
+                        //     }
+                        // }
 
                         return responseData;
                     }

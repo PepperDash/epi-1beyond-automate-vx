@@ -13,7 +13,7 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 		{
 			if (string.IsNullOrEmpty(username))
 			{
-				return "";
+				return null;
 			}
 
 			try
@@ -22,12 +22,17 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 					Convert.ToBase64String(
 						Encoding.GetEncoding("ISO-8859-1")
 							.GetBytes(string.Format("{0}:{1}", username, password)));
-				return string.Format("{0}", base64String);
+				return base64String;
 			}
-			catch (Exception err)
+			catch (EncoderFallbackException ex)
 			{
-                Debug.LogError("[{0}] EncodeBase64 Exception:\r{1}", key, err);
-				return "";
+				Debug.LogError("[{0}] EncodeBase64 EncoderFallbackException:" + Environment.NewLine + "{1}", key, ex);
+				return null;
+			}
+			catch (ArgumentException ex)
+			{
+				Debug.LogError("[{0}] EncodeBase64 ArgumentException:" + Environment.NewLine + "{1}", key, ex);
+				return null;
 			}
 		}
 
