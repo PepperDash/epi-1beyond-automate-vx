@@ -23,10 +23,15 @@ namespace OneBeyondAutomateVxEpi.ApiObjects
 		[JsonProperty("scenario", NullValueHandling = NullValueHandling.Ignore)]
 		public NameWithIdInt Scenario { get; set; }
 
+
+	}
+
+	public class CamerasResponse : RootResponse
+	{
 		[JsonProperty("cameras", NullValueHandling = NullValueHandling.Ignore)]
 		public List<Camera> Cameras { get; set; }
 
-		public RootResponse()
+		public CamerasResponse()
 		{
 			Cameras = new List<Camera>();
 		}

@@ -219,14 +219,24 @@ namespace OneBeyondAutomateVxEpi
                 CurrentScenarioNameFeedback.FireUpdate();
                 CurrentScenarioIdFeedback.FireUpdate();
 
+                if (_currentScenario == null) return;
+
+                if (ScenariosSelectableItems == null) return;
+
                 var scenario = ScenariosSelectableItems.Items.Values.FirstOrDefault(s => s.Key == _currentScenario.Id.ToString());
 
-                ScenariosSelectableItems.CurrentItem = scenario.Key;
+                if (scenario != null)
+                {
+                    ScenariosSelectableItems.CurrentItem = scenario.Key;
+                }
 
                 foreach (var item in ScenariosSelectableItems.Items) 
                 {
                     var scenarioItem = item.Value as ScenariosSelectableItem;
-                    scenarioItem.UpdateSelectedFromFeedback(_currentScenario.Id);
+                    if (scenarioItem != null)
+                    {
+                        scenarioItem.UpdateSelectedFromFeedback(_currentScenario.Id);
+                    }
                 }
             }
         }
@@ -320,28 +330,28 @@ namespace OneBeyondAutomateVxEpi
 
                 //ResponseCodeFeedback = new IntFeedback(() => ResponseCode);
                 //ResponseContentFeedback = new StringFeedback(() => ResponseContent);
-                ResponseSuccessMessageFeedback = new StringFeedback(() => ResponseSuccessMessage);
-                ResponseErrorMessageFeedback = new StringFeedback(() => ResponseErrorMessage);
+                ResponseSuccessMessageFeedback = new StringFeedback("responseSuccessMessageFeedback", () => ResponseSuccessMessage);
+                ResponseErrorMessageFeedback = new StringFeedback("responseErrorMessageFeedback", () => ResponseErrorMessage);
 
-                LoginSuccessfulFeedback = new BoolFeedback(() => !string.IsNullOrEmpty(Token));
-                AutoSwitchIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
-                RecordIsOnFeedback = new BoolFeedback(() => RecordIsOn);
-                IsoRecordIsOnFeedback = new BoolFeedback(() => IsoRecordIsOn);
-                StreamIsOnFeedback = new BoolFeedback(() => StreamIsOn);
-                OutputIsOnFeedback = new BoolFeedback(() => OutputIsOn);
-                CameraAddressFeedback = new IntFeedback(() => CameraAddress);
-                CamerasCountFeedback = new IntFeedback(() => ApiCameras.Count);
-                LayoutsCountFeedback = new IntFeedback(() => Layouts.Count);
-                CurrentLayoutNameFeedback = new StringFeedback(() => CurrentLayout.Name);
-                CurrentLayoutIdFeedback = new IntFeedback(() => ConvertIdToInt(CurrentLayout.Id));
-                RoomConfigsCountFeedback = new IntFeedback(() => RoomConfigs.Count);
-                CurrentRoomConfigNameFeedback = new StringFeedback(() => CurrentRoomConfig.Name);
-                CurrentRoomConfigIdFeedback = new IntFeedback(() => CurrentRoomConfig.Id);
-                ScenariosCountFeedback = new IntFeedback(() => Scenarios.Count);
-                CurrentScenarioNameFeedback = new StringFeedback(() => CurrentScenario.Name);
-                CurrentScenarioIdFeedback = new IntFeedback(() => CurrentScenario.Id);
-                CameraAutoModeIsOnFeedback = new BoolFeedback(() => AutoSwitchIsOn);
-                SelectedCameraFeedback = new StringFeedback(() => _selectedCamera?.Key ?? string.Empty);
+                LoginSuccessfulFeedback = new BoolFeedback("loginSuccessfulFeedback", () => !string.IsNullOrEmpty(Token));
+                AutoSwitchIsOnFeedback = new BoolFeedback("autoSwitchIsOnFeedback", () => AutoSwitchIsOn);
+                RecordIsOnFeedback = new BoolFeedback("recordIsOnFeedback", () => RecordIsOn);
+                IsoRecordIsOnFeedback = new BoolFeedback("isoRecordIsOnFeedback", () => IsoRecordIsOn);
+                StreamIsOnFeedback = new BoolFeedback("streamIsOnFeedback", () => StreamIsOn);
+                OutputIsOnFeedback = new BoolFeedback("outputIsOnFeedback", () => OutputIsOn);
+                CameraAddressFeedback = new IntFeedback("cameraAddressFeedback", () => CameraAddress);
+                CamerasCountFeedback = new IntFeedback("camerasCountFeedback", () => ApiCameras.Count);
+                LayoutsCountFeedback = new IntFeedback("layoutsCountFeedback", () => Layouts.Count);
+                CurrentLayoutNameFeedback = new StringFeedback("currentLayoutNameFeedback", () => CurrentLayout.Name);
+                CurrentLayoutIdFeedback = new IntFeedback("currentLayoutIdFeedback", () => ConvertIdToInt(CurrentLayout.Id));
+                RoomConfigsCountFeedback = new IntFeedback("roomConfigsCountFeedback", () => RoomConfigs.Count);
+                CurrentRoomConfigNameFeedback = new StringFeedback("currentRoomConfigNameFeedback", () => CurrentRoomConfig.Name);
+                CurrentRoomConfigIdFeedback = new IntFeedback("currentRoomConfigIdFeedback", () => CurrentRoomConfig.Id);
+                ScenariosCountFeedback = new IntFeedback("scenariosCountFeedback", () => Scenarios.Count);
+                CurrentScenarioNameFeedback = new StringFeedback("currentScenarioNameFeedback", () => CurrentScenario != null ? CurrentScenario.Name : string.Empty);
+                CurrentScenarioIdFeedback = new IntFeedback("currentScenarioIdFeedback", () => CurrentScenario != null ? CurrentScenario.Id : 0);
+                CameraAutoModeIsOnFeedback = new BoolFeedback("cameraAutoModeIsOnFeedback", () => AutoSwitchIsOn);
+                SelectedCameraFeedback = new StringFeedback("selectedCameraFeedback", () => _selectedCamera?.Key ?? string.Empty);
 
                 if (ApiCameras == null)
                     ApiCameras = new List<ApiCamera>();
@@ -795,7 +805,7 @@ namespace OneBeyondAutomateVxEpi
                         }
                     case "getcameras":
                         {
-                            var response = ApiResponseParser.ParseRootResponse(content);
+                            var response = ApiResponseParser.ParseCamerasResponse(content);
                             if (response.Status == "OK")
                             {
                                 ApiCameras = response.Cameras;

@@ -43,5 +43,10 @@ namespace OneBeyondAutomateVxEpi.ApiObjects
 		{
 			return JsonConvert.DeserializeObject<ScenariosResponse>(content);
 		}
+
+		public static CamerasResponse ParseCamerasResponse(string content)
+		{
+			return JsonConvert.DeserializeObject<CamerasResponse>(content);
+		}
 	}
 }
