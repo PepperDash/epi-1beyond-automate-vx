@@ -20,29 +20,29 @@ namespace OneBeyondAutomateVxEpi
             {
             base.RegisterActions();
           
-            AddAction("/fullStatus", (id, content) => SendFullStatus());
+            AddAction("/fullStatus", (id, content) => SendFullStatus(id));
             AddAction($"/cameraAutoModeOn", (id, context) => _cameramodedevice.CameraAutoModeOn());
             AddAction($"/cameraAutoModeOff", (id, context) => _cameramodedevice.CameraAutoModeOff());
             AddAction($"/cameraAutoModeToggle", (id, context) => _cameramodedevice.CameraAutoModeToggle());
 
-            _cameramodedevice.CameraAutoModeIsOnFeedback.OutputChange += (o, a) => SendFullStatus();
+            _cameramodedevice.CameraAutoModeIsOnFeedback.OutputChange += (o, a) => SendFullStatus(null);
 
             }
 
-        private void SendFullStatus()
+        private void SendFullStatus(string id)
             {
             var state = new IHasCameraAutoModeMessage
                 {
-                CameraAutoModeStatus = _cameramodedevice.CameraAutoModeIsOnFeedback.BoolValue
+                CameraAutoModeIsOn = _cameramodedevice.CameraAutoModeIsOnFeedback.BoolValue
                 };
-            PostStatusMessage(state);
+            PostStatusMessage(state, id);
             }
         }
 
     public class IHasCameraAutoModeMessage : DeviceStateMessageBase
         {
-        [JsonProperty("cameraAutoModeStatus", NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public bool? CameraAutoModeStatus { get; set; }
+            [JsonProperty("cameraAutoModeIsOn", NullValueHandling = NullValueHandling.Ignore)]
+            public bool? CameraAutoModeIsOn { get; set; }
 
         }
 

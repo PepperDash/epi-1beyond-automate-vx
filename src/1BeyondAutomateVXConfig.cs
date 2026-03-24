@@ -9,11 +9,11 @@ namespace OneBeyondAutomateVxEpi
     /// </summary>
     public class OneBeyondAutomateVxConfig
         {
-        [JsonProperty("control")]
-        public EssentialsControlPropertiesConfig Control { get; set; }
+            [JsonProperty("control")]
+            public EssentialsControlPropertiesConfig Control { get; set; }
 
-        [JsonProperty("cameras")]
-        public Dictionary<int, CameraConfig> Cameras { get; set; }
+            [JsonProperty("cameras")]
+            public List<CameraConfig> Cameras { get; set; }
         }
 
     /// <summary>
@@ -21,14 +21,13 @@ namespace OneBeyondAutomateVxEpi
     /// </summary>
     public class CameraConfig
         {
-        [JsonProperty("id")]
-        public int Id { get; set; }
+            [JsonProperty("id")]
+            public uint Id { get; set; }
 
-        [JsonProperty("name")]
-        public string Name { get; set; }
+            [JsonProperty("name")]
+            public string Name { get; set; }
 
-        [JsonProperty("deviceKey")]
-        public string DeviceKey { get; set; }
+            [JsonProperty("deviceKey")]
+            public string DeviceKey { get; set; }
         }
-
     }
