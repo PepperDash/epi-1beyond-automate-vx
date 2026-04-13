@@ -535,7 +535,6 @@ namespace OneBeyondAutomateVxEpi
                 scheduledTime.ToString("yyyy-MM-dd HH:mm:ss"), timeUntilReboot);
 
             _cameraRebootTimer = new CTimer(OnCameraRebootTimerCallback, timeUntilReboot);
-            _cameraRebootTimer.Reset();
         }
 
         private void OnCameraRebootTimerCallback(object obj)
