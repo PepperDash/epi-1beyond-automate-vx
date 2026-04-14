@@ -470,6 +470,12 @@ namespace OneBeyondAutomateVxEpi
 
         private void SetupCameras()
         {
+            if (_config.Cameras == null || _config.Cameras.Count == 0)
+            {
+                Debug.LogInformation(this, "No cameras configured, skipping camera setup");
+                return;
+            }
+
             foreach (var camera in _config.Cameras)
             {
                 var cam = DeviceManager.GetDeviceForKey<IHasCameraControls>(camera.DeviceKey);
