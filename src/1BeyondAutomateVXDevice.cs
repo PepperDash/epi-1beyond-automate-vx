@@ -1697,14 +1697,28 @@ namespace OneBeyondAutomateVxEpi
 
         public void SelectCamera(string key)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                this.LogError("SelectCamera: Camera key is null or empty");
+                return;
+            }
+
+            if (_config == null || _config.Cameras == null)
+            {
+                this.LogError("SelectCamera: Camera configuration is unavailable");
+                return;
+            }
+
             var camera = _config.Cameras.FirstOrDefault((c) => c.DeviceKey == key);
 
             if (camera == null)
+            {
                 this.LogError("SelectCamera: Unable to find camera with key {key}", key);
+                return;
+            }
 
-            this.LogDebug("SelectCamera: Setting camera to {camera}", camera?.Id);
+            this.LogDebug("SelectCamera: Setting camera to {camera}", camera.Id);
             SetCamera(camera.Id);
-            
         }
     }
 }
