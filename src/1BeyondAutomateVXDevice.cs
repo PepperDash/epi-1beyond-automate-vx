@@ -221,14 +221,23 @@ namespace OneBeyondAutomateVxEpi
                 CurrentScenarioNameFeedback.FireUpdate();
                 CurrentScenarioIdFeedback.FireUpdate();
 
+                if (ScenariosSelectableItems == null || ScenariosSelectableItems.Items == null || _currentScenario == null)
+                    return;
+
                 var scenario = ScenariosSelectableItems.Items.Values.FirstOrDefault(s => s.Key == _currentScenario.Id.ToString());
 
-                ScenariosSelectableItems.CurrentItem = scenario.Key;
+                if (scenario != null)
+                {
+                    ScenariosSelectableItems.CurrentItem = scenario.Key;
+                }
 
-                foreach (var item in ScenariosSelectableItems.Items) 
+                foreach (var item in ScenariosSelectableItems.Items)
                 {
                     var scenarioItem = item.Value as ScenariosSelectableItem;
-                    scenarioItem.UpdateSelectedFromFeedback(_currentScenario.Id);
+                    if (scenarioItem != null)
+                    {
+                        scenarioItem.UpdateSelectedFromFeedback(_currentScenario.Id);
+                    }
                 }
             }
         }
