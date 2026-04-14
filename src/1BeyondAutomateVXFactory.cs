@@ -15,7 +15,7 @@ namespace OneBeyondAutomateVxEpi
 		/// </summary>
         public OneBeyoneAutomateVxFactory()
         {
-            MinimumEssentialsFrameworkVersion = "2.0.0";
+            MinimumEssentialsFrameworkVersion = "2.4.7";
 
             TypeNames = new List<string> { "oneBeyondAutomateVx" };
         }
@@ -25,13 +25,13 @@ namespace OneBeyondAutomateVxEpi
 		/// </summary>
         public override EssentialsDevice BuildDevice(PepperDash.Essentials.Core.Config.DeviceConfig dc)
         {
-            Debug.Console(AutomateVxDebug.Notice, "[{0}] Factory Attempting to create new device from type: {1}", dc.Key, dc.Type);
+            Debug.LogDebug("[{0}] Factory Attempting to create new device from type: {1}", dc.Key, dc.Type);			
 
             // get the plugin device properties configuration object & check for null 
             var propertiesConfig = dc.Properties.ToObject<OneBeyondAutomateVxConfig>();
             if (propertiesConfig == null)
             {
-                Debug.Console(AutomateVxDebug.Trace, "[{0}] Factory: failed to read properties config for {1}", dc.Key, dc.Name);
+                Debug.LogInformation("[{0}] Factory: failed to read properties config for {1}", dc.Key, dc.Name);
                 return null;
             }
 
@@ -41,7 +41,7 @@ namespace OneBeyondAutomateVxEpi
 			{
 				case eControlMethod.Http:
 				{
-					Debug.Console(AutomateVxDebug.Notice, "[{0}] building {1} client",
+					Debug.LogDebug("[{0}] building {1} client",
 						dc.Key, propertiesConfig.Control.Method);
 
 					client = new GenericClientHttp(string.Format("{0}-http", dc.Key), propertiesConfig.Control);
@@ -50,7 +50,7 @@ namespace OneBeyondAutomateVxEpi
 				}
 				case eControlMethod.Https:
 				{
-					Debug.Console(AutomateVxDebug.Notice, "[{0}] building {1} client",
+					Debug.LogDebug("[{0}] building {1} client",
 						dc.Key, propertiesConfig.Control.Method);
 
 					client = new GenericClientHttps(string.Format("{0}-https", dc.Key), propertiesConfig.Control);
@@ -59,7 +59,7 @@ namespace OneBeyondAutomateVxEpi
 				}
 				default:
 				{
-					Debug.Console(AutomateVxDebug.Trace, "[{0}] control method {1} not supported, check configuration and upate to 'http' (port 3579) or 'https' (port 4443)",
+					Debug.LogInformation("[{0}] control method {1} not supported, check configuration and upate to 'http' (port 3579) or 'https' (port 4443)",
 						dc.Key, propertiesConfig.Control.Method);
 
 					client = null;
@@ -70,7 +70,7 @@ namespace OneBeyondAutomateVxEpi
 
 			if(client != null ) return new OneBeyondAutomateVx(dc.Key, dc.Name, propertiesConfig, client);
 
-			Debug.Console(AutomateVxDebug.Trace, "[{0}] Factory notice: No control object present for device {1}", dc.Key, dc.Name);
+			Debug.LogInformation("[{0}] Factory notice: No control object present for device {1}", dc.Key, dc.Name);
 			return null;
         }
     }

@@ -4,6 +4,7 @@ using Crestron.SimplSharp;
 using Crestron.SimplSharp.Net.Http;
 using OneBeyondAutomateVxEpi.ApiObjects;
 using PepperDash.Core;
+using PepperDash.Core.Logging;
 using PepperDash.Essentials.Core;
 using RequestType = Crestron.SimplSharp.Net.Http.RequestType;
 
@@ -35,8 +36,7 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 		{
 			if (string.IsNullOrEmpty(key) || controlConfig == null)
 			{
-				Debug.Console(AutomateVxDebug.Verbose, Debug.ErrorLogLevel.Error,
-					"GenericClient key or host is null or empty, failed to create client for {0}", key);
+				Debug.LogError("GenericClient key or host is null or empty, failed to create client for {0}", key);
 				return;
 			}
 
@@ -54,7 +54,7 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 			Password = controlConfig.TcpSshProperties.Password ?? "";
 			AuthorizationBase64 = GenericClientHelpers.EncodeBase64(key, Username, Password);
 
-			Debug.Console(AutomateVxDebug.Verbose, this, @"
+			Debug.LogVerbose(this, @"
 {0}
 >>>>> GenericClientHttps: 
 Key = {1}
@@ -119,7 +119,7 @@ Token = {7}
 
 			request.Header.SetHeaderValue("Authorization", authorizationHeaderValue);
 
-			Debug.Console(AutomateVxDebug.Verbose, this, @"
+			Debug.LogVerbose(this, @"
 {0}
 >>>>> SendRequest
 url: {1}
@@ -137,24 +137,31 @@ authHeaderValue: {4}
 		// dispatches the recieved request
 		private void RequestDispatch(HttpClientRequest request)
 		{
-			_client.DispatchAsync(request, (response, error) =>
+			try
 			{
-				if (response == null)
+				_client.DispatchAsync(request, (response, error) =>
 				{
-					Debug.Console(AutomateVxDebug.Verbose, this, @"
+					if (response == null)
+					{
+						Debug.LogVerbose(this, @"
 {0}
 >>>>> RequestDispatch
 request: {1}
 error: {2}
 {0}", Separator, request, error);
-					return;
-				}
+						return;
+					}
 
-				var parts = request.Url.ToString().Split('/');
-				var requestPath = parts[parts.Length - 1];
+					var parts = request.Url.ToString().Split('/');
+					var requestPath = parts[parts.Length - 1];
 
-				OnResponseRecieved(new GenericClientResponseEventArgs(requestPath, response.Code, response.ContentString));
-			});
+					OnResponseRecieved(new GenericClientResponseEventArgs(requestPath, response.Code, response.ContentString));
+				});
+			}
+			catch (Exception e)
+			{
+				this.LogError(e, "RequestDispatch Exception: {message}", e.Message);
+			}
 		}
 
 		/// <summary>
@@ -228,9 +235,9 @@ error: {2}
 		// Checks request queue and issues next request
 		private void CheckRequestQueue()
 		{
-			Debug.Console(AutomateVxDebug.Verbose, this, "CheckRequestQueue: _requestQueue.Count = {0}", _requestQueue.Count);
+			Debug.LogVerbose(this, "CheckRequestQueue: _requestQueue.Count = {0}", _requestQueue.Count);
 			var nextRequest = _requestQueue.TryToDequeue();
-			Debug.Console(AutomateVxDebug.Verbose, this, "CheckRequestQueue: _requestQueue.TryToDequeue was {0}",
+			Debug.LogVerbose(this, "CheckRequestQueue: _requestQueue.TryToDequeue was {0}",
 				(nextRequest == null) ? "unsuccessful" : "successful");
 			if (nextRequest != null)
 			{

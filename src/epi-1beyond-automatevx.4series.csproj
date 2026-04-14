@@ -11,7 +11,7 @@
 		<AssemblyTitle>PepperDash.Essentials.Plugin.1BeyondAutomateVx</AssemblyTitle>
 		<Company>PepperDash Technologies</Company>
 		<Description>This software is a plugin designed to work as a part of PepperDash Essentials for Crestron control processors. This plugin allows for control of 1Beyond AutomateVX Camera server.</Description>
-		<Copyright>Copyright 2024</Copyright>
+		<Copyright>Copyright 2025</Copyright>
 		<Version>1.0.0-local</Version>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<InformationalVersion>$(Version)</InformationalVersion>
@@ -33,21 +33,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="SleepWakeMessenger.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="epi-1beyond-automatevx.projectinfo" />
   </ItemGroup>
 
   <ItemGroup>
-	  <PackageReference Include="PepperDashEssentials" Version="2.0.0-hotfix-2613" >
-		  <ExcludeAssets>runtime</ExcludeAssets>
-	  </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="../output\epi-1beyond-automatevx.4series.1.0.0-local.cplz" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="../output\epi-1beyond-automatevx.4series.1.0.0-local.cplz" />
+    <PackageReference Include="PepperDashEssentials" Version="2.18.0-feature-add-IKeyed-to-interfaces.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>
