@@ -1604,6 +1604,7 @@ namespace PepperDash.Essentials.Plugins
             var url = string.Format("{0}/Sleep", ApiPath);
             var content = string.Empty;
             _client.SendRequest("POST", url, content);
+            _powerIsOn = false;
         }
 
         /// <summary>
@@ -1614,6 +1615,7 @@ namespace PepperDash.Essentials.Plugins
             var url = string.Format("{0}/Wake", ApiPath);
             var content = string.Empty;
             _client.SendRequest("POST", url, content);
+            _powerIsOn = true;
         }
 
         /// <summary>
@@ -1686,13 +1688,18 @@ namespace PepperDash.Essentials.Plugins
             SetAutoSwitch(!_autoSwitchIsOn);
         }
 
+        private bool _powerIsOn;
+
         public void PowerOn() => SetWake();
 
         public void PowerOff() => SetSleep();
 
         public void PowerToggle()
         {
-            throw new NotImplementedException();
+            if (_powerIsOn)
+                PowerOff();
+            else
+                PowerOn();
         }
 
         public void SelectCamera(string key)
