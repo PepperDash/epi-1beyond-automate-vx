@@ -23,7 +23,16 @@ namespace PepperDash.Essentials.Plugins
                 ItemsUpdated?.Invoke(this, EventArgs.Empty);
             }
         }
-        public string CurrentItem { get; set; }
+        private string _currentItem;
+        public string CurrentItem
+        {
+            get => _currentItem;
+            set
+            {
+                _currentItem = value;
+                CurrentItemChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
         public string Name { get; set; }
         public string Key { get; set; }
 
