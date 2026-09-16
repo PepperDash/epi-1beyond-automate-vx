@@ -1,10 +1,10 @@
-﻿using OneBeyondAutomateVxEpi.ApiObjects;
+using PepperDash.Essentials.Plugins.ApiObjects;
 using PepperDash.Core;
 using PepperDash.Essentials.Core.DeviceTypeInterfaces;
 using System;
 using System.Collections.Generic;
 
-namespace OneBeyondAutomateVxEpi
+namespace PepperDash.Essentials.Plugins
     {
     public class ConfigurationsSelectableItems : ISelectableItems<string>, IKeyName
         {

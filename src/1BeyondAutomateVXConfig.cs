@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using PepperDash.Essentials.Core;
 using System.Collections.Generic;
 
-namespace OneBeyondAutomateVxEpi
+namespace PepperDash.Essentials.Plugins
     {
     /// <summary>
     /// Plugin device configuration object

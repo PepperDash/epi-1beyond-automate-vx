@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using PepperDash.Core;
 using PepperDash.Essentials.AppServer.Messengers;
 using PepperDash.Essentials.Devices.Common.Cameras;
 using System;
 using System.Collections.Generic;
 
-namespace OneBeyondAutomateVxEpi
+namespace PepperDash.Essentials.Plugins
     {
     public class IHasCameraAutoModeMessenger : MessengerBase
         {   

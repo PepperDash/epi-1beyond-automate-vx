@@ -1,8 +1,8 @@
-﻿using Crestron.SimplSharp;
+using Crestron.SimplSharp;
 using Crestron.SimplSharpPro.DeviceSupport;
 using Newtonsoft.Json;
-using OneBeyondAutomateVxEpi.ApiObjects;
-using OneBeyondAutomateVxEpi.GenericClients;
+using PepperDash.Essentials.Plugins.ApiObjects;
+using PepperDash.Essentials.Plugins.GenericClients;
 using PepperDash.Core;
 using PepperDash.Core.Logging;
 using PepperDash.Essentials.AppServer.Messengers;
@@ -13,9 +13,9 @@ using PepperDash.Essentials.Devices.Common.Cameras;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ApiCamera = OneBeyondAutomateVxEpi.ApiObjects.Camera;
+using ApiCamera = PepperDash.Essentials.Plugins.ApiObjects.Camera;
 
-namespace OneBeyondAutomateVxEpi
+namespace PepperDash.Essentials.Plugins
 {
     public class OneBeyondAutomateVx : EssentialsBridgeableDevice, IHasCamerasWithControls, IHasCameraAutoMode, IHasPowerControl
     {
@@ -460,7 +460,7 @@ namespace OneBeyondAutomateVxEpi
         /// <summary>
         /// Initialize EPI
         /// </summary>
-        public override void Initialize()
+        protected override void Initialize()
         {
             GetToken();
 

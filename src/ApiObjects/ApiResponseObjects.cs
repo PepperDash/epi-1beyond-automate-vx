@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace OneBeyondAutomateVxEpi.ApiObjects
+namespace PepperDash.Essentials.Plugins.ApiObjects
 {
 	public class RootResponse
 	{

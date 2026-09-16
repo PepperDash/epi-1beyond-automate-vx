@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using PepperDash.Core;
 using PepperDash.Essentials.Core.DeviceTypeInterfaces;
 
-namespace OneBeyondAutomateVxEpi
+namespace PepperDash.Essentials.Plugins
     {
     public class CameraSelectableItems : ISelectableItems<string>, IKeyName
         {

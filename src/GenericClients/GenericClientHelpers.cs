@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PepperDash.Core;
 
-namespace OneBeyondAutomateVxEpi.GenericClients
+namespace PepperDash.Essentials.Plugins.GenericClients
 {
 	public static class GenericClientHelpers
 	{

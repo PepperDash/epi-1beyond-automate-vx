@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Globalization;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.Net.Http;
 using Crestron.SimplSharp.Net.Https;
-using OneBeyondAutomateVxEpi.ApiObjects;
+using PepperDash.Essentials.Plugins.ApiObjects;
 using PepperDash.Core;
 using PepperDash.Core.Logging;
 using PepperDash.Essentials.Core;
 using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
 
-namespace OneBeyondAutomateVxEpi.GenericClients
+namespace PepperDash.Essentials.Plugins.GenericClients
 {
 	/// <summary>
 	/// Http client

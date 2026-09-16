@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
-namespace OneBeyondAutomateVxEpi.ApiObjects
+namespace PepperDash.Essentials.Plugins.ApiObjects
 {
 	public static class ApiResponseParser
 	{

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using OneBeyondAutomateVxEpi.GenericClients;
+using System.Collections.Generic;
+using PepperDash.Essentials.Plugins.GenericClients;
 using PepperDash.Core;
 using PepperDash.Essentials.Core;
 
-namespace OneBeyondAutomateVxEpi
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// Plugin device factory for device
@@ -15,7 +15,7 @@ namespace OneBeyondAutomateVxEpi
 		/// </summary>
         public OneBeyoneAutomateVxFactory()
         {
-            MinimumEssentialsFrameworkVersion = "2.4.7";
+            MinimumEssentialsFrameworkVersion = "3.0.0";
 
             TypeNames = new List<string> { "oneBeyondAutomateVx" };
         }

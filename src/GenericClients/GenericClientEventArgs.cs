@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace OneBeyondAutomateVxEpi.GenericClients
+namespace PepperDash.Essentials.Plugins.GenericClients
 {
 	/// <summary>
 	/// Cleint event args

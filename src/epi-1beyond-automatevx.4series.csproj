@@ -1,55 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-			<ProjectType>ProgramLibrary</ProjectType>
-		</PropertyGroup>
-
-	<PropertyGroup>
-		<TargetFramework>net472</TargetFramework>
-		<RootNamespace>OneBeyondAutomateVxEpi</RootNamespace>
+		<ProjectType>ProgramLibrary</ProjectType>
+		<TargetFramework>net8</TargetFramework>
+		<RootNamespace>PepperDash.Essentials.Plugins</RootNamespace>
+		<AssemblyName>PepperDash.Essentials.Plugins.1Beyond.Automate.Vx</AssemblyName>
+		<Configurations>Debug;Release</Configurations>
 		<Deterministic>false</Deterministic>
-		<AssemblyTitle>PepperDash.Essentials.Plugin.1BeyondAutomateVx</AssemblyTitle>
-		<Company>PepperDash Technologies</Company>
-		<Description>This software is a plugin designed to work as a part of PepperDash Essentials for Crestron control processors. This plugin allows for control of 1Beyond AutomateVX Camera server.</Description>
-		<Copyright>Copyright 2025</Copyright>
-		<Version>1.0.0-local</Version>
 		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-		<InformationalVersion>$(Version)</InformationalVersion>
-		<OutputPath>bin\$(Configuration)\</OutputPath>
-		<Authors>PepperDash Technologies</Authors>
-		<PackageId>Pepperdash.Essentials.Plugin.1BeyondAutomateVX</PackageId>
+		<AssemblyTitle>PepperDash.Essentials.Plugins.1Beyond.Automate.Vx</AssemblyTitle>
+		<Description>This software is a plugin designed to work as a part of PepperDash Essentials for Crestron control processors. This plugin allows for control of 1Beyond AutomateVX Camera server.</Description>
+		<PackageId>PepperDash.Essentials.Plugins.1Beyond.Automate.Vx</PackageId>
 		<PackageProjectUrl>https://github.com/PepperDash/epi-1beyond-automate-vx</PackageProjectUrl>
-		<PackageTags>crestron 4series 1beyond automateVX</PackageTags>
+		<PackageTags>crestron 4series essentials plugin 1beyond automatevx</PackageTags>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DefineConstants>$(DefineConstants);SERIES4</DefineConstants>
-	</PropertyGroup>
+	<ItemGroup>
+		<Compile Remove="Properties\**" />
+		<EmbeddedResource Remove="Properties\**" />
+		<None Remove="Properties\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Properties\**" />
-    <EmbeddedResource Remove="Properties\**" />
-    <None Remove="Properties\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="SleepWakeMessenger.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="epi-1beyond-automatevx.projectinfo" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="../output\epi-1beyond-automatevx.4series.1.0.0-local.cplz" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="PepperDashEssentials" Version="2.18.0-feature-add-IKeyed-to-interfaces.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Interfaces\" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Crestron.SimplSharp.SDK.ProgramLibrary" Version="2.21.128" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="PepperDashEssentials" Version="3.0.0-feat-routing-slot-online-sync.2">
+			<ExcludeAssets>runtime</ExcludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
 </Project>
