@@ -83,6 +83,19 @@ namespace PepperDash.Essentials.Plugins
         public StringFeedback ResponseSuccessMessageFeedback { get; private set; }
         public StringFeedback ResponseErrorMessageFeedback { get; private set; }
 
+        /// <summary>
+        /// The scenarios this device knows, as selectable items.
+        /// </summary>
+        /// <remarks>
+        /// Public so a consumer can recall a scenario by key without referencing this plugin,
+        /// through the ISelectableItems interface the collection already implements. Keyed by the
+        /// scenario id as a string, matching what the device reports.
+        ///
+        /// Named for what it is rather than Scenarios, which is already the raw list this is
+        /// built from.
+        /// </remarks>
+        public ISelectableItems<string> SelectableScenarios => ScenariosSelectableItems;
+
         private ScenariosSelectableItems ScenariosSelectableItems;
 
         #endregion
