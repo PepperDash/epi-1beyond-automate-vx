@@ -1,6 +1,6 @@
-﻿using PepperDash.Essentials.Core;
+using PepperDash.Essentials.Core;
 
-namespace OneBeyondAutomateVxEpi
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// Plugin device Bridge Join Map

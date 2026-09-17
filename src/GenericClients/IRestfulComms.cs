@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using PepperDash.Core;
 
-namespace OneBeyondAutomateVxEpi.GenericClients
+namespace PepperDash.Essentials.Plugins.GenericClients
 {
 	public interface IRestfulComms : IKeyed
 	{
