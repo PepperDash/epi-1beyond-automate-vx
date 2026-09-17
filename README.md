@@ -56,15 +56,18 @@ Provided under MIT license
 
 - EssentialsBridgeableDevice
 - JoinMapBaseAdvanced
+- MessengerBase
 - EventArgs
 - RootResponse
-- MessengerBase
 <!-- END Base Classes -->
 <!-- START Public Methods -->
 ### Public Methods
 
 - public void Select()
 - public void UpdateSelectedFromFeedback(int selectedId)
+- public void Select()
+- public void UpdateSelectedFromFeedback(int selectedId)
+- public void Select()
 - public void RebootCameras()
 - public void ClearToken()
 - public void GetToken()
@@ -111,9 +114,6 @@ Provided under MIT license
 - public void PowerOff()
 - public void PowerToggle()
 - public void SelectCamera(string key)
-- public void Select()
-- public void Select()
-- public void UpdateSelectedFromFeedback(int selectedId)
 - public void SendRequest(string requestType, string path, string content)
 - public void SendRequest(RequestType requestType, string path, string content)
 - public void SendRequest(string requestType, string path, string content)
