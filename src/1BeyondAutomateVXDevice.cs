@@ -1071,7 +1071,7 @@ namespace OneBeyondAutomateVxEpi
                         }
                     case "gotoscenario":
                         {
-                            var response = ApiResponseParser.ParseRootResponse(content);
+                            var response = ApiResponseParser.ParseActionResponse(content);
                             if (response.Status == "OK")
                             {
                                 GetScenarioStatus();
@@ -1096,6 +1096,7 @@ namespace OneBeyondAutomateVxEpi
             {
                 Debug.LogError(this, "OnResponseReceived Exception Message for request: {0}", args.Request);
                 Debug.LogError(this, "OnResponseReceived Exception Message: {0}", ex.Message);
+                Debug.LogError(this, "OnResponseReceived Content: {0}", args.ContentString);
                 Debug.LogError(this, "OnResponseReceived Stack Trace: {0}", ex.StackTrace);
                 if (ex.InnerException != null) Debug.LogError(this, "OnResponseReceived Inner Exception {0}", ex.InnerException);
             }
