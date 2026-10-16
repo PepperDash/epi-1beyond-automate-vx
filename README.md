@@ -44,11 +44,11 @@ Provided under MIT license
 <!-- START Interfaces Implemented -->
 ### Interfaces Implemented
 
-- ISelectableItems<string>
-- IKeyName
 - IHasCamerasWithControls
 - IHasCameraAutoMode
 - IHasPowerControl
+- ISelectableItems<string>
+- IKeyName
 - IRestfulComms
 <!-- END Interfaces Implemented -->
 <!-- START Base Classes -->
@@ -56,15 +56,13 @@ Provided under MIT license
 
 - EssentialsBridgeableDevice
 - JoinMapBaseAdvanced
-- EventArgs
 - RootResponse
 - MessengerBase
+- EventArgs
 <!-- END Base Classes -->
 <!-- START Public Methods -->
 ### Public Methods
 
-- public void Select()
-- public void UpdateSelectedFromFeedback(int selectedId)
 - public void RebootCameras()
 - public void ClearToken()
 - public void GetToken()
@@ -112,8 +110,10 @@ Provided under MIT license
 - public void PowerToggle()
 - public void SelectCamera(string key)
 - public void Select()
+- public void UpdateSelectedFromFeedback(int selectedId)
 - public void Select()
 - public void UpdateSelectedFromFeedback(int selectedId)
+- public void Select()
 - public void SendRequest(string requestType, string path, string content)
 - public void SendRequest(RequestType requestType, string path, string content)
 - public void SendRequest(string requestType, string path, string content)
