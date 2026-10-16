@@ -14,6 +14,11 @@ namespace PepperDash.Essentials.Plugins.ApiObjects
 			return JsonConvert.DeserializeObject<RootResponse>(content);
 		}
 
+		public static ActionResponse ParseActionResponse(string content)
+		{
+			return JsonConvert.DeserializeObject<ActionResponse>(content);
+		}
+
 		public static ResultResponse ParseResultResponse(string content)
 		{
 			return JsonConvert.DeserializeObject<ResultResponse>(content);

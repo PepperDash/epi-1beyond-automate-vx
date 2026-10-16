@@ -32,6 +32,22 @@ namespace PepperDash.Essentials.Plugins.ApiObjects
 		}
 	}
 
+	/// <summary>
+	/// Minimal response for action requests (e.g. GoToScenario). Deliberately has no camera list:
+	/// the server can return "cameras" as bare ids rather than camera objects for some scenarios.
+	/// </summary>
+	public class ActionResponse
+	{
+		[JsonProperty("status")]
+		public string Status { get; set; }
+
+		[JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
+		public string Message { get; set; }
+
+		[JsonProperty("err", NullValueHandling = NullValueHandling.Ignore)]
+		public string Error { get; set; }
+	}
+
 	public class TokenResponse : RootResponse
 	{
 		[JsonProperty("token", NullValueHandling = NullValueHandling.Ignore)]
