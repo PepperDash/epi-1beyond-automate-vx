@@ -21,6 +21,35 @@ namespace OneBeyondAutomateVxEpi
     {
         private const string ApiPath = "/api";
 
+        private const int DefaultPollIntervalSeconds = 30;
+        private const int MinPollIntervalSeconds = 10;
+
+        // A scenario change seen within this window of our own GoToScenario is treated as ours
+        private const double CommandedScenarioWindowSeconds = 120;
+
+        // Requests Poll() re-sends after a new token, so they are not retried individually
+        private static readonly HashSet<string> PolledRequests = new HashSet<string>
+        {
+            "autoswitchstatus", "outputstatus", "streamstatus", "getroomconfigs", "getlayouts", "getscenarios",
+            "getcameras", "roomconfigstatus", "layoutstatus", "scenariostatus", "camerastatus"
+        };
+
+        private CTimer _pollTimer;
+
+        // Rejections arriving this soon after a new token are for requests sent with the previous one
+        private const double TokenGraceSeconds = 5;
+
+        private readonly object _authLock = new object();
+        private bool _reauthInProgress;
+        private DateTime _tokenTime;
+        private readonly Dictionary<string, KeyValuePair<string, string>> _lastRequests = new Dictionary<string, KeyValuePair<string, string>>();
+        private readonly List<string> _pendingRetries = new List<string>();
+        private readonly HashSet<string> _retriedRequests = new HashSet<string>();
+
+        private readonly object _scenarioLock = new object();
+        private int? _commandedScenarioId;
+        private DateTime _commandedScenarioTime;
+
         #region IRestfulComms
 
         private readonly IRestfulComms _client;
@@ -459,6 +488,57 @@ namespace OneBeyondAutomateVxEpi
 
             SetupCameras();
 
+            StartPollTimer();
+
+            CrestronEnvironment.ProgramStatusEventHandler += (type) =>
+            {
+                if (type != eProgramStatusEventType.Stopping || _pollTimer == null) return;
+
+                _pollTimer.Stop();
+                _pollTimer.Dispose();
+            };
+        }
+
+        private void StartPollTimer()
+        {
+            var seconds = _config.PollIntervalSeconds ?? DefaultPollIntervalSeconds;
+
+            if (seconds <= 0)
+            {
+                this.LogInformation("Scenario status polling disabled (pollIntervalSeconds = {seconds})", seconds);
+                return;
+            }
+
+            if (seconds < MinPollIntervalSeconds)
+            {
+                this.LogWarning("pollIntervalSeconds {seconds} is below the minimum, using {minimum}", seconds, MinPollIntervalSeconds);
+                seconds = MinPollIntervalSeconds;
+            }
+
+            this.LogInformation("Polling scenario status every {seconds} s", seconds);
+
+            var intervalMs = seconds * 1000L;
+            _pollTimer = new CTimer((o) => OnPollTimer(), null, intervalMs, intervalMs);
+        }
+
+        private void OnPollTimer()
+        {
+            try
+            {
+                // no token yet (VX unreachable at startup, or a re-auth that got no answer), keep trying
+                if (string.IsNullOrEmpty(Token))
+                {
+                    this.LogDebug("Poll timer: no token, requesting one");
+                    GetToken();
+                    return;
+                }
+
+                GetScenarioStatus();
+            }
+            catch (Exception ex)
+            {
+                this.LogError(ex, "Poll timer exception: {message}", ex.Message);
+            }
         }
 
         private void SetupCameras()
@@ -670,20 +750,57 @@ namespace OneBeyondAutomateVxEpi
                 var request = args.Request.ToLower();
                 var content = args.ContentString;
 
+                if (request != "get-token")
+                {
+                    if (IsAuthFailure(args.Code, content))
+                    {
+                        HandleAuthFailure(request, args.Code);
+                        return;
+                    }
+
+                    lock (_authLock)
+                    {
+                        _retriedRequests.Remove(request);
+                    }
+                }
+
                 switch (request)
                 {
                     case "get-token":
                         {
-                            var response = ApiResponseParser.ParseTokenResponse(content);
-                            if (response.Status == "OK")
+                            var response = args.Code == 200 ? ApiResponseParser.ParseTokenResponse(content) : null;
+                            if (response != null && response.Status == "OK")
                             {
+                                List<string> retries;
+                                lock (_authLock)
+                                {
+                                    _reauthInProgress = false;
+                                    _tokenTime = DateTime.Now;
+                                    retries = new List<string>(_pendingRetries);
+                                    _pendingRetries.Clear();
+                                    foreach (var retry in retries)
+                                        _retriedRequests.Add(retry);
+                                }
+
+                                // a new token runs Poll(), which refreshes all status
                                 Token = response.Token;
                                 ResponseSuccessMessage = response.Message;
+
+                                RetryRequests(retries);
                                 return;
                             }
 
                             // if not OK, clear the token
-                            ResponseErrorMessage = response.Error;
+                            lock (_authLock)
+                            {
+                                _reauthInProgress = false;
+                                if (_pendingRetries.Count > 0)
+                                    this.LogError("Get-Token failed (code {code}), dropping retry of {requests:l}", args.Code, string.Join(", ", _pendingRetries.ToArray()));
+                                _pendingRetries.Clear();
+                            }
+
+                            this.LogWarning("Get-Token failed: code {code}, content {content}", args.Code, content);
+                            ResponseErrorMessage = response != null ? response.Error : content;
                             ClearToken();
 
                             break;
@@ -964,7 +1081,9 @@ namespace OneBeyondAutomateVxEpi
                             var response = ApiResponseParser.ParseRootResponse(content);
                             if (response.Status == "OK")
                             {
+                                var previousScenario = CurrentScenario;
                                 CurrentScenario = response.Scenario;
+                                LogScenarioChange(previousScenario, response.Scenario);
                                 ResponseSuccessMessage = response.Message;
 
                                 GetAutoSwitchStatus();
@@ -1086,6 +1205,7 @@ namespace OneBeyondAutomateVxEpi
         /// </summary>
         public void ClearToken()
         {
+            _client.ClearToken();
             Token = null;
         }
 
@@ -1095,6 +1215,162 @@ namespace OneBeyondAutomateVxEpi
         public void GetToken()
         {
             _client.SendRequest("POST", "Get-Token", string.Empty);
+        }
+
+        // Sends an API request and remembers it so it can be retried once after re-authenticating.
+        // Without a token the request is not sent (the client would send credentials as the token and
+        // draw a 401); polled requests are covered by the Poll() that follows Get-Token, commands are queued.
+        private void SendRequest(string path, string content)
+        {
+            var request = path.Substring(path.LastIndexOf('/') + 1).ToLower();
+            var requestToken = false;
+
+            lock (_authLock)
+            {
+                _lastRequests[request] = new KeyValuePair<string, string>(path, content);
+
+                if (string.IsNullOrEmpty(Token))
+                {
+                    if (!PolledRequests.Contains(request) && !_pendingRetries.Contains(request))
+                        _pendingRetries.Add(request);
+
+                    requestToken = !_reauthInProgress;
+                    _reauthInProgress = true;
+                }
+            }
+
+            if (string.IsNullOrEmpty(Token))
+            {
+                this.LogDebug("No token, holding {request:l} until Get-Token completes", request);
+                if (requestToken) GetToken();
+                return;
+            }
+
+            _client.SendRequest("POST", path, content);
+        }
+
+        // The VX rejects a stale token after it restarts. The exact response isn't documented,
+        // so treat 401/403, or a non-OK body whose error mentions the token, as an auth failure.
+        private bool IsAuthFailure(int code, string content)
+        {
+            if (code == 401 || code == 403) return true;
+
+            if (code != 200 || string.IsNullOrEmpty(content)) return false;
+
+            try
+            {
+                var response = ApiResponseParser.ParseRootResponse(content);
+                if (response == null || response.Status == "OK") return false;
+
+                var text = string.Format("{0} {1}", response.Error, response.Message).ToLower();
+                return text.Contains("token") || text.Contains("auth");
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private void HandleAuthFailure(string request, int code)
+        {
+            bool sentBeforeCurrentToken;
+            bool startReauth = false;
+
+            lock (_authLock)
+            {
+                if (_retriedRequests.Remove(request))
+                {
+                    this.LogError("{request:l} rejected again after re-authenticating (code {code}), not retrying", request, code);
+                    return;
+                }
+
+                // Requests already in flight when the token was replaced come back rejected; that doesn't
+                // mean the new token is stale, so don't re-authenticate again for them.
+                sentBeforeCurrentToken = (DateTime.Now - _tokenTime).TotalSeconds < TokenGraceSeconds;
+
+                if (!sentBeforeCurrentToken)
+                {
+                    if (!PolledRequests.Contains(request) && !_pendingRetries.Contains(request))
+                        _pendingRetries.Add(request);
+
+                    startReauth = !_reauthInProgress;
+                    _reauthInProgress = true;
+                }
+            }
+
+            if (sentBeforeCurrentToken)
+            {
+                this.LogDebug("{request:l} rejected (code {code}), sent before the current token", request, code);
+
+                // polled requests are refreshed by the Poll() that followed the new token, a command is re-sent once
+                if (!PolledRequests.Contains(request))
+                {
+                    lock (_authLock)
+                    {
+                        _retriedRequests.Add(request);
+                    }
+                    RetryRequests(new List<string> { request });
+                }
+                return;
+            }
+
+            if (!startReauth) return;
+
+            this.LogWarning("{request:l} rejected as unauthorized (code {code}), token is stale (VX restarted?). Re-acquiring token", request, code);
+
+            ClearToken();
+            GetToken();
+        }
+
+        private void RetryRequests(List<string> requests)
+        {
+            foreach (var request in requests)
+            {
+                KeyValuePair<string, string> last;
+                lock (_authLock)
+                {
+                    if (!_lastRequests.TryGetValue(request, out last)) continue;
+                }
+
+                this.LogInformation("Retrying {request:l} with new token", request);
+                SendRequest(last.Key, last.Value);
+            }
+        }
+
+        // Logs scenario changes, flagging any we didn't command (VX restart, change made on the VX itself)
+        private void LogScenarioChange(NameWithIdInt previous, NameWithIdInt current)
+        {
+            if (current == null) return;
+
+            bool commandedByUs;
+            int? commandedId;
+            lock (_scenarioLock)
+            {
+                commandedId = _commandedScenarioId;
+                commandedByUs = _commandedScenarioId == current.Id
+                    && (DateTime.Now - _commandedScenarioTime).TotalSeconds <= CommandedScenarioWindowSeconds;
+
+                if (_commandedScenarioId == current.Id)
+                    _commandedScenarioId = null;
+            }
+
+            if (previous == null)
+            {
+                this.LogInformation("Current scenario: {id} {name:l}", current.Id, current.Name);
+                return;
+            }
+
+            if (previous.Id == current.Id) return;
+
+            if (commandedByUs)
+            {
+                this.LogInformation("Scenario changed {oldId} {oldName:l} -> {newId} {newName:l} (commanded by Essentials)",
+                    previous.Id, previous.Name, current.Id, current.Name);
+                return;
+            }
+
+            this.LogWarning("Scenario changed outside Essentials: {oldId} {oldName:l} -> {newId} {newName:l}. Last scenario commanded by Essentials: {commandedId:l}. Changed on the VX itself, or the VX restarted",
+                previous.Id, previous.Name, current.Id, current.Name, commandedId.HasValue ? commandedId.Value.ToString() : "none pending");
         }
 
         /// <summary>
@@ -1137,7 +1413,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetAutoSwitchStatus()
         {
             var url = string.Format("{0}/AutoSwitchStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1150,7 +1426,7 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartAutoSwitch", ApiPath)
                 : string.Format("{0}/StopAutoSwitch", ApiPath);
 
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1159,7 +1435,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetRecordStatus()
         {
             var url = string.Format("{0}/RecordStatusResponse", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1193,7 +1469,7 @@ namespace OneBeyondAutomateVxEpi
                     break;
             }
 
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1202,7 +1478,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetIsoRecordStatus()
         {
             var url = string.Format("{0}/ISORecordStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1215,7 +1491,7 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartISORecord", ApiPath)
                 : string.Format("{0}/StopISORecord", ApiPath);
 
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1224,7 +1500,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetStreamStatus()
         {
             var url = string.Format("{0}/StreamStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1237,7 +1513,7 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartStream", ApiPath)
                 : string.Format("{0}/StopStream", ApiPath);
 
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1246,7 +1522,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetOutputStatus()
         {
             var url = string.Format("{0}/OutputStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1259,7 +1535,7 @@ namespace OneBeyondAutomateVxEpi
                 ? string.Format("{0}/StartOutput", ApiPath)
                 : string.Format("{0}/StopOutput", ApiPath);
 
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1268,7 +1544,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetLayouts()
         {
             var url = string.Format("{0}/GetLayouts", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1277,7 +1553,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetLayoutStatus()
         {
             var url = string.Format("{0}/LayoutStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1298,7 +1574,7 @@ namespace OneBeyondAutomateVxEpi
                 id = c
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         private char ConvertIdToString(int id)
@@ -1318,7 +1594,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetRoomConfigStatus()
         {
             var url = string.Format("{0}/RoomConfigStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1327,7 +1603,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetRoomConfigs()
         {
             var url = string.Format("{0}/GetRoomConfigs", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1342,7 +1618,7 @@ namespace OneBeyondAutomateVxEpi
                 id = configId
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1357,7 +1633,7 @@ namespace OneBeyondAutomateVxEpi
                 id = configId
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1366,7 +1642,7 @@ namespace OneBeyondAutomateVxEpi
         public void GoHome()
         {
             var url = string.Format("{0}/GoHome", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1375,7 +1651,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetCameras()
         {
             var url = string.Format("{0}/GetCameras", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1384,7 +1660,7 @@ namespace OneBeyondAutomateVxEpi
         public void GetCameraStatus()
         {
             var url = string.Format("{0}/CameraStatus", ApiPath);
-            _client.SendRequest("POST", url, string.Empty);
+            SendRequest(url, string.Empty);
         }
 
         /// <summary>
@@ -1399,7 +1675,7 @@ namespace OneBeyondAutomateVxEpi
                 address = cameraAddress.ToString()
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1416,7 +1692,7 @@ namespace OneBeyondAutomateVxEpi
                 pre = presetId.ToString()
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1433,7 +1709,7 @@ namespace OneBeyondAutomateVxEpi
                 pre = presetId.ToString()
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1443,7 +1719,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ImportCameraPresets", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1453,7 +1729,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ExportCameraPresets", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1472,7 +1748,7 @@ namespace OneBeyondAutomateVxEpi
                 deleteSource = delete
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1492,7 +1768,7 @@ namespace OneBeyondAutomateVxEpi
                 drives = driveLetters
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1502,7 +1778,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/RecodingSpaceAvail", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1512,7 +1788,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Sleep", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1522,7 +1798,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Wake", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1532,7 +1808,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/Restart", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1542,7 +1818,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/CloseWirecast", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1552,7 +1828,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/GetScenarios", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1562,7 +1838,7 @@ namespace OneBeyondAutomateVxEpi
         {
             var url = string.Format("{0}/ScenarioStatus", ApiPath);
             var content = string.Empty;
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         /// <summary>
@@ -1571,13 +1847,19 @@ namespace OneBeyondAutomateVxEpi
         /// <param name="scenarioId"></param>
         public void SetScenario(uint scenarioId)
         {
+            lock (_scenarioLock)
+            {
+                _commandedScenarioId = (int)scenarioId;
+                _commandedScenarioTime = DateTime.Now;
+            }
+
             var url = string.Format("{0}/GoToScenario", ApiPath);
             var jo = new
             {
                 id = scenarioId
             };
             var content = JsonConvert.SerializeObject(jo);
-            _client.SendRequest("POST", url, content);
+            SendRequest(url, content);
         }
 
         public void CameraAutoModeOn()
@@ -1616,4 +1898,4 @@ namespace OneBeyondAutomateVxEpi
             
         }
     }
-}
+}
