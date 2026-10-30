@@ -14,6 +14,12 @@ namespace OneBeyondAutomateVxEpi
 
             [JsonProperty("cameras")]
             public List<CameraConfig> Cameras { get; set; }
+
+            /// <summary>
+            /// Seconds between scenario status polls. Defaults to 30 when omitted; 0 disables polling.
+            /// </summary>
+            [JsonProperty("pollIntervalSeconds", NullValueHandling = NullValueHandling.Ignore)]
+            public int? PollIntervalSeconds { get; set; }
         }
 
     /// <summary>

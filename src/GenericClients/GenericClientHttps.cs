@@ -116,7 +116,9 @@ Token = {7}
 			request.Header.ContentType = "application/json";
 			request.Header.SetHeaderValue("Content-Length", content.Length.ToString(CultureInfo.InvariantCulture));
 
-			var authorizationHeaderValue = string.IsNullOrEmpty(Token)
+			// Get-Token always uses the configured credentials; a cached token goes stale when the VX restarts
+			var isTokenRequest = path.TrimStart('/').Equals("Get-Token", StringComparison.OrdinalIgnoreCase);
+			var authorizationHeaderValue = isTokenRequest || string.IsNullOrEmpty(Token)
 				? AuthorizationBase64
 				: Token;
 
@@ -152,6 +154,9 @@ authHeaderValue: {4}
 	request: {1}
 	error: {2}
 	{0}", Separator, request, error);
+
+						// no response (device unreachable), keep draining so queued requests don't stall
+						CheckRequestQueue();
 						return;
 					}
 
@@ -166,6 +171,14 @@ authHeaderValue: {4}
                 this.LogError(e, "RequestDispatch Exception: {message}", e.Message);
             }
         }
+
+		/// <summary>
+		/// Discard the cached token
+		/// </summary>
+		public void ClearToken()
+		{
+			Token = null;
+		}
 
 		/// <summary>
 		/// Client response event

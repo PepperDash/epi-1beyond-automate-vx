@@ -36,7 +36,8 @@
 							"autoReconnect": false,
 							"autoReconnectIntervalMs": 5000
 						}
-					}
+					},
+					"pollIntervalSeconds": 30
 				}
 			},
 			{

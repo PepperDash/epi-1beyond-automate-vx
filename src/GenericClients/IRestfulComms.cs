@@ -14,6 +14,11 @@ namespace OneBeyondAutomateVxEpi.GenericClients
 		void SendRequest(string requestType, string path, string content);
 
 		/// <summary>
+		/// Discard the cached token so the next Get-Token request authenticates with the configured credentials
+		/// </summary>
+		void ClearToken();
+
+		/// <summary>
 		/// This event will fire when a response is received from the Host
 		/// </summary>
 		event EventHandler<GenericClientResponseEventArgs> ResponseReceived;
