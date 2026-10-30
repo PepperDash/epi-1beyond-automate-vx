@@ -849,7 +849,7 @@ namespace OneBeyondAutomateVxEpi
 
                             break;
                         }
-                    case "startouput":
+                    case "startoutput":
                     case "stopoutput":
                         {
                             var response = ApiResponseParser.ParseRootResponse(content);
@@ -893,6 +893,7 @@ namespace OneBeyondAutomateVxEpi
                             break;
                         }
                     case "recordstatus":
+                    case "recordstatusresponse": // GetRecordStatus() posts /api/RecordStatusResponse
                         {
                             var response = ApiResponseParser.ParseRecordStatusResponse(content);
                             if (response.Status == "OK")
@@ -1048,6 +1049,7 @@ namespace OneBeyondAutomateVxEpi
                             {
                                 CurrentRoomConfig = response.RoomConfig;
                                 ResponseSuccessMessage = response.Message;
+                                return;
                             }
 
                             ResponseErrorMessage = response.Error;
