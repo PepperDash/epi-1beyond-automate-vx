@@ -83,6 +83,19 @@ namespace PepperDash.Essentials.Plugins
         public StringFeedback ResponseSuccessMessageFeedback { get; private set; }
         public StringFeedback ResponseErrorMessageFeedback { get; private set; }
 
+        /// <summary>
+        /// The scenarios this device knows, as selectable items.
+        /// </summary>
+        /// <remarks>
+        /// Public so a consumer can recall a scenario by key without referencing this plugin,
+        /// through the ISelectableItems interface the collection already implements. Keyed by the
+        /// scenario id as a string, matching what the device reports.
+        ///
+        /// Named for what it is rather than Scenarios, which is already the raw list this is
+        /// built from.
+        /// </remarks>
+        public ISelectableItems<string> SelectableScenarios => ScenariosSelectableItems;
+
         private ScenariosSelectableItems ScenariosSelectableItems;
 
         #endregion
@@ -388,6 +401,10 @@ namespace PepperDash.Essentials.Plugins
                 return;
             }
 
+            // Overriding this method replaces the base class, which is what adds Essentials' default messengers; ask for the one this
+            // device needs, the camera list (the room's camera tabs), without doubling the auto-mode messenger added below.
+            mc.AddDefaultMessengersForDevice(this, new[] { typeof(IHasCamerasWithControls) });
+
             var iHasCameraAutoModeMessenger = new IHasCameraAutoModeMessenger($"{Key}-cameraAutoMode", $"/device/{Key}", this);
             mc.AddDeviceMessenger(iHasCameraAutoModeMessenger);
 
@@ -462,9 +479,11 @@ namespace PepperDash.Essentials.Plugins
         /// </summary>
         protected override void Initialize()
         {
-            GetToken();
-
+            // The cameras come from the config, not from the server: set them up first so the room has them even
+            // while the Automate VX server is unreachable.
             SetupCameras();
+
+            GetToken();
 
         }
 
