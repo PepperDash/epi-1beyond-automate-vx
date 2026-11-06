@@ -23,7 +23,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="PepperDashEssentials" Version="3.0.0-rc.23">
+		<PackageReference Include="PepperDashEssentials" Version="3.0.0-rc.25">
 			<ExcludeAssets>runtime</ExcludeAssets>
 		</PackageReference>
 	</ItemGroup>
