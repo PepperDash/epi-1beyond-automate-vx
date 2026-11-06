@@ -401,6 +401,10 @@ namespace PepperDash.Essentials.Plugins
                 return;
             }
 
+            // Overriding this method replaces the base class, which is what adds Essentials' default messengers; ask for the one this
+            // device needs, the camera list (the room's camera tabs), without doubling the auto-mode messenger added below.
+            mc.AddDefaultMessengersForDevice(this, new[] { typeof(IHasCamerasWithControls) });
+
             var iHasCameraAutoModeMessenger = new IHasCameraAutoModeMessenger($"{Key}-cameraAutoMode", $"/device/{Key}", this);
             mc.AddDeviceMessenger(iHasCameraAutoModeMessenger);
 
@@ -475,9 +479,11 @@ namespace PepperDash.Essentials.Plugins
         /// </summary>
         protected override void Initialize()
         {
-            GetToken();
-
+            // The cameras come from the config, not from the server: set them up first so the room has them even
+            // while the Automate VX server is unreachable.
             SetupCameras();
+
+            GetToken();
 
         }
 
